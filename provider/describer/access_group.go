@@ -9,24 +9,14 @@ import (
 	"github.com/turbot/go-kit/helpers"
 )
 
-func GetAllAccessGroups(ctx context.Context, conn *cloudflare.API, stream *models.StreamSender) ([]models.Resource, error) {
+func ListAccessGroups(ctx context.Context, conn *cloudflare.API, stream *models.StreamSender) ([]models.Resource, error) {
 	account, err := getAccount(ctx, conn)
 	if err != nil {
 		return nil, nil
 	}
-	var values []models.Resource
-	accountValues, err := GetAccountAccessGroups(ctx, conn, stream, *account)
-	if err != nil {
-		return nil, err
-	}
-	values = append(values, accountValues...)
-	return values, nil
-}
-
-func GetAccountAccessGroups(ctx context.Context, conn *cloudflare.API, stream *models.StreamSender, account cloudflare.Account) ([]models.Resource, error) {
 	opts := cloudflare.PaginationOptions{
-		PerPage: 100,
-		Page:    1,
+		PerPage: perPage,
+		Page:    page,
 	}
 	type ListPageResponse struct {
 		Groups []cloudflare.AccessGroup

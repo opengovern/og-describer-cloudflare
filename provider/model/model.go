@@ -56,3 +56,63 @@ type AccessPolicyDescription struct {
 	Include                      []interface{}
 	Require                      []interface{}
 }
+
+type AccountDescription struct {
+	ID       string
+	Name     string
+	Type     string
+	Settings *cloudflare.AccountSettings
+}
+
+type DNSRecordDescription struct {
+	ZoneID     string
+	ZoneName   string
+	ID         string
+	Type       string
+	Name       string
+	Content    string
+	TTL        int
+	CreatedOn  time.Time
+	Locked     bool
+	ModifiedOn time.Time
+	Priority   *uint16
+	Proxiable  bool
+	Proxied    *bool
+	Data       interface{}
+	Meta       interface{}
+}
+
+type FireWallRuleDescription struct {
+	ID          string
+	Paused      bool
+	Description string
+	Action      string
+	Title       string
+	Priority    interface{}
+	Filter      cloudflare.Filter
+	Products    []string
+	CreatedOn   time.Time
+	ModifiedOn  time.Time
+	ZoneID      string
+}
+
+type LoadBalancerDescription struct {
+	ID                        string
+	Name                      string
+	ZoneName                  string
+	ZoneID                    string
+	TTL                       int
+	Enabled                   *bool
+	CreatedOn                 *time.Time
+	Description               string
+	FallbackPool              string
+	ModifiedOn                *time.Time
+	Proxied                   bool
+	SessionAffinity           string
+	SessionAffinityTTL        int
+	SteeringPolicy            string
+	DefaultPools              []string
+	PopPools                  map[string][]string
+	RegionPools               map[string][]string
+	SessionAffinityAttributes *cloudflare.SessionAffinityAttributes
+}

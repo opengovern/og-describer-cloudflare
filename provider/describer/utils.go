@@ -38,6 +38,14 @@ func getApplications(ctx context.Context, conn *cloudflare.API, accountID string
 	return apps, nil
 }
 
+func getZones(ctx context.Context, conn *cloudflare.API) ([]cloudflare.Zone, error) {
+	zones, err := conn.ListZones(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return zones, nil
+}
+
 func retry(ctx context.Context, operation func() (interface{}, error), shouldRetry func(error) bool) (interface{}, error) {
 	var result interface{}
 	var err error

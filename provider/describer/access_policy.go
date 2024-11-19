@@ -7,7 +7,7 @@ import (
 	"github.com/opengovern/og-describer-template/provider/model"
 )
 
-func GetAllAccessPolicies(ctx context.Context, conn *cloudflare.API, stream *models.StreamSender) ([]models.Resource, error) {
+func ListAccessPolicies(ctx context.Context, conn *cloudflare.API, stream *models.StreamSender) ([]models.Resource, error) {
 	account, err := getAccount(ctx, conn)
 	if err != nil {
 		return nil, nil
@@ -15,7 +15,7 @@ func GetAllAccessPolicies(ctx context.Context, conn *cloudflare.API, stream *mod
 	apps, err := getApplications(ctx, conn, account.ID)
 	var values []models.Resource
 	for _, app := range apps {
-		accountValues, err := GetAccountAccessPolicies(ctx, conn, stream, account.ID, app)
+		accountValues, err := GetAppAccessPolicies(ctx, conn, stream, account.ID, app)
 		if err != nil {
 			return nil, err
 		}
@@ -24,7 +24,7 @@ func GetAllAccessPolicies(ctx context.Context, conn *cloudflare.API, stream *mod
 	return values, nil
 }
 
-func GetAccountAccessPolicies(ctx context.Context, conn *cloudflare.API, stream *models.StreamSender, accountID string, app cloudflare.AccessApplication) ([]models.Resource, error) {
+func GetAppAccessPolicies(ctx context.Context, conn *cloudflare.API, stream *models.StreamSender, accountID string, app cloudflare.AccessApplication) ([]models.Resource, error) {
 	appID := app.ID
 	opts := cloudflare.PaginationOptions{
 		PerPage: perPage,

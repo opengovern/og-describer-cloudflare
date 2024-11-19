@@ -9,8 +9,8 @@ import (
 	"golang.org/x/net/context"
 )
 
-// DescribeByCloudFlare A wrapper to pass cloudflare authorization to describer functions
-func DescribeByCloudFlare(describe func(context.Context, *cloudflare.API, *model.StreamSender) ([]model.Resource, error)) model.ResourceDescriber {
+// DescribeByCloudFlareList A wrapper to pass cloudflare authorization to describer functions
+func DescribeByCloudFlareList(describe func(context.Context, *cloudflare.API, *model.StreamSender) ([]model.Resource, error)) model.ResourceDescriber {
 	return func(ctx context.Context, cfg configs.IntegrationCredentials, triggerType enums.DescribeTriggerType, additionalParameters map[string]string, stream *model.StreamSender) ([]model.Resource, error) {
 		ctx = describer.WithTriggerType(ctx, triggerType)
 
