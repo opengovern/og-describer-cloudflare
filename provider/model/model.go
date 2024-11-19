@@ -4,7 +4,10 @@
 
 package model
 
-import "time"
+import (
+	"github.com/cloudflare/cloudflare-go"
+	"time"
+)
 
 type AccessApplicationDescription struct {
 	ID                     string
@@ -20,6 +23,18 @@ type AccessApplicationDescription struct {
 	EnableBindingCookie    bool
 	SessionDuration        string
 	UpdatedAt              *time.Time
-	AllowedIDPs            interface{}
-	CORSHeaders            interface{}
+	AllowedIDPs            []string
+	CORSHeaders            *cloudflare.AccessApplicationCorsHeaders
+}
+
+type AccessGroupDescription struct {
+	ID          string
+	Name        string
+	AccountID   string
+	AccountName string
+	CreatedAt   *time.Time
+	UpdatedAt   *time.Time
+	Exclude     []interface{}
+	Include     []interface{}
+	Require     []interface{}
 }

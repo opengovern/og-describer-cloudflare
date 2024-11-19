@@ -10,7 +10,7 @@ import (
 const (
 	maxRetries = 3
 	backoff    = 2 * time.Second
-	perPage    = 50
+	perPage    = 100
 	page       = 1
 )
 
