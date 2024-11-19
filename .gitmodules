@@ -1,0 +1,3 @@
+[submodule "steampipe-plugin-cloudflare"]
+	path = steampipe-plugin-cloudflare
+	url = https://github.com/turbot/steampipe-plugin-cloudflare.git

@@ -3,3 +3,23 @@
 // Implement types for each resource
 
 package model
+
+import "time"
+
+type AccessApplicationDescription struct {
+	ID                     string
+	Name                   string
+	AccountID              string
+	AccountName            string
+	Domain                 string
+	CreatedAt              *time.Time
+	Aud                    string
+	AutoRedirectToIdentity bool
+	CustomDenyMessage      string
+	CustomDenyURL          string
+	EnableBindingCookie    bool
+	SessionDuration        string
+	UpdatedAt              *time.Time
+	AllowedIDPs            interface{}
+	CORSHeaders            interface{}
+}
