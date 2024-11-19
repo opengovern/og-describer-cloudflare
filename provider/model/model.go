@@ -38,3 +38,21 @@ type AccessGroupDescription struct {
 	Include     []interface{}
 	Require     []interface{}
 }
+
+type AccessPolicyDescription struct {
+	ID                           string
+	Name                         string
+	ApplicationID                string
+	ApplicationName              string
+	AccountID                    string
+	CreatedAt                    *time.Time
+	Decision                     string
+	Precedence                   int
+	PurposeJustificationPrompt   *string
+	PurposeJustificationRequired *bool
+	UpdatedAt                    *time.Time
+	ApprovalGroups               []cloudflare.AccessApprovalGroup
+	Exclude                      []interface{}
+	Include                      []interface{}
+	Require                      []interface{}
+}

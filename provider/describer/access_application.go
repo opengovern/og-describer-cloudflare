@@ -10,18 +10,16 @@ import (
 )
 
 func GetAllAccessApplications(ctx context.Context, conn *cloudflare.API, stream *models.StreamSender) ([]models.Resource, error) {
-	accounts, err := getAllAccounts(ctx, conn)
+	account, err := getAccount(ctx, conn)
 	if err != nil {
 		return nil, nil
 	}
 	var values []models.Resource
-	for _, account := range accounts {
-		accountValues, err := GetAccountAccessApplications(ctx, conn, stream, account)
-		if err != nil {
-			return nil, err
-		}
-		values = append(values, accountValues...)
+	accountValues, err := GetAccountAccessApplications(ctx, conn, stream, *account)
+	if err != nil {
+		return nil, err
 	}
+	values = append(values, accountValues...)
 	return values, nil
 }
 

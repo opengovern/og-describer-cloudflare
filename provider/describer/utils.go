@@ -14,7 +14,7 @@ const (
 	page       = 1
 )
 
-func getAllAccounts(ctx context.Context, conn *cloudflare.API) ([]cloudflare.Account, error) {
+func getAccount(ctx context.Context, conn *cloudflare.API) (*cloudflare.Account, error) {
 	pageOpts := cloudflare.PaginationOptions{
 		PerPage: perPage,
 		Page:    page,
@@ -23,7 +23,19 @@ func getAllAccounts(ctx context.Context, conn *cloudflare.API) ([]cloudflare.Acc
 	if err != nil {
 		return nil, err
 	}
-	return accounts, nil
+	return &accounts[0], nil
+}
+
+func getApplications(ctx context.Context, conn *cloudflare.API, accountID string) ([]cloudflare.AccessApplication, error) {
+	pageOpts := cloudflare.PaginationOptions{
+		PerPage: perPage,
+		Page:    page,
+	}
+	apps, _, err := conn.AccessApplications(ctx, accountID, pageOpts)
+	if err != nil {
+		return nil, err
+	}
+	return apps, nil
 }
 
 func retry(ctx context.Context, operation func() (interface{}, error), shouldRetry func(error) bool) (interface{}, error) {
