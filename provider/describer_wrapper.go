@@ -9,7 +9,7 @@ import (
 	"golang.org/x/net/context"
 )
 
-// DescribeByIntegration TODO: implement a wrapper to pass integration authorization to describer functions
+// DescribeByCloudFlare A wrapper to pass cloudflare authorization to describer functions
 func DescribeByCloudFlare(describe func(context.Context, *cloudflare.API, *model.StreamSender) ([]model.Resource, error)) model.ResourceDescriber {
 	return func(ctx context.Context, cfg configs.IntegrationCredentials, triggerType enums.DescribeTriggerType, additionalParameters map[string]string, stream *model.StreamSender) ([]model.Resource, error) {
 		ctx = describer.WithTriggerType(ctx, triggerType)
