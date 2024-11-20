@@ -11,7 +11,6 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/go-hclog v1.6.3
 	github.com/nats-io/nats.go v1.36.0
-	github.com/opengovern/og-describer-template v0.0.0-20241120095452-4893358d2654
 	github.com/opengovern/og-util v1.1.5
 	github.com/spf13/cobra v1.7.0
 	github.com/turbot/steampipe-plugin-sdk/v5 v5.8.0
