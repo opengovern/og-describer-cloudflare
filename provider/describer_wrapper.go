@@ -18,15 +18,15 @@ func DescribeByCloudFlareList(describe func(context.Context, *cloudflare.API, *m
 		var conn *cloudflare.API
 		var err error
 		// First: check for the token
-		if cfg.Token != nil {
-			conn, err = cloudflare.NewWithAPIToken(*cfg.Token)
+		if cfg.Token != "" {
+			conn, err = cloudflare.NewWithAPIToken(cfg.Token)
 			if err != nil {
 				return nil, err
 			}
 		}
 		// Second: Email + API Key
-		if cfg.Email != nil && cfg.APIKey != nil {
-			conn, err = cloudflare.New(*cfg.APIKey, *cfg.Email)
+		if cfg.Email != "" && cfg.APIKey != "" {
+			conn, err = cloudflare.New(cfg.APIKey, cfg.Email)
 			if err != nil {
 				return nil, err
 			}
