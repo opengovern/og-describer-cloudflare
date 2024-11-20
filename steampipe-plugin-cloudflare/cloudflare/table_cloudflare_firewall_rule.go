@@ -9,6 +9,8 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
+
+	opengovernance "github.com/opengovern/og-describer-cloudflare/pkg/sdk/es"
 )
 
 type firewallRuleInfo = struct {
@@ -31,13 +33,13 @@ func tableCloudflareFirewallRule(ctx context.Context) *plugin.Table {
 		Name:        "cloudflare_firewall_rule",
 		Description: "Cloudflare Firewall Rules is a flexible and intuitive framework for filtering HTTP requests.",
 		List: &plugin.ListConfig{
-			Hydrate:       listFirewallRules,
+			Hydrate:       opengovernance.ListFireWallRule,
 			ParentHydrate: listZones,
 		},
 		Get: &plugin.GetConfig{
 			KeyColumns:        plugin.AllColumns([]string{"zone_id", "id"}),
 			ShouldIgnoreError: isNotFoundError([]string{"HTTP status 404"}),
-			Hydrate:           getFirewallRule,
+			Hydrate:           opengovernance.GetFireWallRule,
 		},
 		Columns: commonColumns([]*plugin.Column{
 			// Top columns

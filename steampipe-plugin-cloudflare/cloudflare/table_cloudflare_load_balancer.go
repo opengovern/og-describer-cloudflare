@@ -7,6 +7,8 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
+
+	opengovernance "github.com/opengovern/og-describer-cloudflare/pkg/sdk/es"
 )
 
 func tableCloudflareLoadBalancer(ctx context.Context) *plugin.Table {
@@ -14,7 +16,7 @@ func tableCloudflareLoadBalancer(ctx context.Context) *plugin.Table {
 		Name:        "cloudflare_load_balancer",
 		Description: "Cloudflare Load balancers allows to distribute traffic across servers, which reduces server strain and latency and improves the experience for end users.",
 		List: &plugin.ListConfig{
-			Hydrate:       listLoadBalancers,
+			Hydrate:       opengovernance.ListLoadBalancer,
 			ParentHydrate: listZones,
 		},
 		Columns: commonColumns([]*plugin.Column{

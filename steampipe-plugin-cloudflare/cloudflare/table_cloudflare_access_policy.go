@@ -11,6 +11,8 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
+
+	opengovernance "github.com/opengovern/og-describer-cloudflare/pkg/sdk/es"
 )
 
 func tableCloudflareAccessPolicy(ctx context.Context) *plugin.Table {
@@ -18,7 +20,7 @@ func tableCloudflareAccessPolicy(ctx context.Context) *plugin.Table {
 		Name:        "cloudflare_access_policy",
 		Description: "Access Policies define the users or groups who can, or cannot, reach the Application Resource.",
 		List: &plugin.ListConfig{
-			Hydrate:       listAccessPolicies,
+			Hydrate:       opengovernance.ListAccessPolicy,
 			ParentHydrate: listParentAccessApplications,
 			KeyColumns: plugin.KeyColumnSlice{
 				{Name: "application_id", Require: plugin.Optional},

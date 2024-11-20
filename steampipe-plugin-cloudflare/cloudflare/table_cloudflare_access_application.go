@@ -20,7 +20,7 @@ func tableCloudflareAccessApplication(ctx context.Context) *plugin.Table {
 		Description: "Access Applications are used to restrict access to a whole application using an authorisation gateway managed by Cloudflare.",
 		List: &plugin.ListConfig{
 			ParentHydrate: listAccount,
-			Hydrate:       ,
+			Hydrate:       opengovernance.ListAccessApplication,
 			KeyColumns: plugin.KeyColumnSlice{
 				{Name: "account_id", Require: plugin.Optional},
 				{Name: "account_name", Require: plugin.Optional},

@@ -11,6 +11,8 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
+
+	opengovernance "github.com/opengovern/og-describer-cloudflare/pkg/sdk/es"
 )
 
 func tableCloudflareAccessGroup(ctx context.Context) *plugin.Table {
@@ -19,7 +21,7 @@ func tableCloudflareAccessGroup(ctx context.Context) *plugin.Table {
 		Description: "Access Groups allows to define a set of users to which an application policy can be applied.",
 		List: &plugin.ListConfig{
 			ParentHydrate: listAccount,
-			Hydrate:       listAccessGroups,
+			Hydrate:       opengovernance.ListAccessGroup,
 			KeyColumns: plugin.KeyColumnSlice{
 				{Name: "account_id", Require: plugin.Optional},
 				{Name: "account_name", Require: plugin.Optional},

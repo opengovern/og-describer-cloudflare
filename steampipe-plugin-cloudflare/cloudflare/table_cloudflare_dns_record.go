@@ -7,6 +7,8 @@ import (
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+
+	opengovernance "github.com/opengovern/og-describer-cloudflare/pkg/sdk/es"
 )
 
 func tableCloudflareDNSRecord(ctx context.Context) *plugin.Table {
@@ -15,12 +17,12 @@ func tableCloudflareDNSRecord(ctx context.Context) *plugin.Table {
 		Description: "DNS records for a zone.",
 		List: &plugin.ListConfig{
 			KeyColumns: plugin.SingleColumn("zone_id"),
-			Hydrate:    listDNSRecord,
+			Hydrate:    opengovernance.ListDNSRecord,
 		},
 		Get: &plugin.GetConfig{
 			KeyColumns:        plugin.AllColumns([]string{"zone_id", "id"}),
 			ShouldIgnoreError: isNotFoundError([]string{"HTTP status 404"}),
-			Hydrate:           getDNSRecord,
+			Hydrate:           opengovernance.GetDNSRecord,
 		},
 		Columns: commonColumns([]*plugin.Column{
 			// Top columns

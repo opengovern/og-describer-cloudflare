@@ -7,6 +7,8 @@ import (
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+
+	opengovernance "github.com/opengovern/og-describer-cloudflare/pkg/sdk/es"
 )
 
 func tableCloudflareAccount(ctx context.Context) *plugin.Table {
@@ -18,7 +20,7 @@ func tableCloudflareAccount(ctx context.Context) *plugin.Table {
 		},
 		Get: &plugin.GetConfig{
 			KeyColumns:        plugin.SingleColumn("id"),
-			Hydrate:           getAccount,
+			Hydrate:           opengovernance.GetAccount,
 			ShouldIgnoreError: isNotFoundError([]string{"HTTP status 404"}),
 		},
 		Columns: commonColumns([]*plugin.Column{
