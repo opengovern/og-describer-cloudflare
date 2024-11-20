@@ -4,13 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
-
 	"github.com/cloudflare/cloudflare-go"
 
 	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
+
+	opengovernance "github.com/opengovern/og-describer-cloudflare/pkg/sdk/es"
 )
 
 func tableCloudflareAccessApplication(ctx context.Context) *plugin.Table {
@@ -19,7 +20,7 @@ func tableCloudflareAccessApplication(ctx context.Context) *plugin.Table {
 		Description: "Access Applications are used to restrict access to a whole application using an authorisation gateway managed by Cloudflare.",
 		List: &plugin.ListConfig{
 			ParentHydrate: listAccount,
-			Hydrate:       listAccessApplications,
+			Hydrate:       ,
 			KeyColumns: plugin.KeyColumnSlice{
 				{Name: "account_id", Require: plugin.Optional},
 				{Name: "account_name", Require: plugin.Optional},

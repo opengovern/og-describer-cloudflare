@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 	"github.com/cloudflare/cloudflare-go"
-	"github.com/opengovern/og-describer-template/pkg/sdk/models"
-	"github.com/opengovern/og-describer-template/provider/model"
+	"github.com/opengovern/og-describer-cloudflare/pkg/sdk/models"
+	"github.com/opengovern/og-describer-cloudflare/provider/model"
 	"github.com/turbot/go-kit/helpers"
 )
 

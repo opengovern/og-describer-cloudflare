@@ -1,9 +1,86 @@
 [
   {
-    "ResourceName": "AWS::Redshift::Snapshot",
-    "ListDescriber": "ParallelDescribeRegional(describer.RedshiftSnapshot)",
-    "GetDescriber": "ParallelDescribeRegionalSingleResource(describer.GetRedshiftSnapshot)",
-    "SteampipeTable": "aws_redshift_snapshot",
-    "Model": "RedshiftSnapshot"
+    "ResourceName": "CloudFlare/Access/Application",
+    "Tags": {
+      "category": [
+        "Access"
+      ]
+    },
+    "ListDescriber": "DescribeByCloudFlareList(describer.ListAccessApplications)",
+    "GetDescriber": "",
+    "SteampipeTable": "cloudflare_access_application",
+    "Model": "AccessApplication"
+  },
+  {
+    "ResourceName": "CloudFlare/Access/Group",
+    "Tags": {
+      "category": [
+        "Access"
+      ]
+    },
+    "ListDescriber": "DescribeByCloudFlareList(describer.ListAccessGroups)",
+    "GetDescriber": "",
+    "SteampipeTable": "cloudflare_access_group",
+    "Model": "AccessGroup"
+  },
+  {
+    "ResourceName": "CloudFlare/Access/Policy",
+    "Tags": {
+      "category": [
+        "Access"
+      ]
+    },
+    "ListDescriber": "DescribeByCloudFlareList(describer.ListAccessPolicies)",
+    "GetDescriber": "",
+    "SteampipeTable": "cloudflare_access_policy",
+    "Model": "AccessPolicy"
+  },
+  {
+    "ResourceName": "CloudFlare/Account",
+    "Tags": {
+      "category": [
+        "Account"
+      ]
+    },
+    "ListDescriber": "",
+    "GetDescriber": "DescribeByCloudFlareGet(describer.GetAccount)",
+    "SteampipeTable": "cloudflare_account",
+    "Model": "Account"
+  },
+  {
+    "ResourceName": "CloudFlare/DNSRecord",
+    "Tags": {
+      "category": [
+        "DNSRecord"
+      ]
+    },
+    "ListDescriber": "DescribeByCloudFlareList(describer.ListDNSRecords)",
+    "GetDescriber": "DescribeByCloudFlareGet(describer.GetDNSRecord)",
+    "SteampipeTable": "cloudflare_dns_record",
+    "Model": "DNSRecord"
+  },
+  {
+    "ResourceName": "CloudFlare/Firewall/Rule",
+    "Tags": {
+      "category": [
+        "Firewall"
+      ]
+    },
+    "ListDescriber": "DescribeByCloudFlareList(describer.ListFireWallRules)",
+    "GetDescriber": "DescribeByCloudFlareGet(describer.GetFireWallRule)",
+    "SteampipeTable": "cloudflare_firewall_rule",
+    "Model": "FireWallRule"
+  },
+  {
+    "ResourceName": "CloudFlare/LoadBalancer",
+    "Tags": {
+      "category": [
+        "LoadBalancer"
+      ]
+    },
+    "ListDescriber": "DescribeByCloudFlareList(describer.ListLoadBalancers)",
+    "GetDescriber": "DescribeByCloudFlareGet(describer.GetLoadBalancer)",
+    "SteampipeTable": "cloudflare_load_balancer",
+    "Model": "LoadBalancer"
   }
 ]

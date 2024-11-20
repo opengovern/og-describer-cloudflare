@@ -1,4 +1,4 @@
-module github.com/opengovern/og-describer-template
+module github.com/opengovern/og-describer-cloudflare
 
 go 1.22.0
 
@@ -8,8 +8,10 @@ require (
 	github.com/cloudflare/cloudflare-go v0.27.0
 	github.com/go-errors/errors v1.4.2
 	github.com/golang-jwt/jwt/v5 v5.2.1
+	github.com/google/uuid v1.6.0
 	github.com/hashicorp/go-hclog v1.6.3
 	github.com/nats-io/nats.go v1.36.0
+	github.com/opengovern/og-describer-template v0.0.0-20241120095452-4893358d2654
 	github.com/opengovern/og-util v1.1.5
 	github.com/spf13/cobra v1.7.0
 	github.com/turbot/steampipe-plugin-sdk/v5 v5.8.0
@@ -84,17 +86,14 @@ require (
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
-	github.com/goccy/go-json v0.10.3 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/golang/glog v1.2.1 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/mock v1.6.0 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
-	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/google/s2a-go v0.1.7 // indirect
-	github.com/google/uuid v1.6.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.2 // indirect
 	github.com/googleapis/gax-go/v2 v2.12.2 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.18.1 // indirect

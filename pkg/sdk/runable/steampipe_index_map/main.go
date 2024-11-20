@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/opengovern/og-describer-template/provider/configs"
+	"github.com/opengovern/og-describer-cloudflare/provider/configs"
 	"os"
 	"strings"
 )
@@ -36,12 +36,12 @@ func main() {
 	var resourceTypes []ResourceType
 
 	if resourceTypesFile == nil || len(*resourceTypesFile) == 0 {
-		rt := "../../../../provider/resource_types/resource-types.json"
+		rt := "C:\\Users\\ASUS\\GolandProjects\\og-describer-cloudflare\\provider\\resource_types\\resource-types.json"
 		resourceTypesFile = &rt
 	}
 
 	if indexMap == nil || len(*indexMap) == 0 {
-		v := "../../../../steampipe/table_index_map.go"
+		v := "C:\\Users\\ASUS\\GolandProjects\\og-describer-cloudflare\\steampipe\\table_index_map.go"
 		indexMap = &v
 	}
 

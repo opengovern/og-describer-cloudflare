@@ -9,6 +9,8 @@ import (
 	"time"
 )
 
+type Metadata struct{}
+
 type AccessApplicationDescription struct {
 	ID                     string
 	Name                   string

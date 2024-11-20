@@ -3,8 +3,8 @@ package describer
 import (
 	"context"
 	"github.com/cloudflare/cloudflare-go"
-	"github.com/opengovern/og-describer-template/pkg/sdk/models"
-	"github.com/opengovern/og-describer-template/provider/model"
+	"github.com/opengovern/og-describer-cloudflare/pkg/sdk/models"
+	"github.com/opengovern/og-describer-cloudflare/provider/model"
 )
 
 func GetAccount(ctx context.Context, conn *cloudflare.API, resourceID string) (*models.Resource, error) {

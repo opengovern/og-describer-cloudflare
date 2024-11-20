@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/opengovern/og-describer-template/provider/configs"
+	"github.com/opengovern/og-describer-cloudflare/provider/configs"
 	"go/ast"
 	"go/format"
 	"go/parser"
@@ -23,7 +23,7 @@ var (
 	pluginPath        = flag.String("pluginPath", "", "Location of the steampipe plugin")
 )
 
-const PluginPath = "" // TODO: give the steampipe plugin path
+const PluginPath = "C:\\Users\\ASUS\\GolandProjects\\og-describer-cloudflare\\steampipe-plugin-cloudflare\\cloudflare"
 
 type IntegrationType struct {
 	Name            string
@@ -43,11 +43,11 @@ type ResourceType struct {
 
 func main() {
 	if output == nil || len(*output) == 0 {
-		v := "../../es/resources_clients.go"
+		v := "C:\\Users\\ASUS\\GolandProjects\\og-describer-cloudflare\\pkg\\sdk\\es\\resources_clients.go"
 		output = &v
 	}
 	if file == nil || len(*file) == 0 {
-		v := "../../../../provider/model/model.go"
+		v := "C:\\Users\\ASUS\\GolandProjects\\og-describer-cloudflare\\provider\\model\\model.go"
 		file = &v
 	}
 
@@ -57,7 +57,7 @@ func main() {
 	}
 
 	if resourceTypesFile == nil || len(*resourceTypesFile) == 0 {
-		rt := "../../../../provider/resource_types/resource-types.json"
+		rt := "C:\\Users\\ASUS\\GolandProjects\\og-describer-cloudflare\\provider\\resource_types\\resource-types.json"
 		resourceTypesFile = &rt
 	}
 
