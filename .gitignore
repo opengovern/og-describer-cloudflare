@@ -2,3 +2,4 @@ build/
 og-describer-template
 .idea
 .env
+command/output.json
