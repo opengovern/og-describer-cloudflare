@@ -6,96 +6,40 @@ import (
 	"github.com/cloudflare/cloudflare-go"
 	"github.com/opengovern/og-describer-cloudflare/pkg/sdk/models"
 	"github.com/opengovern/og-describer-cloudflare/provider/model"
-	"github.com/turbot/go-kit/helpers"
+	"sync"
 )
 
-func ListAccessApplications(ctx context.Context, conn *cloudflare.API, stream *models.StreamSender) ([]models.Resource, error) {
-	account, err := getAccount(ctx, conn)
+func ListAccessApplications(ctx context.Context, handler *CloudFlareAPIHandler, stream *models.StreamSender) ([]models.Resource, error) {
+	var wg sync.WaitGroup
+	cloudFlareChan := make(chan models.Resource)
+	account, err := getAccount(ctx, handler)
 	if err != nil {
-		return nil, nil
+		return nil, err
 	}
-	opts := cloudflare.PaginationOptions{
-		PerPage: perPage,
-		Page:    page,
-	}
-	type ListPageResponse struct {
-		Applications []cloudflare.AccessApplication
-		resp         cloudflare.ResultInfo
-	}
-	listPage := func(ctx context.Context) (interface{}, error) {
-		applications, resp, err := conn.AccessApplications(ctx, account.ID, opts)
-		return ListPageResponse{
-			Applications: applications,
-			resp:         resp,
-		}, err
-	}
+	go func() {
+		processAccessApps(ctx, handler, account, cloudFlareChan, &wg)
+		wg.Wait()
+		close(cloudFlareChan)
+	}()
 	var values []models.Resource
-	for {
-		listPageResponse, err := retry(
-			ctx,
-			func() (interface{}, error) {
-				return listPage(ctx)
-			},
-			shouldRetryError,
-		)
-		if err != nil {
-			var cloudFlareErr *cloudflare.APIRequestError
-			if errors.As(err, &cloudFlareErr) {
-				if helpers.StringSliceContains(cloudFlareErr.ErrorMessages(), "Access is not enabled. Visit the Access dashboard at https://dash.cloudflare.com/ and click the 'Enable Access' button.") {
-					return nil, nil
-				}
+	for value := range cloudFlareChan {
+		if stream != nil {
+			if err := (*stream)(value); err != nil {
+				return nil, err
 			}
-			return nil, err
+		} else {
+			values = append(values, value)
 		}
-		listResponse := listPageResponse.(ListPageResponse)
-		apps := listResponse.Applications
-		resp := listResponse.resp
-		for _, app := range apps {
-			value := models.Resource{
-				ID:   app.ID,
-				Name: app.Name,
-				Description: JSONAllFieldsMarshaller{
-					Value: model.AccessApplicationDescription{
-						ID:                     app.ID,
-						Name:                   app.Name,
-						AccountID:              account.ID,
-						AccountName:            account.Name,
-						Domain:                 app.Domain,
-						CreatedAt:              app.CreatedAt,
-						Aud:                    app.AUD,
-						AutoRedirectToIdentity: app.AutoRedirectToIdentity,
-						CustomDenyMessage:      app.CustomDenyMessage,
-						CustomDenyURL:          app.CustomDenyURL,
-						EnableBindingCookie:    app.EnableBindingCookie,
-						SessionDuration:        app.SessionDuration,
-						UpdatedAt:              app.UpdatedAt,
-						AllowedIDPs:            app.AllowedIdps,
-						CORSHeaders:            app.CorsHeaders,
-					},
-				},
-			}
-			if stream != nil {
-				if err := (*stream)(value); err != nil {
-					return nil, err
-				}
-			} else {
-				values = append(values, value)
-			}
-		}
-		if resp.Page >= resp.TotalPages {
-			break
-		}
-		opts.Page = opts.Page + 1
 	}
 	return values, nil
 }
 
-func GetAccessApplication(ctx context.Context, conn *cloudflare.API, resourceID string) (*models.Resource, error) {
-	account, err := getAccount(ctx, conn)
+func GetAccessApplication(ctx context.Context, handler *CloudFlareAPIHandler, resourceID string) (*models.Resource, error) {
+	account, err := getAccount(ctx, handler)
 	if err != nil {
-		return nil, nil
+		return nil, err
 	}
-	app, err := conn.AccessApplication(ctx, account.ID, resourceID)
+	app, err := processAccessApp(ctx, handler, account, resourceID)
 	if err != nil {
 		return nil, err
 	}
@@ -123,4 +67,88 @@ func GetAccessApplication(ctx context.Context, conn *cloudflare.API, resourceID 
 		},
 	}
 	return &value, nil
+}
+
+func processAccessApps(ctx context.Context, handler *CloudFlareAPIHandler, account *cloudflare.Account, cloudFlareChan chan<- models.Resource, wg *sync.WaitGroup) {
+	var accessApps []cloudflare.AccessApplication
+	var pageAccessApps []cloudflare.AccessApplication
+	var pageData cloudflare.ResultInfo
+	var statusCode *int
+	requestFunc := func() (*int, error) {
+		var e error
+		opts := cloudflare.PaginationOptions{
+			PerPage: perPage,
+			Page:    page,
+		}
+		for {
+			pageAccessApps, pageData, e = handler.Conn.AccessApplications(ctx, account.ID, opts)
+			if e != nil {
+				var httpErr *cloudflare.APIRequestError
+				if errors.As(e, &httpErr) {
+					statusCode = &httpErr.StatusCode
+				}
+			}
+			accessApps = append(accessApps, pageAccessApps...)
+			if pageData.Page >= pageData.TotalPages {
+				break
+			}
+			opts.Page = opts.Page + 1
+		}
+		return statusCode, e
+	}
+	err := handler.DoRequest(ctx, requestFunc)
+	if err != nil {
+		return
+	}
+	for _, app := range accessApps {
+		wg.Add(1)
+		go func(app cloudflare.AccessApplication) {
+			defer wg.Done()
+			value := models.Resource{
+				ID:   app.ID,
+				Name: app.Name,
+				Description: JSONAllFieldsMarshaller{
+					Value: model.AccessApplicationDescription{
+						ID:                     app.ID,
+						Name:                   app.Name,
+						AccountID:              account.ID,
+						AccountName:            account.Name,
+						Domain:                 app.Domain,
+						CreatedAt:              app.CreatedAt,
+						Aud:                    app.AUD,
+						AutoRedirectToIdentity: app.AutoRedirectToIdentity,
+						CustomDenyMessage:      app.CustomDenyMessage,
+						CustomDenyURL:          app.CustomDenyURL,
+						EnableBindingCookie:    app.EnableBindingCookie,
+						SessionDuration:        app.SessionDuration,
+						UpdatedAt:              app.UpdatedAt,
+						AllowedIDPs:            app.AllowedIdps,
+						CORSHeaders:            app.CorsHeaders,
+					},
+				},
+			}
+			cloudFlareChan <- value
+		}(app)
+	}
+}
+
+func processAccessApp(ctx context.Context, handler *CloudFlareAPIHandler, account *cloudflare.Account, resourceID string) (*cloudflare.AccessApplication, error) {
+	var accessApp cloudflare.AccessApplication
+	var statusCode *int
+	requestFunc := func() (*int, error) {
+		var e error
+		accessApp, e = handler.Conn.AccessApplication(ctx, account.ID, resourceID)
+		if e != nil {
+			var httpErr *cloudflare.APIRequestError
+			if errors.As(e, &httpErr) {
+				statusCode = &httpErr.StatusCode
+			}
+		}
+		return statusCode, e
+	}
+	err := handler.DoRequest(ctx, requestFunc)
+	if err != nil {
+		return nil, err
+	}
+	return &accessApp, nil
 }

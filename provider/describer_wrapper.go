@@ -7,10 +7,12 @@ import (
 	"github.com/opengovern/og-describer-cloudflare/provider/describer"
 	"github.com/opengovern/og-util/pkg/describe/enums"
 	"golang.org/x/net/context"
+	"golang.org/x/time/rate"
+	"time"
 )
 
 // DescribeListByCloudFlare A wrapper to pass cloudflare authorization to describer functions
-func DescribeListByCloudFlare(describe func(context.Context, *cloudflare.API, *model.StreamSender) ([]model.Resource, error)) model.ResourceDescriber {
+func DescribeListByCloudFlare(describe func(context.Context, *describer.CloudFlareAPIHandler, *model.StreamSender) ([]model.Resource, error)) model.ResourceDescriber {
 	return func(ctx context.Context, cfg configs.IntegrationCredentials, triggerType enums.DescribeTriggerType, additionalParameters map[string]string, stream *model.StreamSender) ([]model.Resource, error) {
 		ctx = describer.WithTriggerType(ctx, triggerType)
 
@@ -32,9 +34,11 @@ func DescribeListByCloudFlare(describe func(context.Context, *cloudflare.API, *m
 			}
 		}
 
+		cloudflareAPIHandler := describer.NewCloudFlareAPIHandler(conn, rate.Every(time.Second/4), 1, 10, 5, 5*time.Minute)
+
 		// Get values from describer
 		var values []model.Resource
-		result, err := describe(ctx, conn, stream)
+		result, err := describe(ctx, cloudflareAPIHandler, stream)
 		if err != nil {
 			return nil, err
 		}
@@ -44,7 +48,7 @@ func DescribeListByCloudFlare(describe func(context.Context, *cloudflare.API, *m
 }
 
 // DescribeSingleByCloudFlare A wrapper to pass cloudflare authorization to describer functions
-func DescribeSingleByCloudFlare(describe func(context.Context, *cloudflare.API, string) (*model.Resource, error)) model.SingleResourceDescriber {
+func DescribeSingleByCloudFlare(describe func(context.Context, *describer.CloudFlareAPIHandler, string) (*model.Resource, error)) model.SingleResourceDescriber {
 	return func(ctx context.Context, cfg configs.IntegrationCredentials, triggerType enums.DescribeTriggerType, additionalParameters map[string]string, resourceID string) (*model.Resource, error) {
 		ctx = describer.WithTriggerType(ctx, triggerType)
 
@@ -66,8 +70,10 @@ func DescribeSingleByCloudFlare(describe func(context.Context, *cloudflare.API, 
 			}
 		}
 
+		cloudflareAPIHandler := describer.NewCloudFlareAPIHandler(conn, rate.Every(time.Second/4), 1, 10, 5, 5*time.Minute)
+
 		// Get value from describer
-		value, err := describe(ctx, conn, resourceID)
+		value, err := describe(ctx, cloudflareAPIHandler, resourceID)
 		if err != nil {
 			return nil, err
 		}

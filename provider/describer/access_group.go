@@ -6,90 +6,40 @@ import (
 	"github.com/cloudflare/cloudflare-go"
 	"github.com/opengovern/og-describer-cloudflare/pkg/sdk/models"
 	"github.com/opengovern/og-describer-cloudflare/provider/model"
-	"github.com/turbot/go-kit/helpers"
+	"sync"
 )
 
-func ListAccessGroups(ctx context.Context, conn *cloudflare.API, stream *models.StreamSender) ([]models.Resource, error) {
-	account, err := getAccount(ctx, conn)
+func ListAccessGroups(ctx context.Context, handler *CloudFlareAPIHandler, stream *models.StreamSender) ([]models.Resource, error) {
+	var wg sync.WaitGroup
+	cloudFlareChan := make(chan models.Resource)
+	account, err := getAccount(ctx, handler)
 	if err != nil {
-		return nil, nil
+		return nil, err
 	}
-	opts := cloudflare.PaginationOptions{
-		PerPage: perPage,
-		Page:    page,
-	}
-	type ListPageResponse struct {
-		Groups []cloudflare.AccessGroup
-		resp   cloudflare.ResultInfo
-	}
-	listPage := func(ctx context.Context) (interface{}, error) {
-		groups, resp, err := conn.AccessGroups(ctx, account.ID, opts)
-		return ListPageResponse{
-			Groups: groups,
-			resp:   resp,
-		}, err
-	}
+	go func() {
+		processAccessGroups(ctx, handler, account, cloudFlareChan, &wg)
+		wg.Wait()
+		close(cloudFlareChan)
+	}()
 	var values []models.Resource
-	for {
-		listPageResponse, err := retry(
-			ctx,
-			func() (interface{}, error) {
-				return listPage(ctx)
-			},
-			shouldRetryError,
-		)
-		if err != nil {
-			var cloudFlareErr *cloudflare.APIRequestError
-			if errors.As(err, &cloudFlareErr) {
-				if helpers.StringSliceContains(cloudFlareErr.ErrorMessages(), "Access is not enabled. Visit the Access dashboard at https://dash.cloudflare.com/ and click the 'Enable Access' button.") {
-					return nil, nil
-				}
+	for value := range cloudFlareChan {
+		if stream != nil {
+			if err := (*stream)(value); err != nil {
+				return nil, err
 			}
-			return nil, err
+		} else {
+			values = append(values, value)
 		}
-		listResponse := listPageResponse.(ListPageResponse)
-		groups := listResponse.Groups
-		resp := listResponse.resp
-		for _, group := range groups {
-			value := models.Resource{
-				ID:   group.ID,
-				Name: group.Name,
-				Description: JSONAllFieldsMarshaller{
-					Value: model.AccessGroupDescription{
-						ID:          group.ID,
-						Name:        group.Name,
-						AccountID:   account.ID,
-						AccountName: account.Name,
-						CreatedAt:   group.CreatedAt,
-						UpdatedAt:   group.UpdatedAt,
-						Exclude:     group.Exclude,
-						Include:     group.Include,
-						Require:     group.Require,
-					},
-				},
-			}
-			if stream != nil {
-				if err := (*stream)(value); err != nil {
-					return nil, err
-				}
-			} else {
-				values = append(values, value)
-			}
-		}
-		if resp.Page >= resp.TotalPages {
-			break
-		}
-		opts.Page = opts.Page + 1
 	}
 	return values, nil
 }
 
-func GetAccessGroup(ctx context.Context, conn *cloudflare.API, resourceID string) (*models.Resource, error) {
-	account, err := getAccount(ctx, conn)
+func GetAccessGroup(ctx context.Context, handler *CloudFlareAPIHandler, resourceID string) (*models.Resource, error) {
+	account, err := getAccount(ctx, handler)
 	if err != nil {
-		return nil, nil
+		return nil, err
 	}
-	group, err := conn.AccessGroup(ctx, account.ID, resourceID)
+	group, err := processAccessGroup(ctx, handler, account, resourceID)
 	if err != nil {
 		return nil, err
 	}
@@ -111,4 +61,82 @@ func GetAccessGroup(ctx context.Context, conn *cloudflare.API, resourceID string
 		},
 	}
 	return &value, nil
+}
+
+func processAccessGroups(ctx context.Context, handler *CloudFlareAPIHandler, account *cloudflare.Account, cloudFlareChan chan<- models.Resource, wg *sync.WaitGroup) {
+	var accessGroups []cloudflare.AccessGroup
+	var pageAccessGroups []cloudflare.AccessGroup
+	var pageData cloudflare.ResultInfo
+	var statusCode *int
+	requestFunc := func() (*int, error) {
+		var e error
+		opts := cloudflare.PaginationOptions{
+			PerPage: perPage,
+			Page:    page,
+		}
+		for {
+			pageAccessGroups, pageData, e = handler.Conn.AccessGroups(ctx, account.ID, opts)
+			if e != nil {
+				var httpErr *cloudflare.APIRequestError
+				if errors.As(e, &httpErr) {
+					statusCode = &httpErr.StatusCode
+				}
+			}
+			accessGroups = append(accessGroups, pageAccessGroups...)
+			if pageData.Page >= pageData.TotalPages {
+				break
+			}
+			opts.Page = opts.Page + 1
+		}
+		return statusCode, e
+	}
+	err := handler.DoRequest(ctx, requestFunc)
+	if err != nil {
+		return
+	}
+	for _, group := range accessGroups {
+		wg.Add(1)
+		go func(group cloudflare.AccessGroup) {
+			defer wg.Done()
+			value := models.Resource{
+				ID:   group.ID,
+				Name: group.Name,
+				Description: JSONAllFieldsMarshaller{
+					Value: model.AccessGroupDescription{
+						ID:          group.ID,
+						Name:        group.Name,
+						AccountID:   account.ID,
+						AccountName: account.Name,
+						CreatedAt:   group.CreatedAt,
+						UpdatedAt:   group.UpdatedAt,
+						Exclude:     group.Exclude,
+						Include:     group.Include,
+						Require:     group.Require,
+					},
+				},
+			}
+			cloudFlareChan <- value
+		}(group)
+	}
+}
+
+func processAccessGroup(ctx context.Context, handler *CloudFlareAPIHandler, account *cloudflare.Account, resourceID string) (*cloudflare.AccessGroup, error) {
+	var accessGroup cloudflare.AccessGroup
+	var statusCode *int
+	requestFunc := func() (*int, error) {
+		var e error
+		accessGroup, e = handler.Conn.AccessGroup(ctx, account.ID, resourceID)
+		if e != nil {
+			var httpErr *cloudflare.APIRequestError
+			if errors.As(e, &httpErr) {
+				statusCode = &httpErr.StatusCode
+			}
+		}
+		return statusCode, e
+	}
+	err := handler.DoRequest(ctx, requestFunc)
+	if err != nil {
+		return nil, err
+	}
+	return &accessGroup, nil
 }

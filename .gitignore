@@ -2,3 +2,4 @@ build/
 og-describer-template
 .idea
 .env
+go1.23.2.linux-amd64.tar.gz

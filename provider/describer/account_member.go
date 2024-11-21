@@ -2,68 +2,49 @@ package describer
 
 import (
 	"context"
+	"errors"
 	"github.com/cloudflare/cloudflare-go"
 	"github.com/opengovern/og-describer-cloudflare/pkg/sdk/models"
 	"github.com/opengovern/og-describer-cloudflare/provider/model"
 	"strings"
+	"sync"
 )
 
-func ListAccountMembers(ctx context.Context, conn *cloudflare.API, stream *models.StreamSender) ([]models.Resource, error) {
-	account, err := getAccount(ctx, conn)
+func ListAccountMembers(ctx context.Context, handler *CloudFlareAPIHandler, stream *models.StreamSender) ([]models.Resource, error) {
+	var wg sync.WaitGroup
+	cloudFlareChan := make(chan models.Resource)
+	account, err := getAccount(ctx, handler)
 	if err != nil {
 		return nil, err
 	}
-	var pages cloudflare.PaginationOptions
+	go func() {
+		processAccountMembers(ctx, handler, account, cloudFlareChan, &wg)
+		wg.Wait()
+		close(cloudFlareChan)
+	}()
 	var values []models.Resource
-	for {
-		accountMembers, pageData, err := conn.AccountMembers(ctx, account.ID, pages)
-		if err != nil {
-			return nil, err
-		}
-		for _, accountMember := range accountMembers {
-			title := accountMemberTitle(accountMember)
-			value := models.Resource{
-				ID:   accountMember.ID,
-				Name: title,
-				Description: JSONAllFieldsMarshaller{
-					Value: model.AccountMemberDescription{
-						UserEmail: accountMember.User.Email,
-						ID:        accountMember.ID,
-						Status:    accountMember.Status,
-						AccountID: account.ID,
-						Code:      accountMember.Code,
-						User:      accountMember.User,
-						Roles:     accountMember.Roles,
-						Title:     title,
-					},
-				},
+	for value := range cloudFlareChan {
+		if stream != nil {
+			if err := (*stream)(value); err != nil {
+				return nil, err
 			}
-			if stream != nil {
-				if err := (*stream)(value); err != nil {
-					return nil, err
-				}
-			} else {
-				values = append(values, value)
-			}
+		} else {
+			values = append(values, value)
 		}
-		if pageData.Page == pageData.TotalPages {
-			break
-		}
-		pages.Page = pageData.Page + 1
 	}
 	return values, nil
 }
 
-func GetAccountMember(ctx context.Context, conn *cloudflare.API, resourceID string) (*models.Resource, error) {
-	account, err := getAccount(ctx, conn)
+func GetAccountMember(ctx context.Context, handler *CloudFlareAPIHandler, resourceID string) (*models.Resource, error) {
+	account, err := getAccount(ctx, handler)
 	if err != nil {
 		return nil, err
 	}
-	accountMember, err := conn.AccountMember(ctx, account.ID, resourceID)
+	accountMember, err := processAccountMember(ctx, handler, account, resourceID)
 	if err != nil {
 		return nil, err
 	}
-	title := accountMemberTitle(accountMember)
+	title := accountMemberTitle(*accountMember)
 	value := models.Resource{
 		ID:   accountMember.ID,
 		Name: title,
@@ -81,6 +62,81 @@ func GetAccountMember(ctx context.Context, conn *cloudflare.API, resourceID stri
 		},
 	}
 	return &value, nil
+}
+
+func processAccountMembers(ctx context.Context, handler *CloudFlareAPIHandler, account *cloudflare.Account, cloudFlareChan chan<- models.Resource, wg *sync.WaitGroup) {
+	var accountMembers []cloudflare.AccountMember
+	var pageAccountMembers []cloudflare.AccountMember
+	var pageData cloudflare.ResultInfo
+	var statusCode *int
+	requestFunc := func() (*int, error) {
+		var e error
+		var pages cloudflare.PaginationOptions
+		for {
+			pageAccountMembers, pageData, e = handler.Conn.AccountMembers(ctx, account.ID, pages)
+			if e != nil {
+				var httpErr *cloudflare.APIRequestError
+				if errors.As(e, &httpErr) {
+					statusCode = &httpErr.StatusCode
+				}
+			}
+			accountMembers = append(accountMembers, pageAccountMembers...)
+			if pageData.Page == pageData.TotalPages {
+				break
+			}
+			pages.Page = pageData.Page + 1
+		}
+		return statusCode, e
+	}
+	err := handler.DoRequest(ctx, requestFunc)
+	if err != nil {
+		return
+	}
+	for _, accountMember := range accountMembers {
+		wg.Add(1)
+		go func(accountMember cloudflare.AccountMember) {
+			defer wg.Done()
+			title := accountMemberTitle(accountMember)
+			value := models.Resource{
+				ID:   accountMember.ID,
+				Name: title,
+				Description: JSONAllFieldsMarshaller{
+					Value: model.AccountMemberDescription{
+						UserEmail: accountMember.User.Email,
+						ID:        accountMember.ID,
+						Status:    accountMember.Status,
+						AccountID: account.ID,
+						Code:      accountMember.Code,
+						User:      accountMember.User,
+						Roles:     accountMember.Roles,
+						Title:     title,
+					},
+				},
+			}
+			cloudFlareChan <- value
+		}(accountMember)
+	}
+}
+
+func processAccountMember(ctx context.Context, handler *CloudFlareAPIHandler, account *cloudflare.Account, resourceID string) (*cloudflare.AccountMember, error) {
+	var accountMember cloudflare.AccountMember
+	var statusCode *int
+	requestFunc := func() (*int, error) {
+		var e error
+		accountMember, e = handler.Conn.AccountMember(ctx, account.ID, resourceID)
+		if e != nil {
+			var httpErr *cloudflare.APIRequestError
+			if errors.As(e, &httpErr) {
+				statusCode = &httpErr.StatusCode
+			}
+		}
+		return statusCode, e
+	}
+	err := handler.DoRequest(ctx, requestFunc)
+	if err != nil {
+		return nil, err
+	}
+	return &accountMember, nil
 }
 
 func accountMemberTitle(accountMember cloudflare.AccountMember) string {
