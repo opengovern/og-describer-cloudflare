@@ -14,7 +14,7 @@ func ListDNSRecords(ctx context.Context, conn *cloudflare.API, stream *models.St
 	}
 	var values []models.Resource
 	for _, zone := range zones {
-		zoneValues, err := GetZoneDNSRecord(ctx, conn, stream, zone)
+		zoneValues, err := getZoneDNSRecord(ctx, conn, stream, zone)
 		if err != nil {
 			return nil, err
 		}
@@ -76,7 +76,7 @@ func GetDNSRecord(ctx context.Context, conn *cloudflare.API, resourceID string) 
 	return &value, nil
 }
 
-func GetZoneDNSRecord(ctx context.Context, conn *cloudflare.API, stream *models.StreamSender, zone cloudflare.Zone) ([]models.Resource, error) {
+func getZoneDNSRecord(ctx context.Context, conn *cloudflare.API, stream *models.StreamSender, zone cloudflare.Zone) ([]models.Resource, error) {
 	zoneID := zone.ID
 	items, err := conn.DNSRecords(ctx, zoneID, cloudflare.DNSRecord{})
 	if err != nil {

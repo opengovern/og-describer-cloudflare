@@ -14,7 +14,7 @@ func ListFireWallRules(ctx context.Context, conn *cloudflare.API, stream *models
 	}
 	var values []models.Resource
 	for _, zone := range zones {
-		zoneValues, err := GetZoneFirewallRules(ctx, conn, stream, zone)
+		zoneValues, err := getZoneFirewallRules(ctx, conn, stream, zone)
 		if err != nil {
 			return nil, err
 		}
@@ -70,7 +70,7 @@ func GetFireWallRule(ctx context.Context, conn *cloudflare.API, resourceID strin
 	return &value, nil
 }
 
-func GetZoneFirewallRules(ctx context.Context, conn *cloudflare.API, stream *models.StreamSender, zone cloudflare.Zone) ([]models.Resource, error) {
+func getZoneFirewallRules(ctx context.Context, conn *cloudflare.API, stream *models.StreamSender, zone cloudflare.Zone) ([]models.Resource, error) {
 	zoneID := zone.ID
 	fireWallRules, err := conn.FirewallRules(ctx, zoneID, cloudflare.PaginationOptions{})
 	if err != nil {

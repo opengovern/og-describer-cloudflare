@@ -7,7 +7,7 @@
       ]
     },
     "ListDescriber": "DescribeByCloudFlareList(describer.ListAccessApplications)",
-    "GetDescriber": "",
+    "GetDescriber": "DescribeByCloudFlareGet(describer.GetAccessApplication)",
     "SteampipeTable": "cloudflare_access_application",
     "Model": "AccessApplication"
   },
@@ -19,7 +19,7 @@
       ]
     },
     "ListDescriber": "DescribeByCloudFlareList(describer.ListAccessGroups)",
-    "GetDescriber": "",
+    "GetDescriber": "DescribeByCloudFlareGet(describer.GetAccessGroup)",
     "SteampipeTable": "cloudflare_access_group",
     "Model": "AccessGroup"
   },
@@ -31,7 +31,7 @@
       ]
     },
     "ListDescriber": "DescribeByCloudFlareList(describer.ListAccessPolicies)",
-    "GetDescriber": "",
+    "GetDescriber": "DescribeByCloudFlareGet(describer.GetAccessPolicy)",
     "SteampipeTable": "cloudflare_access_policy",
     "Model": "AccessPolicy"
   },
@@ -42,10 +42,46 @@
         "Account"
       ]
     },
-    "ListDescriber": "",
+    "ListDescriber": "DescribeByCloudFlareList(describer.ListAccounts)",
     "GetDescriber": "DescribeByCloudFlareGet(describer.GetAccount)",
     "SteampipeTable": "cloudflare_account",
     "Model": "Account"
+  },
+  {
+    "ResourceName": "CloudFlare/Account/Member",
+    "Tags": {
+      "category": [
+        "Account"
+      ]
+    },
+    "ListDescriber": "DescribeByCloudFlareList(describer.ListAccountMembers)",
+    "GetDescriber": "DescribeByCloudFlareGet(describer.GetAccountMember)",
+    "SteampipeTable": "cloudflare_account_member",
+    "Model": "AccountMember"
+  },
+  {
+    "ResourceName": "CloudFlare/Account/Role",
+    "Tags": {
+      "category": [
+        "Account"
+      ]
+    },
+    "ListDescriber": "DescribeByCloudFlareList(describer.ListAccountRoles)",
+    "GetDescriber": "DescribeByCloudFlareGet(describer.GetAccountRole)",
+    "SteampipeTable": "cloudflare_account_role",
+    "Model": "AccountRole"
+  },
+  {
+    "ResourceName": "CloudFlare/ApiToken",
+    "Tags": {
+      "category": [
+        "ApiToken"
+      ]
+    },
+    "ListDescriber": "DescribeByCloudFlareList(describer.ListApiTokens)",
+    "GetDescriber": "DescribeByCloudFlareGet(describer.GetApiToken)",
+    "SteampipeTable": "cloudflare_api_token",
+    "Model": "ApiToken"
   },
   {
     "ResourceName": "CloudFlare/DNSRecord",
@@ -82,5 +118,29 @@
     "GetDescriber": "DescribeByCloudFlareGet(describer.GetLoadBalancer)",
     "SteampipeTable": "cloudflare_load_balancer",
     "Model": "LoadBalancer"
+  },
+  {
+    "ResourceName": "CloudFlare/LoadBalancer/Monitor",
+    "Tags": {
+      "category": [
+        "LoadBalancer"
+      ]
+    },
+    "ListDescriber": "DescribeByCloudFlareList(describer.ListLoadBalancerMonitors)",
+    "GetDescriber": "DescribeByCloudFlareGet(describer.GetLoadBalancerMonitor)",
+    "SteampipeTable": "cloudflare_load_balancer_monitor",
+    "Model": "LoadBalancerMonitor"
+  },
+  {
+    "ResourceName": "CloudFlare/LoadBalancer/Pool",
+    "Tags": {
+      "category": [
+        "LoadBalancer"
+      ]
+    },
+    "ListDescriber": "DescribeByCloudFlareList(describer.ListLoadBalancerPools)",
+    "GetDescriber": "DescribeByCloudFlareGet(describer.GetLoadBalancerPool)",
+    "SteampipeTable": "cloudflare_load_balancer_pool",
+    "Model": "LoadBalancerPool"
   }
 ]

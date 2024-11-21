@@ -66,6 +66,38 @@ type AccountDescription struct {
 	Settings *cloudflare.AccountSettings
 }
 
+type AccountMemberDescription struct {
+	UserEmail string
+	ID        string
+	Status    string
+	AccountID string
+	Code      string
+	User      cloudflare.AccountMemberUserDetails
+	Roles     []cloudflare.AccountRole
+	Title     string
+}
+
+type AccountRoleDescription = struct {
+	ID          string
+	Name        string
+	Description string
+	Permissions map[string]cloudflare.AccountRolePermission
+	AccountID   string
+	Title       string
+}
+
+type ApiTokenDescription struct {
+	ID         string
+	Name       string
+	Status     string
+	Condition  *cloudflare.APITokenCondition
+	ExpiresOn  *time.Time
+	IssuedOn   *time.Time
+	ModifiedOn *time.Time
+	NotBefore  *time.Time
+	Policies   []cloudflare.APITokenPolicies
+}
+
 type DNSRecordDescription struct {
 	ZoneID     string
 	ZoneName   string
@@ -117,4 +149,41 @@ type LoadBalancerDescription struct {
 	PopPools                  map[string][]string
 	RegionPools               map[string][]string
 	SessionAffinityAttributes *cloudflare.SessionAffinityAttributes
+}
+
+type LoadBalancerMonitorDescription struct {
+	ID              string
+	CreatedOn       *time.Time
+	ModifiedOn      *time.Time
+	Type            string
+	Description     string
+	Method          string
+	Path            string
+	Header          map[string][]string
+	Timeout         int
+	Retries         int
+	Interval        int
+	Port            uint16
+	ExpectedBody    string
+	ExpectedCodes   string
+	FollowRedirects bool
+	AllowInsecure   bool
+	ProbeZone       string
+}
+
+type LoadBalancerPoolDescription struct {
+	ID                string
+	Name              string
+	Enabled           bool
+	Monitor           string
+	CreatedOn         *time.Time
+	Description       string
+	Latitude          *float32
+	Longitude         *float32
+	MinimumOrigins    int
+	ModifiedOn        *time.Time
+	NotificationEmail string
+	CheckRegions      []string
+	LoadShedding      *cloudflare.LoadBalancerLoadShedding
+	Origins           []cloudflare.LoadBalancerOrigin
 }

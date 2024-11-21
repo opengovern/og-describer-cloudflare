@@ -89,3 +89,38 @@ func ListAccessApplications(ctx context.Context, conn *cloudflare.API, stream *m
 	}
 	return values, nil
 }
+
+func GetAccessApplication(ctx context.Context, conn *cloudflare.API, resourceID string) (*models.Resource, error) {
+	account, err := getAccount(ctx, conn)
+	if err != nil {
+		return nil, nil
+	}
+	app, err := conn.AccessApplication(ctx, account.ID, resourceID)
+	if err != nil {
+		return nil, err
+	}
+	value := models.Resource{
+		ID:   app.ID,
+		Name: app.Name,
+		Description: JSONAllFieldsMarshaller{
+			Value: model.AccessApplicationDescription{
+				ID:                     app.ID,
+				Name:                   app.Name,
+				AccountID:              account.ID,
+				AccountName:            account.Name,
+				Domain:                 app.Domain,
+				CreatedAt:              app.CreatedAt,
+				Aud:                    app.AUD,
+				AutoRedirectToIdentity: app.AutoRedirectToIdentity,
+				CustomDenyMessage:      app.CustomDenyMessage,
+				CustomDenyURL:          app.CustomDenyURL,
+				EnableBindingCookie:    app.EnableBindingCookie,
+				SessionDuration:        app.SessionDuration,
+				UpdatedAt:              app.UpdatedAt,
+				AllowedIDPs:            app.AllowedIdps,
+				CORSHeaders:            app.CorsHeaders,
+			},
+		},
+	}
+	return &value, nil
+}

@@ -14,7 +14,7 @@ func ListLoadBalancers(ctx context.Context, conn *cloudflare.API, stream *models
 	}
 	var values []models.Resource
 	for _, zone := range zones {
-		zoneValues, err := GetZoneLoadBalancers(ctx, conn, stream, zone)
+		zoneValues, err := getZoneLoadBalancers(ctx, conn, stream, zone)
 		if err != nil {
 			return nil, err
 		}
@@ -79,7 +79,7 @@ func GetLoadBalancer(ctx context.Context, conn *cloudflare.API, resourceID strin
 	return &value, nil
 }
 
-func GetZoneLoadBalancers(ctx context.Context, conn *cloudflare.API, stream *models.StreamSender, zone cloudflare.Zone) ([]models.Resource, error) {
+func getZoneLoadBalancers(ctx context.Context, conn *cloudflare.API, stream *models.StreamSender, zone cloudflare.Zone) ([]models.Resource, error) {
 	zoneID := zone.ID
 	loadBalancers, err := conn.ListLoadBalancers(ctx, zoneID)
 	if err != nil {

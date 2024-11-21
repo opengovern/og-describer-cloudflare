@@ -13,9 +13,12 @@ func ListAccessPolicies(ctx context.Context, conn *cloudflare.API, stream *model
 		return nil, nil
 	}
 	apps, err := getApplications(ctx, conn, account.ID)
+	if err != nil {
+		return nil, nil
+	}
 	var values []models.Resource
 	for _, app := range apps {
-		accountValues, err := GetAppAccessPolicies(ctx, conn, stream, account.ID, app)
+		accountValues, err := getAppAccessPolicies(ctx, conn, stream, account.ID, app)
 		if err != nil {
 			return nil, err
 		}
@@ -24,7 +27,68 @@ func ListAccessPolicies(ctx context.Context, conn *cloudflare.API, stream *model
 	return values, nil
 }
 
-func GetAppAccessPolicies(ctx context.Context, conn *cloudflare.API, stream *models.StreamSender, accountID string, app cloudflare.AccessApplication) ([]models.Resource, error) {
+func GetAccessPolicy(ctx context.Context, conn *cloudflare.API, resourceID string) (*models.Resource, error) {
+	var appID string
+	var appName string
+	opts := cloudflare.PaginationOptions{
+		PerPage: perPage,
+		Page:    page,
+	}
+	account, err := getAccount(ctx, conn)
+	if err != nil {
+		return nil, nil
+	}
+	apps, err := getApplications(ctx, conn, account.ID)
+	if err != nil {
+		return nil, nil
+	}
+	for _, app := range apps {
+		accessPolicies, _, err := conn.AccessPolicies(ctx, account.ID, app.ID, opts)
+		if err != nil {
+			return nil, err
+		}
+		for _, accessPolicy := range accessPolicies {
+			if accessPolicy.ID == resourceID {
+				appID = app.ID
+				appName = app.Name
+				break
+			}
+		}
+		if appID != "" {
+			break
+		}
+	}
+	item, err := conn.AccessPolicy(ctx, account.ID, appID, resourceID)
+	if err != nil {
+		return nil, err
+	}
+	value := models.Resource{
+		ID:   item.ID,
+		Name: item.Name,
+		Description: JSONAllFieldsMarshaller{
+			Value: model.AccessPolicyDescription{
+				ID:                           item.ID,
+				Name:                         item.Name,
+				AccountID:                    account.ID,
+				ApplicationID:                appID,
+				ApplicationName:              appName,
+				CreatedAt:                    item.CreatedAt,
+				Decision:                     item.Decision,
+				Precedence:                   item.Precedence,
+				PurposeJustificationPrompt:   item.PurposeJustificationPrompt,
+				PurposeJustificationRequired: item.PurposeJustificationRequired,
+				UpdatedAt:                    item.UpdatedAt,
+				ApprovalGroups:               item.ApprovalGroups,
+				Exclude:                      item.Exclude,
+				Include:                      item.Include,
+				Require:                      item.Require,
+			},
+		},
+	}
+	return &value, nil
+}
+
+func getAppAccessPolicies(ctx context.Context, conn *cloudflare.API, stream *models.StreamSender, accountID string, app cloudflare.AccessApplication) ([]models.Resource, error) {
 	appID := app.ID
 	opts := cloudflare.PaginationOptions{
 		PerPage: perPage,

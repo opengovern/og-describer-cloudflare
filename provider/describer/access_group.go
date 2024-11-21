@@ -83,3 +83,32 @@ func ListAccessGroups(ctx context.Context, conn *cloudflare.API, stream *models.
 	}
 	return values, nil
 }
+
+func GetAccessGroup(ctx context.Context, conn *cloudflare.API, resourceID string) (*models.Resource, error) {
+	account, err := getAccount(ctx, conn)
+	if err != nil {
+		return nil, nil
+	}
+	group, err := conn.AccessGroup(ctx, account.ID, resourceID)
+	if err != nil {
+		return nil, err
+	}
+	value := models.Resource{
+		ID:   group.ID,
+		Name: group.Name,
+		Description: JSONAllFieldsMarshaller{
+			Value: model.AccessGroupDescription{
+				ID:          group.ID,
+				Name:        group.Name,
+				AccountID:   account.ID,
+				AccountName: account.Name,
+				CreatedAt:   group.CreatedAt,
+				UpdatedAt:   group.UpdatedAt,
+				Exclude:     group.Exclude,
+				Include:     group.Include,
+				Require:     group.Require,
+			},
+		},
+	}
+	return &value, nil
+}
