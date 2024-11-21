@@ -142,5 +142,65 @@
     "GetDescriber": "DescribeByCloudFlareGet(describer.GetLoadBalancerPool)",
     "SteampipeTable": "cloudflare_load_balancer_pool",
     "Model": "LoadBalancerPool"
+  },
+  {
+    "ResourceName": "CloudFlare/PageRule",
+    "Tags": {
+      "category": [
+        "PageRule"
+      ]
+    },
+    "ListDescriber": "DescribeByCloudFlareList(describer.ListPageRules)",
+    "GetDescriber": "DescribeByCloudFlareGet(describer.GetPageRule)",
+    "SteampipeTable": "cloudflare_page_rule",
+    "Model": "PageRule"
+  },
+  {
+    "ResourceName": "CloudFlare/User",
+    "Tags": {
+      "category": [
+        "User"
+      ]
+    },
+    "ListDescriber": "DescribeByCloudFlareList(describer.ListUsers)",
+    "GetDescriber": "DescribeByCloudFlareGet(describer.GetUser)",
+    "SteampipeTable": "cloudflare_user",
+    "Model": "User"
+  },
+  {
+    "ResourceName": "CloudFlare/User/AuditLog",
+    "Tags": {
+      "category": [
+        "User"
+      ]
+    },
+    "ListDescriber": "DescribeByCloudFlareList(describer.ListUserAuditLogs)",
+    "GetDescriber": "",
+    "SteampipeTable": "cloudflare_user_audit_log",
+    "Model": "UserAuditLog"
+  },
+  {
+    "ResourceName": "CloudFlare/WorkerRoute",
+    "Tags": {
+      "category": [
+        "WorkerRoute"
+      ]
+    },
+    "ListDescriber": "DescribeByCloudFlareList(describer.ListWorkerRoutes)",
+    "GetDescriber": "DescribeByCloudFlareGet(describer.GetWorkerRoute)",
+    "SteampipeTable": "cloudflare_worker_route",
+    "Model": "WorkerRoute"
+  },
+  {
+    "ResourceName": "CloudFlare/Zone",
+    "Tags": {
+      "category": [
+        "Zone"
+      ]
+    },
+    "ListDescriber": "DescribeByCloudFlareList(describer.ListZones)",
+    "GetDescriber": "DescribeByCloudFlareGet(describer.GetZone)",
+    "SteampipeTable": "cloudflare_zone",
+    "Model": "Zone"
   }
 ]

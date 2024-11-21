@@ -187,3 +187,88 @@ type LoadBalancerPoolDescription struct {
 	LoadShedding      *cloudflare.LoadBalancerLoadShedding
 	Origins           []cloudflare.LoadBalancerOrigin
 }
+
+type PageRuleDescription struct {
+	ID         string
+	Status     string
+	ZoneID     string
+	CreatedOn  time.Time
+	ModifiedOn time.Time
+	Priority   int
+	Title      string
+	Actions    []cloudflare.PageRuleAction
+	Targets    []cloudflare.PageRuleTarget
+}
+
+type UserDescription struct {
+	ID                             string
+	Email                          string
+	Username                       string
+	Telephone                      string
+	FirstName                      string
+	LastName                       string
+	Country                        string
+	Zipcode                        string
+	CreatedOn                      *time.Time
+	ModifiedOn                     *time.Time
+	APIKey                         string
+	TwoFactorAuthenticationEnabled bool
+	Betas                          []string
+	Organizations                  []cloudflare.Account
+}
+
+type UserAuditLogDescription struct {
+	ActorEmail   string
+	ActorID      string
+	ActorIP      string
+	ActorType    string
+	ID           string
+	NewValue     string
+	OldValue     string
+	OwnerID      string
+	When         string
+	Action       cloudflare.AuditLogAction
+	Metadata     map[string]interface{}
+	NewValueJSON map[string]interface{}
+	OldValueJSON map[string]interface{}
+	Resource     cloudflare.AuditLogResource
+}
+
+type WorkerRouteDescription struct {
+	ID       string
+	ZoneName string
+	Pattern  string
+	Script   string
+	ZoneID   string
+}
+
+type host struct {
+	Name    string
+	Website string
+}
+
+type ZoneDescription struct {
+	ID                  string
+	Name                string
+	Betas               []string
+	CreatedOn           time.Time
+	DeactivationReason  string
+	DevelopmentMode     int
+	DNSSEC              cloudflare.ZoneDNSSEC
+	Host                host
+	Meta                cloudflare.ZoneMeta
+	ModifiedOn          time.Time
+	NameServers         []string
+	OriginalDNSHost     string
+	OriginalNameServers []string
+	OriginalRegistrar   string
+	Owner               cloudflare.Owner
+	Paused              bool
+	Permissions         []string
+	Settings            map[string]interface{}
+	Plan                cloudflare.ZonePlan
+	PlanPending         cloudflare.ZonePlan
+	Status              string
+	Type                string
+	VanityNameServers   []string
+}
