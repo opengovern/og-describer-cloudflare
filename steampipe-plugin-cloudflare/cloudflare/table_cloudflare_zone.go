@@ -2,6 +2,7 @@ package cloudflare
 
 import (
 	"context"
+	opengovernance "github.com/opengovern/og-describer-cloudflare/pkg/sdk/es"
 
 	"github.com/cloudflare/cloudflare-go"
 
@@ -15,12 +16,12 @@ func tableCloudflareZone(ctx context.Context) *plugin.Table {
 		Name:        "cloudflare_zone",
 		Description: "A Zone is a domain name along with its subdomains and other identities.",
 		List: &plugin.ListConfig{
-			Hydrate: listZones,
+			Hydrate: opengovernance.ListZone,
 		},
 		Get: &plugin.GetConfig{
 			KeyColumns:        plugin.SingleColumn("id"),
 			ShouldIgnoreError: isNotFoundError([]string{"Invalid zone identifier"}),
-			Hydrate:           getZone,
+			Hydrate:           opengovernance.GetZone,
 		},
 		Columns: commonColumns([]*plugin.Column{
 			// Top columns

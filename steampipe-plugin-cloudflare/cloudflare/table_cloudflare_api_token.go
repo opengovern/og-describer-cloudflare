@@ -2,6 +2,7 @@ package cloudflare
 
 import (
 	"context"
+	opengovernance "github.com/opengovern/og-describer-cloudflare/pkg/sdk/es"
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
@@ -12,7 +13,7 @@ func tableCloudflareAPIToken(ctx context.Context) *plugin.Table {
 		Name:        "cloudflare_api_token",
 		Description: "API tokens for the user.",
 		List: &plugin.ListConfig{
-			Hydrate: listAPIToken,
+			Hydrate: opengovernance.ListApiToken,
 		},
 		Columns: commonColumns([]*plugin.Column{
 			// Top columns

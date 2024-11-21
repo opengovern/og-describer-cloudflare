@@ -3,9 +3,6 @@ package opengovernance
 
 import (
 	"context"
-	//"encoding/json"
-	//"fmt"
-	//cloudflareDescriber "github.com/opengovern/og-describer-cloudflare/provider/describer"
 	cloudflare "github.com/opengovern/og-describer-cloudflare/provider/model"
 	essdk "github.com/opengovern/og-util/pkg/opengovernance-es-sdk"
 	steampipesdk "github.com/opengovern/og-util/pkg/steampipe"
@@ -831,6 +828,617 @@ func GetAccount(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData)
 
 // ==========================  END: Account =============================
 
+// ==========================  START: AccountMember =============================
+
+type AccountMember struct {
+	ResourceID      string                              `json:"resource_id"`
+	PlatformID      string                              `json:"platform_id"`
+	Description     cloudflare.AccountMemberDescription `json:"description"`
+	Metadata        cloudflare.Metadata                 `json:"metadata"`
+	DescribedBy     string                              `json:"described_by"`
+	ResourceType    string                              `json:"resource_type"`
+	IntegrationType string                              `json:"integration_type"`
+	IntegrationID   string                              `json:"integration_id"`
+}
+
+type AccountMemberHit struct {
+	ID      string        `json:"_id"`
+	Score   float64       `json:"_score"`
+	Index   string        `json:"_index"`
+	Type    string        `json:"_type"`
+	Version int64         `json:"_version,omitempty"`
+	Source  AccountMember `json:"_source"`
+	Sort    []interface{} `json:"sort"`
+}
+
+type AccountMemberHits struct {
+	Total essdk.SearchTotal  `json:"total"`
+	Hits  []AccountMemberHit `json:"hits"`
+}
+
+type AccountMemberSearchResponse struct {
+	PitID string            `json:"pit_id"`
+	Hits  AccountMemberHits `json:"hits"`
+}
+
+type AccountMemberPaginator struct {
+	paginator *essdk.BaseESPaginator
+}
+
+func (k Client) NewAccountMemberPaginator(filters []essdk.BoolFilter, limit *int64) (AccountMemberPaginator, error) {
+	paginator, err := essdk.NewPaginator(k.ES(), "cloudflare_account_member", filters, limit)
+	if err != nil {
+		return AccountMemberPaginator{}, err
+	}
+
+	p := AccountMemberPaginator{
+		paginator: paginator,
+	}
+
+	return p, nil
+}
+
+func (p AccountMemberPaginator) HasNext() bool {
+	return !p.paginator.Done()
+}
+
+func (p AccountMemberPaginator) Close(ctx context.Context) error {
+	return p.paginator.Deallocate(ctx)
+}
+
+func (p AccountMemberPaginator) NextPage(ctx context.Context) ([]AccountMember, error) {
+	var response AccountMemberSearchResponse
+	err := p.paginator.Search(ctx, &response)
+	if err != nil {
+		return nil, err
+	}
+
+	var values []AccountMember
+	for _, hit := range response.Hits.Hits {
+		values = append(values, hit.Source)
+	}
+
+	hits := int64(len(response.Hits.Hits))
+	if hits > 0 {
+		p.paginator.UpdateState(hits, response.Hits.Hits[hits-1].Sort, response.PitID)
+	} else {
+		p.paginator.UpdateState(hits, nil, "")
+	}
+
+	return values, nil
+}
+
+var listAccountMemberFilters = map[string]string{
+	"account_id": "AccountID",
+	"user_email": "User.Email",
+}
+
+func ListAccountMember(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("ListAccountMember")
+	runtime.GC()
+
+	// create service
+	cfg := essdk.GetConfig(d.Connection)
+	ke, err := essdk.NewClientCached(cfg, d.ConnectionCache, ctx)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListAccountMember NewClientCached", "error", err)
+		return nil, err
+	}
+	k := Client{Client: ke}
+
+	sc, err := steampipesdk.NewSelfClientCached(ctx, d.ConnectionCache)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListAccountMember NewSelfClientCached", "error", err)
+		return nil, err
+	}
+	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListAccountMember GetConfigTableValueOrNil for OpenGovernanceConfigKeyAccountID", "error", err)
+		return nil, err
+	}
+	encodedResourceCollectionFilters, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyResourceCollectionFilters)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListAccountMember GetConfigTableValueOrNil for OpenGovernanceConfigKeyResourceCollectionFilters", "error", err)
+		return nil, err
+	}
+	clientType, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyClientType)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListAccountMember GetConfigTableValueOrNil for OpenGovernanceConfigKeyClientType", "error", err)
+		return nil, err
+	}
+
+	paginator, err := k.NewAccountMemberPaginator(essdk.BuildFilter(ctx, d.QueryContext, listAccountMemberFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), d.QueryContext.Limit)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListAccountMember NewAccountMemberPaginator", "error", err)
+		return nil, err
+	}
+
+	for paginator.HasNext() {
+		page, err := paginator.NextPage(ctx)
+		if err != nil {
+			plugin.Logger(ctx).Error("ListAccountMember paginator.NextPage", "error", err)
+			return nil, err
+		}
+
+		for _, v := range page {
+			d.StreamListItem(ctx, v)
+		}
+	}
+
+	err = paginator.Close(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, nil
+}
+
+var getAccountMemberFilters = map[string]string{
+	"account_id": "AccountID",
+	"user_email": "User.Email",
+}
+
+func GetAccountMember(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("GetAccountMember")
+	runtime.GC()
+	// create service
+	cfg := essdk.GetConfig(d.Connection)
+	ke, err := essdk.NewClientCached(cfg, d.ConnectionCache, ctx)
+	if err != nil {
+		return nil, err
+	}
+	k := Client{Client: ke}
+
+	sc, err := steampipesdk.NewSelfClientCached(ctx, d.ConnectionCache)
+	if err != nil {
+		return nil, err
+	}
+	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	if err != nil {
+		return nil, err
+	}
+	encodedResourceCollectionFilters, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyResourceCollectionFilters)
+	if err != nil {
+		return nil, err
+	}
+	clientType, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyClientType)
+	if err != nil {
+		return nil, err
+	}
+
+	limit := int64(1)
+	paginator, err := k.NewAccountMemberPaginator(essdk.BuildFilter(ctx, d.QueryContext, getAccountMemberFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), &limit)
+	if err != nil {
+		return nil, err
+	}
+
+	for paginator.HasNext() {
+		page, err := paginator.NextPage(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, v := range page {
+			return v, nil
+		}
+	}
+
+	err = paginator.Close(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, nil
+}
+
+// ==========================  END: AccountMember =============================
+
+// ==========================  START: AccountRole =============================
+
+type AccountRole struct {
+	ResourceID      string                            `json:"resource_id"`
+	PlatformID      string                            `json:"platform_id"`
+	Description     cloudflare.AccountRoleDescription `json:"description"`
+	Metadata        cloudflare.Metadata               `json:"metadata"`
+	DescribedBy     string                            `json:"described_by"`
+	ResourceType    string                            `json:"resource_type"`
+	IntegrationType string                            `json:"integration_type"`
+	IntegrationID   string                            `json:"integration_id"`
+}
+
+type AccountRoleHit struct {
+	ID      string        `json:"_id"`
+	Score   float64       `json:"_score"`
+	Index   string        `json:"_index"`
+	Type    string        `json:"_type"`
+	Version int64         `json:"_version,omitempty"`
+	Source  AccountRole   `json:"_source"`
+	Sort    []interface{} `json:"sort"`
+}
+
+type AccountRoleHits struct {
+	Total essdk.SearchTotal `json:"total"`
+	Hits  []AccountRoleHit  `json:"hits"`
+}
+
+type AccountRoleSearchResponse struct {
+	PitID string          `json:"pit_id"`
+	Hits  AccountRoleHits `json:"hits"`
+}
+
+type AccountRolePaginator struct {
+	paginator *essdk.BaseESPaginator
+}
+
+func (k Client) NewAccountRolePaginator(filters []essdk.BoolFilter, limit *int64) (AccountRolePaginator, error) {
+	paginator, err := essdk.NewPaginator(k.ES(), "cloudflare_account_role", filters, limit)
+	if err != nil {
+		return AccountRolePaginator{}, err
+	}
+
+	p := AccountRolePaginator{
+		paginator: paginator,
+	}
+
+	return p, nil
+}
+
+func (p AccountRolePaginator) HasNext() bool {
+	return !p.paginator.Done()
+}
+
+func (p AccountRolePaginator) Close(ctx context.Context) error {
+	return p.paginator.Deallocate(ctx)
+}
+
+func (p AccountRolePaginator) NextPage(ctx context.Context) ([]AccountRole, error) {
+	var response AccountRoleSearchResponse
+	err := p.paginator.Search(ctx, &response)
+	if err != nil {
+		return nil, err
+	}
+
+	var values []AccountRole
+	for _, hit := range response.Hits.Hits {
+		values = append(values, hit.Source)
+	}
+
+	hits := int64(len(response.Hits.Hits))
+	if hits > 0 {
+		p.paginator.UpdateState(hits, response.Hits.Hits[hits-1].Sort, response.PitID)
+	} else {
+		p.paginator.UpdateState(hits, nil, "")
+	}
+
+	return values, nil
+}
+
+var listAccountRoleFilters = map[string]string{
+	"account_id": "AccountID",
+	"id":         "ID",
+	"title":      "Name",
+}
+
+func ListAccountRole(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("ListAccountRole")
+	runtime.GC()
+
+	// create service
+	cfg := essdk.GetConfig(d.Connection)
+	ke, err := essdk.NewClientCached(cfg, d.ConnectionCache, ctx)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListAccountRole NewClientCached", "error", err)
+		return nil, err
+	}
+	k := Client{Client: ke}
+
+	sc, err := steampipesdk.NewSelfClientCached(ctx, d.ConnectionCache)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListAccountRole NewSelfClientCached", "error", err)
+		return nil, err
+	}
+	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListAccountRole GetConfigTableValueOrNil for OpenGovernanceConfigKeyAccountID", "error", err)
+		return nil, err
+	}
+	encodedResourceCollectionFilters, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyResourceCollectionFilters)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListAccountRole GetConfigTableValueOrNil for OpenGovernanceConfigKeyResourceCollectionFilters", "error", err)
+		return nil, err
+	}
+	clientType, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyClientType)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListAccountRole GetConfigTableValueOrNil for OpenGovernanceConfigKeyClientType", "error", err)
+		return nil, err
+	}
+
+	paginator, err := k.NewAccountRolePaginator(essdk.BuildFilter(ctx, d.QueryContext, listAccountRoleFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), d.QueryContext.Limit)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListAccountRole NewAccountRolePaginator", "error", err)
+		return nil, err
+	}
+
+	for paginator.HasNext() {
+		page, err := paginator.NextPage(ctx)
+		if err != nil {
+			plugin.Logger(ctx).Error("ListAccountRole paginator.NextPage", "error", err)
+			return nil, err
+		}
+
+		for _, v := range page {
+			d.StreamListItem(ctx, v)
+		}
+	}
+
+	err = paginator.Close(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, nil
+}
+
+var getAccountRoleFilters = map[string]string{
+	"account_id": "AccountID",
+	"id":         "ID",
+	"title":      "Name",
+}
+
+func GetAccountRole(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("GetAccountRole")
+	runtime.GC()
+	// create service
+	cfg := essdk.GetConfig(d.Connection)
+	ke, err := essdk.NewClientCached(cfg, d.ConnectionCache, ctx)
+	if err != nil {
+		return nil, err
+	}
+	k := Client{Client: ke}
+
+	sc, err := steampipesdk.NewSelfClientCached(ctx, d.ConnectionCache)
+	if err != nil {
+		return nil, err
+	}
+	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	if err != nil {
+		return nil, err
+	}
+	encodedResourceCollectionFilters, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyResourceCollectionFilters)
+	if err != nil {
+		return nil, err
+	}
+	clientType, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyClientType)
+	if err != nil {
+		return nil, err
+	}
+
+	limit := int64(1)
+	paginator, err := k.NewAccountRolePaginator(essdk.BuildFilter(ctx, d.QueryContext, getAccountRoleFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), &limit)
+	if err != nil {
+		return nil, err
+	}
+
+	for paginator.HasNext() {
+		page, err := paginator.NextPage(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, v := range page {
+			return v, nil
+		}
+	}
+
+	err = paginator.Close(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, nil
+}
+
+// ==========================  END: AccountRole =============================
+
+// ==========================  START: ApiToken =============================
+
+type ApiToken struct {
+	ResourceID      string                         `json:"resource_id"`
+	PlatformID      string                         `json:"platform_id"`
+	Description     cloudflare.ApiTokenDescription `json:"description"`
+	Metadata        cloudflare.Metadata            `json:"metadata"`
+	DescribedBy     string                         `json:"described_by"`
+	ResourceType    string                         `json:"resource_type"`
+	IntegrationType string                         `json:"integration_type"`
+	IntegrationID   string                         `json:"integration_id"`
+}
+
+type ApiTokenHit struct {
+	ID      string        `json:"_id"`
+	Score   float64       `json:"_score"`
+	Index   string        `json:"_index"`
+	Type    string        `json:"_type"`
+	Version int64         `json:"_version,omitempty"`
+	Source  ApiToken      `json:"_source"`
+	Sort    []interface{} `json:"sort"`
+}
+
+type ApiTokenHits struct {
+	Total essdk.SearchTotal `json:"total"`
+	Hits  []ApiTokenHit     `json:"hits"`
+}
+
+type ApiTokenSearchResponse struct {
+	PitID string       `json:"pit_id"`
+	Hits  ApiTokenHits `json:"hits"`
+}
+
+type ApiTokenPaginator struct {
+	paginator *essdk.BaseESPaginator
+}
+
+func (k Client) NewApiTokenPaginator(filters []essdk.BoolFilter, limit *int64) (ApiTokenPaginator, error) {
+	paginator, err := essdk.NewPaginator(k.ES(), "cloudflare_apitoken", filters, limit)
+	if err != nil {
+		return ApiTokenPaginator{}, err
+	}
+
+	p := ApiTokenPaginator{
+		paginator: paginator,
+	}
+
+	return p, nil
+}
+
+func (p ApiTokenPaginator) HasNext() bool {
+	return !p.paginator.Done()
+}
+
+func (p ApiTokenPaginator) Close(ctx context.Context) error {
+	return p.paginator.Deallocate(ctx)
+}
+
+func (p ApiTokenPaginator) NextPage(ctx context.Context) ([]ApiToken, error) {
+	var response ApiTokenSearchResponse
+	err := p.paginator.Search(ctx, &response)
+	if err != nil {
+		return nil, err
+	}
+
+	var values []ApiToken
+	for _, hit := range response.Hits.Hits {
+		values = append(values, hit.Source)
+	}
+
+	hits := int64(len(response.Hits.Hits))
+	if hits > 0 {
+		p.paginator.UpdateState(hits, response.Hits.Hits[hits-1].Sort, response.PitID)
+	} else {
+		p.paginator.UpdateState(hits, nil, "")
+	}
+
+	return values, nil
+}
+
+var listApiTokenFilters = map[string]string{}
+
+func ListApiToken(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("ListApiToken")
+	runtime.GC()
+
+	// create service
+	cfg := essdk.GetConfig(d.Connection)
+	ke, err := essdk.NewClientCached(cfg, d.ConnectionCache, ctx)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListApiToken NewClientCached", "error", err)
+		return nil, err
+	}
+	k := Client{Client: ke}
+
+	sc, err := steampipesdk.NewSelfClientCached(ctx, d.ConnectionCache)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListApiToken NewSelfClientCached", "error", err)
+		return nil, err
+	}
+	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListApiToken GetConfigTableValueOrNil for OpenGovernanceConfigKeyAccountID", "error", err)
+		return nil, err
+	}
+	encodedResourceCollectionFilters, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyResourceCollectionFilters)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListApiToken GetConfigTableValueOrNil for OpenGovernanceConfigKeyResourceCollectionFilters", "error", err)
+		return nil, err
+	}
+	clientType, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyClientType)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListApiToken GetConfigTableValueOrNil for OpenGovernanceConfigKeyClientType", "error", err)
+		return nil, err
+	}
+
+	paginator, err := k.NewApiTokenPaginator(essdk.BuildFilter(ctx, d.QueryContext, listApiTokenFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), d.QueryContext.Limit)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListApiToken NewApiTokenPaginator", "error", err)
+		return nil, err
+	}
+
+	for paginator.HasNext() {
+		page, err := paginator.NextPage(ctx)
+		if err != nil {
+			plugin.Logger(ctx).Error("ListApiToken paginator.NextPage", "error", err)
+			return nil, err
+		}
+
+		for _, v := range page {
+			d.StreamListItem(ctx, v)
+		}
+	}
+
+	err = paginator.Close(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, nil
+}
+
+var getApiTokenFilters = map[string]string{}
+
+func GetApiToken(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("GetApiToken")
+	runtime.GC()
+	// create service
+	cfg := essdk.GetConfig(d.Connection)
+	ke, err := essdk.NewClientCached(cfg, d.ConnectionCache, ctx)
+	if err != nil {
+		return nil, err
+	}
+	k := Client{Client: ke}
+
+	sc, err := steampipesdk.NewSelfClientCached(ctx, d.ConnectionCache)
+	if err != nil {
+		return nil, err
+	}
+	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	if err != nil {
+		return nil, err
+	}
+	encodedResourceCollectionFilters, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyResourceCollectionFilters)
+	if err != nil {
+		return nil, err
+	}
+	clientType, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyClientType)
+	if err != nil {
+		return nil, err
+	}
+
+	limit := int64(1)
+	paginator, err := k.NewApiTokenPaginator(essdk.BuildFilter(ctx, d.QueryContext, getApiTokenFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), &limit)
+	if err != nil {
+		return nil, err
+	}
+
+	for paginator.HasNext() {
+		page, err := paginator.NextPage(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, v := range page {
+			return v, nil
+		}
+	}
+
+	err = paginator.Close(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, nil
+}
+
+// ==========================  END: ApiToken =============================
+
 // ==========================  START: DNSRecord =============================
 
 type DNSRecord struct {
@@ -1441,3 +2049,1428 @@ func GetLoadBalancer(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 }
 
 // ==========================  END: LoadBalancer =============================
+
+// ==========================  START: LoadBalancerMonitor =============================
+
+type LoadBalancerMonitor struct {
+	ResourceID      string                                    `json:"resource_id"`
+	PlatformID      string                                    `json:"platform_id"`
+	Description     cloudflare.LoadBalancerMonitorDescription `json:"description"`
+	Metadata        cloudflare.Metadata                       `json:"metadata"`
+	DescribedBy     string                                    `json:"described_by"`
+	ResourceType    string                                    `json:"resource_type"`
+	IntegrationType string                                    `json:"integration_type"`
+	IntegrationID   string                                    `json:"integration_id"`
+}
+
+type LoadBalancerMonitorHit struct {
+	ID      string              `json:"_id"`
+	Score   float64             `json:"_score"`
+	Index   string              `json:"_index"`
+	Type    string              `json:"_type"`
+	Version int64               `json:"_version,omitempty"`
+	Source  LoadBalancerMonitor `json:"_source"`
+	Sort    []interface{}       `json:"sort"`
+}
+
+type LoadBalancerMonitorHits struct {
+	Total essdk.SearchTotal        `json:"total"`
+	Hits  []LoadBalancerMonitorHit `json:"hits"`
+}
+
+type LoadBalancerMonitorSearchResponse struct {
+	PitID string                  `json:"pit_id"`
+	Hits  LoadBalancerMonitorHits `json:"hits"`
+}
+
+type LoadBalancerMonitorPaginator struct {
+	paginator *essdk.BaseESPaginator
+}
+
+func (k Client) NewLoadBalancerMonitorPaginator(filters []essdk.BoolFilter, limit *int64) (LoadBalancerMonitorPaginator, error) {
+	paginator, err := essdk.NewPaginator(k.ES(), "cloudflare_loadbalancer_monitor", filters, limit)
+	if err != nil {
+		return LoadBalancerMonitorPaginator{}, err
+	}
+
+	p := LoadBalancerMonitorPaginator{
+		paginator: paginator,
+	}
+
+	return p, nil
+}
+
+func (p LoadBalancerMonitorPaginator) HasNext() bool {
+	return !p.paginator.Done()
+}
+
+func (p LoadBalancerMonitorPaginator) Close(ctx context.Context) error {
+	return p.paginator.Deallocate(ctx)
+}
+
+func (p LoadBalancerMonitorPaginator) NextPage(ctx context.Context) ([]LoadBalancerMonitor, error) {
+	var response LoadBalancerMonitorSearchResponse
+	err := p.paginator.Search(ctx, &response)
+	if err != nil {
+		return nil, err
+	}
+
+	var values []LoadBalancerMonitor
+	for _, hit := range response.Hits.Hits {
+		values = append(values, hit.Source)
+	}
+
+	hits := int64(len(response.Hits.Hits))
+	if hits > 0 {
+		p.paginator.UpdateState(hits, response.Hits.Hits[hits-1].Sort, response.PitID)
+	} else {
+		p.paginator.UpdateState(hits, nil, "")
+	}
+
+	return values, nil
+}
+
+var listLoadBalancerMonitorFilters = map[string]string{}
+
+func ListLoadBalancerMonitor(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("ListLoadBalancerMonitor")
+	runtime.GC()
+
+	// create service
+	cfg := essdk.GetConfig(d.Connection)
+	ke, err := essdk.NewClientCached(cfg, d.ConnectionCache, ctx)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListLoadBalancerMonitor NewClientCached", "error", err)
+		return nil, err
+	}
+	k := Client{Client: ke}
+
+	sc, err := steampipesdk.NewSelfClientCached(ctx, d.ConnectionCache)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListLoadBalancerMonitor NewSelfClientCached", "error", err)
+		return nil, err
+	}
+	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListLoadBalancerMonitor GetConfigTableValueOrNil for OpenGovernanceConfigKeyAccountID", "error", err)
+		return nil, err
+	}
+	encodedResourceCollectionFilters, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyResourceCollectionFilters)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListLoadBalancerMonitor GetConfigTableValueOrNil for OpenGovernanceConfigKeyResourceCollectionFilters", "error", err)
+		return nil, err
+	}
+	clientType, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyClientType)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListLoadBalancerMonitor GetConfigTableValueOrNil for OpenGovernanceConfigKeyClientType", "error", err)
+		return nil, err
+	}
+
+	paginator, err := k.NewLoadBalancerMonitorPaginator(essdk.BuildFilter(ctx, d.QueryContext, listLoadBalancerMonitorFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), d.QueryContext.Limit)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListLoadBalancerMonitor NewLoadBalancerMonitorPaginator", "error", err)
+		return nil, err
+	}
+
+	for paginator.HasNext() {
+		page, err := paginator.NextPage(ctx)
+		if err != nil {
+			plugin.Logger(ctx).Error("ListLoadBalancerMonitor paginator.NextPage", "error", err)
+			return nil, err
+		}
+
+		for _, v := range page {
+			d.StreamListItem(ctx, v)
+		}
+	}
+
+	err = paginator.Close(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, nil
+}
+
+var getLoadBalancerMonitorFilters = map[string]string{}
+
+func GetLoadBalancerMonitor(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("GetLoadBalancerMonitor")
+	runtime.GC()
+	// create service
+	cfg := essdk.GetConfig(d.Connection)
+	ke, err := essdk.NewClientCached(cfg, d.ConnectionCache, ctx)
+	if err != nil {
+		return nil, err
+	}
+	k := Client{Client: ke}
+
+	sc, err := steampipesdk.NewSelfClientCached(ctx, d.ConnectionCache)
+	if err != nil {
+		return nil, err
+	}
+	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	if err != nil {
+		return nil, err
+	}
+	encodedResourceCollectionFilters, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyResourceCollectionFilters)
+	if err != nil {
+		return nil, err
+	}
+	clientType, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyClientType)
+	if err != nil {
+		return nil, err
+	}
+
+	limit := int64(1)
+	paginator, err := k.NewLoadBalancerMonitorPaginator(essdk.BuildFilter(ctx, d.QueryContext, getLoadBalancerMonitorFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), &limit)
+	if err != nil {
+		return nil, err
+	}
+
+	for paginator.HasNext() {
+		page, err := paginator.NextPage(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, v := range page {
+			return v, nil
+		}
+	}
+
+	err = paginator.Close(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, nil
+}
+
+// ==========================  END: LoadBalancerMonitor =============================
+
+// ==========================  START: LoadBalancerPool =============================
+
+type LoadBalancerPool struct {
+	ResourceID      string                                 `json:"resource_id"`
+	PlatformID      string                                 `json:"platform_id"`
+	Description     cloudflare.LoadBalancerPoolDescription `json:"description"`
+	Metadata        cloudflare.Metadata                    `json:"metadata"`
+	DescribedBy     string                                 `json:"described_by"`
+	ResourceType    string                                 `json:"resource_type"`
+	IntegrationType string                                 `json:"integration_type"`
+	IntegrationID   string                                 `json:"integration_id"`
+}
+
+type LoadBalancerPoolHit struct {
+	ID      string           `json:"_id"`
+	Score   float64          `json:"_score"`
+	Index   string           `json:"_index"`
+	Type    string           `json:"_type"`
+	Version int64            `json:"_version,omitempty"`
+	Source  LoadBalancerPool `json:"_source"`
+	Sort    []interface{}    `json:"sort"`
+}
+
+type LoadBalancerPoolHits struct {
+	Total essdk.SearchTotal     `json:"total"`
+	Hits  []LoadBalancerPoolHit `json:"hits"`
+}
+
+type LoadBalancerPoolSearchResponse struct {
+	PitID string               `json:"pit_id"`
+	Hits  LoadBalancerPoolHits `json:"hits"`
+}
+
+type LoadBalancerPoolPaginator struct {
+	paginator *essdk.BaseESPaginator
+}
+
+func (k Client) NewLoadBalancerPoolPaginator(filters []essdk.BoolFilter, limit *int64) (LoadBalancerPoolPaginator, error) {
+	paginator, err := essdk.NewPaginator(k.ES(), "cloudflare_loadbalancer_pool", filters, limit)
+	if err != nil {
+		return LoadBalancerPoolPaginator{}, err
+	}
+
+	p := LoadBalancerPoolPaginator{
+		paginator: paginator,
+	}
+
+	return p, nil
+}
+
+func (p LoadBalancerPoolPaginator) HasNext() bool {
+	return !p.paginator.Done()
+}
+
+func (p LoadBalancerPoolPaginator) Close(ctx context.Context) error {
+	return p.paginator.Deallocate(ctx)
+}
+
+func (p LoadBalancerPoolPaginator) NextPage(ctx context.Context) ([]LoadBalancerPool, error) {
+	var response LoadBalancerPoolSearchResponse
+	err := p.paginator.Search(ctx, &response)
+	if err != nil {
+		return nil, err
+	}
+
+	var values []LoadBalancerPool
+	for _, hit := range response.Hits.Hits {
+		values = append(values, hit.Source)
+	}
+
+	hits := int64(len(response.Hits.Hits))
+	if hits > 0 {
+		p.paginator.UpdateState(hits, response.Hits.Hits[hits-1].Sort, response.PitID)
+	} else {
+		p.paginator.UpdateState(hits, nil, "")
+	}
+
+	return values, nil
+}
+
+var listLoadBalancerPoolFilters = map[string]string{}
+
+func ListLoadBalancerPool(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("ListLoadBalancerPool")
+	runtime.GC()
+
+	// create service
+	cfg := essdk.GetConfig(d.Connection)
+	ke, err := essdk.NewClientCached(cfg, d.ConnectionCache, ctx)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListLoadBalancerPool NewClientCached", "error", err)
+		return nil, err
+	}
+	k := Client{Client: ke}
+
+	sc, err := steampipesdk.NewSelfClientCached(ctx, d.ConnectionCache)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListLoadBalancerPool NewSelfClientCached", "error", err)
+		return nil, err
+	}
+	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListLoadBalancerPool GetConfigTableValueOrNil for OpenGovernanceConfigKeyAccountID", "error", err)
+		return nil, err
+	}
+	encodedResourceCollectionFilters, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyResourceCollectionFilters)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListLoadBalancerPool GetConfigTableValueOrNil for OpenGovernanceConfigKeyResourceCollectionFilters", "error", err)
+		return nil, err
+	}
+	clientType, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyClientType)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListLoadBalancerPool GetConfigTableValueOrNil for OpenGovernanceConfigKeyClientType", "error", err)
+		return nil, err
+	}
+
+	paginator, err := k.NewLoadBalancerPoolPaginator(essdk.BuildFilter(ctx, d.QueryContext, listLoadBalancerPoolFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), d.QueryContext.Limit)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListLoadBalancerPool NewLoadBalancerPoolPaginator", "error", err)
+		return nil, err
+	}
+
+	for paginator.HasNext() {
+		page, err := paginator.NextPage(ctx)
+		if err != nil {
+			plugin.Logger(ctx).Error("ListLoadBalancerPool paginator.NextPage", "error", err)
+			return nil, err
+		}
+
+		for _, v := range page {
+			d.StreamListItem(ctx, v)
+		}
+	}
+
+	err = paginator.Close(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, nil
+}
+
+var getLoadBalancerPoolFilters = map[string]string{}
+
+func GetLoadBalancerPool(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("GetLoadBalancerPool")
+	runtime.GC()
+	// create service
+	cfg := essdk.GetConfig(d.Connection)
+	ke, err := essdk.NewClientCached(cfg, d.ConnectionCache, ctx)
+	if err != nil {
+		return nil, err
+	}
+	k := Client{Client: ke}
+
+	sc, err := steampipesdk.NewSelfClientCached(ctx, d.ConnectionCache)
+	if err != nil {
+		return nil, err
+	}
+	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	if err != nil {
+		return nil, err
+	}
+	encodedResourceCollectionFilters, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyResourceCollectionFilters)
+	if err != nil {
+		return nil, err
+	}
+	clientType, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyClientType)
+	if err != nil {
+		return nil, err
+	}
+
+	limit := int64(1)
+	paginator, err := k.NewLoadBalancerPoolPaginator(essdk.BuildFilter(ctx, d.QueryContext, getLoadBalancerPoolFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), &limit)
+	if err != nil {
+		return nil, err
+	}
+
+	for paginator.HasNext() {
+		page, err := paginator.NextPage(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, v := range page {
+			return v, nil
+		}
+	}
+
+	err = paginator.Close(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, nil
+}
+
+// ==========================  END: LoadBalancerPool =============================
+
+// ==========================  START: PageRule =============================
+
+type PageRule struct {
+	ResourceID      string                         `json:"resource_id"`
+	PlatformID      string                         `json:"platform_id"`
+	Description     cloudflare.PageRuleDescription `json:"description"`
+	Metadata        cloudflare.Metadata            `json:"metadata"`
+	DescribedBy     string                         `json:"described_by"`
+	ResourceType    string                         `json:"resource_type"`
+	IntegrationType string                         `json:"integration_type"`
+	IntegrationID   string                         `json:"integration_id"`
+}
+
+type PageRuleHit struct {
+	ID      string        `json:"_id"`
+	Score   float64       `json:"_score"`
+	Index   string        `json:"_index"`
+	Type    string        `json:"_type"`
+	Version int64         `json:"_version,omitempty"`
+	Source  PageRule      `json:"_source"`
+	Sort    []interface{} `json:"sort"`
+}
+
+type PageRuleHits struct {
+	Total essdk.SearchTotal `json:"total"`
+	Hits  []PageRuleHit     `json:"hits"`
+}
+
+type PageRuleSearchResponse struct {
+	PitID string       `json:"pit_id"`
+	Hits  PageRuleHits `json:"hits"`
+}
+
+type PageRulePaginator struct {
+	paginator *essdk.BaseESPaginator
+}
+
+func (k Client) NewPageRulePaginator(filters []essdk.BoolFilter, limit *int64) (PageRulePaginator, error) {
+	paginator, err := essdk.NewPaginator(k.ES(), "cloudflare_pagerule", filters, limit)
+	if err != nil {
+		return PageRulePaginator{}, err
+	}
+
+	p := PageRulePaginator{
+		paginator: paginator,
+	}
+
+	return p, nil
+}
+
+func (p PageRulePaginator) HasNext() bool {
+	return !p.paginator.Done()
+}
+
+func (p PageRulePaginator) Close(ctx context.Context) error {
+	return p.paginator.Deallocate(ctx)
+}
+
+func (p PageRulePaginator) NextPage(ctx context.Context) ([]PageRule, error) {
+	var response PageRuleSearchResponse
+	err := p.paginator.Search(ctx, &response)
+	if err != nil {
+		return nil, err
+	}
+
+	var values []PageRule
+	for _, hit := range response.Hits.Hits {
+		values = append(values, hit.Source)
+	}
+
+	hits := int64(len(response.Hits.Hits))
+	if hits > 0 {
+		p.paginator.UpdateState(hits, response.Hits.Hits[hits-1].Sort, response.PitID)
+	} else {
+		p.paginator.UpdateState(hits, nil, "")
+	}
+
+	return values, nil
+}
+
+var listPageRuleFilters = map[string]string{
+	"id":      "ID",
+	"title":   "ID",
+	"zone_id": "ZoneID",
+}
+
+func ListPageRule(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("ListPageRule")
+	runtime.GC()
+
+	// create service
+	cfg := essdk.GetConfig(d.Connection)
+	ke, err := essdk.NewClientCached(cfg, d.ConnectionCache, ctx)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListPageRule NewClientCached", "error", err)
+		return nil, err
+	}
+	k := Client{Client: ke}
+
+	sc, err := steampipesdk.NewSelfClientCached(ctx, d.ConnectionCache)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListPageRule NewSelfClientCached", "error", err)
+		return nil, err
+	}
+	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListPageRule GetConfigTableValueOrNil for OpenGovernanceConfigKeyAccountID", "error", err)
+		return nil, err
+	}
+	encodedResourceCollectionFilters, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyResourceCollectionFilters)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListPageRule GetConfigTableValueOrNil for OpenGovernanceConfigKeyResourceCollectionFilters", "error", err)
+		return nil, err
+	}
+	clientType, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyClientType)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListPageRule GetConfigTableValueOrNil for OpenGovernanceConfigKeyClientType", "error", err)
+		return nil, err
+	}
+
+	paginator, err := k.NewPageRulePaginator(essdk.BuildFilter(ctx, d.QueryContext, listPageRuleFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), d.QueryContext.Limit)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListPageRule NewPageRulePaginator", "error", err)
+		return nil, err
+	}
+
+	for paginator.HasNext() {
+		page, err := paginator.NextPage(ctx)
+		if err != nil {
+			plugin.Logger(ctx).Error("ListPageRule paginator.NextPage", "error", err)
+			return nil, err
+		}
+
+		for _, v := range page {
+			d.StreamListItem(ctx, v)
+		}
+	}
+
+	err = paginator.Close(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, nil
+}
+
+var getPageRuleFilters = map[string]string{
+	"id":      "ID",
+	"title":   "ID",
+	"zone_id": "ZoneID",
+}
+
+func GetPageRule(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("GetPageRule")
+	runtime.GC()
+	// create service
+	cfg := essdk.GetConfig(d.Connection)
+	ke, err := essdk.NewClientCached(cfg, d.ConnectionCache, ctx)
+	if err != nil {
+		return nil, err
+	}
+	k := Client{Client: ke}
+
+	sc, err := steampipesdk.NewSelfClientCached(ctx, d.ConnectionCache)
+	if err != nil {
+		return nil, err
+	}
+	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	if err != nil {
+		return nil, err
+	}
+	encodedResourceCollectionFilters, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyResourceCollectionFilters)
+	if err != nil {
+		return nil, err
+	}
+	clientType, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyClientType)
+	if err != nil {
+		return nil, err
+	}
+
+	limit := int64(1)
+	paginator, err := k.NewPageRulePaginator(essdk.BuildFilter(ctx, d.QueryContext, getPageRuleFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), &limit)
+	if err != nil {
+		return nil, err
+	}
+
+	for paginator.HasNext() {
+		page, err := paginator.NextPage(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, v := range page {
+			return v, nil
+		}
+	}
+
+	err = paginator.Close(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, nil
+}
+
+// ==========================  END: PageRule =============================
+
+// ==========================  START: User =============================
+
+type User struct {
+	ResourceID      string                     `json:"resource_id"`
+	PlatformID      string                     `json:"platform_id"`
+	Description     cloudflare.UserDescription `json:"description"`
+	Metadata        cloudflare.Metadata        `json:"metadata"`
+	DescribedBy     string                     `json:"described_by"`
+	ResourceType    string                     `json:"resource_type"`
+	IntegrationType string                     `json:"integration_type"`
+	IntegrationID   string                     `json:"integration_id"`
+}
+
+type UserHit struct {
+	ID      string        `json:"_id"`
+	Score   float64       `json:"_score"`
+	Index   string        `json:"_index"`
+	Type    string        `json:"_type"`
+	Version int64         `json:"_version,omitempty"`
+	Source  User          `json:"_source"`
+	Sort    []interface{} `json:"sort"`
+}
+
+type UserHits struct {
+	Total essdk.SearchTotal `json:"total"`
+	Hits  []UserHit         `json:"hits"`
+}
+
+type UserSearchResponse struct {
+	PitID string   `json:"pit_id"`
+	Hits  UserHits `json:"hits"`
+}
+
+type UserPaginator struct {
+	paginator *essdk.BaseESPaginator
+}
+
+func (k Client) NewUserPaginator(filters []essdk.BoolFilter, limit *int64) (UserPaginator, error) {
+	paginator, err := essdk.NewPaginator(k.ES(), "cloudflare_user", filters, limit)
+	if err != nil {
+		return UserPaginator{}, err
+	}
+
+	p := UserPaginator{
+		paginator: paginator,
+	}
+
+	return p, nil
+}
+
+func (p UserPaginator) HasNext() bool {
+	return !p.paginator.Done()
+}
+
+func (p UserPaginator) Close(ctx context.Context) error {
+	return p.paginator.Deallocate(ctx)
+}
+
+func (p UserPaginator) NextPage(ctx context.Context) ([]User, error) {
+	var response UserSearchResponse
+	err := p.paginator.Search(ctx, &response)
+	if err != nil {
+		return nil, err
+	}
+
+	var values []User
+	for _, hit := range response.Hits.Hits {
+		values = append(values, hit.Source)
+	}
+
+	hits := int64(len(response.Hits.Hits))
+	if hits > 0 {
+		p.paginator.UpdateState(hits, response.Hits.Hits[hits-1].Sort, response.PitID)
+	} else {
+		p.paginator.UpdateState(hits, nil, "")
+	}
+
+	return values, nil
+}
+
+var listUserFilters = map[string]string{}
+
+func ListUser(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("ListUser")
+	runtime.GC()
+
+	// create service
+	cfg := essdk.GetConfig(d.Connection)
+	ke, err := essdk.NewClientCached(cfg, d.ConnectionCache, ctx)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListUser NewClientCached", "error", err)
+		return nil, err
+	}
+	k := Client{Client: ke}
+
+	sc, err := steampipesdk.NewSelfClientCached(ctx, d.ConnectionCache)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListUser NewSelfClientCached", "error", err)
+		return nil, err
+	}
+	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListUser GetConfigTableValueOrNil for OpenGovernanceConfigKeyAccountID", "error", err)
+		return nil, err
+	}
+	encodedResourceCollectionFilters, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyResourceCollectionFilters)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListUser GetConfigTableValueOrNil for OpenGovernanceConfigKeyResourceCollectionFilters", "error", err)
+		return nil, err
+	}
+	clientType, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyClientType)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListUser GetConfigTableValueOrNil for OpenGovernanceConfigKeyClientType", "error", err)
+		return nil, err
+	}
+
+	paginator, err := k.NewUserPaginator(essdk.BuildFilter(ctx, d.QueryContext, listUserFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), d.QueryContext.Limit)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListUser NewUserPaginator", "error", err)
+		return nil, err
+	}
+
+	for paginator.HasNext() {
+		page, err := paginator.NextPage(ctx)
+		if err != nil {
+			plugin.Logger(ctx).Error("ListUser paginator.NextPage", "error", err)
+			return nil, err
+		}
+
+		for _, v := range page {
+			d.StreamListItem(ctx, v)
+		}
+	}
+
+	err = paginator.Close(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, nil
+}
+
+var getUserFilters = map[string]string{}
+
+func GetUser(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("GetUser")
+	runtime.GC()
+	// create service
+	cfg := essdk.GetConfig(d.Connection)
+	ke, err := essdk.NewClientCached(cfg, d.ConnectionCache, ctx)
+	if err != nil {
+		return nil, err
+	}
+	k := Client{Client: ke}
+
+	sc, err := steampipesdk.NewSelfClientCached(ctx, d.ConnectionCache)
+	if err != nil {
+		return nil, err
+	}
+	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	if err != nil {
+		return nil, err
+	}
+	encodedResourceCollectionFilters, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyResourceCollectionFilters)
+	if err != nil {
+		return nil, err
+	}
+	clientType, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyClientType)
+	if err != nil {
+		return nil, err
+	}
+
+	limit := int64(1)
+	paginator, err := k.NewUserPaginator(essdk.BuildFilter(ctx, d.QueryContext, getUserFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), &limit)
+	if err != nil {
+		return nil, err
+	}
+
+	for paginator.HasNext() {
+		page, err := paginator.NextPage(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, v := range page {
+			return v, nil
+		}
+	}
+
+	err = paginator.Close(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, nil
+}
+
+// ==========================  END: User =============================
+
+// ==========================  START: UserAuditLog =============================
+
+type UserAuditLog struct {
+	ResourceID      string                             `json:"resource_id"`
+	PlatformID      string                             `json:"platform_id"`
+	Description     cloudflare.UserAuditLogDescription `json:"description"`
+	Metadata        cloudflare.Metadata                `json:"metadata"`
+	DescribedBy     string                             `json:"described_by"`
+	ResourceType    string                             `json:"resource_type"`
+	IntegrationType string                             `json:"integration_type"`
+	IntegrationID   string                             `json:"integration_id"`
+}
+
+type UserAuditLogHit struct {
+	ID      string        `json:"_id"`
+	Score   float64       `json:"_score"`
+	Index   string        `json:"_index"`
+	Type    string        `json:"_type"`
+	Version int64         `json:"_version,omitempty"`
+	Source  UserAuditLog  `json:"_source"`
+	Sort    []interface{} `json:"sort"`
+}
+
+type UserAuditLogHits struct {
+	Total essdk.SearchTotal `json:"total"`
+	Hits  []UserAuditLogHit `json:"hits"`
+}
+
+type UserAuditLogSearchResponse struct {
+	PitID string           `json:"pit_id"`
+	Hits  UserAuditLogHits `json:"hits"`
+}
+
+type UserAuditLogPaginator struct {
+	paginator *essdk.BaseESPaginator
+}
+
+func (k Client) NewUserAuditLogPaginator(filters []essdk.BoolFilter, limit *int64) (UserAuditLogPaginator, error) {
+	paginator, err := essdk.NewPaginator(k.ES(), "cloudflare_user_auditlog", filters, limit)
+	if err != nil {
+		return UserAuditLogPaginator{}, err
+	}
+
+	p := UserAuditLogPaginator{
+		paginator: paginator,
+	}
+
+	return p, nil
+}
+
+func (p UserAuditLogPaginator) HasNext() bool {
+	return !p.paginator.Done()
+}
+
+func (p UserAuditLogPaginator) Close(ctx context.Context) error {
+	return p.paginator.Deallocate(ctx)
+}
+
+func (p UserAuditLogPaginator) NextPage(ctx context.Context) ([]UserAuditLog, error) {
+	var response UserAuditLogSearchResponse
+	err := p.paginator.Search(ctx, &response)
+	if err != nil {
+		return nil, err
+	}
+
+	var values []UserAuditLog
+	for _, hit := range response.Hits.Hits {
+		values = append(values, hit.Source)
+	}
+
+	hits := int64(len(response.Hits.Hits))
+	if hits > 0 {
+		p.paginator.UpdateState(hits, response.Hits.Hits[hits-1].Sort, response.PitID)
+	} else {
+		p.paginator.UpdateState(hits, nil, "")
+	}
+
+	return values, nil
+}
+
+var listUserAuditLogFilters = map[string]string{
+	"actor_email":    "Actor.Email",
+	"actor_id":       "Actor.ID",
+	"actor_ip":       "Actor.IP",
+	"actor_type":     "Actor.Type",
+	"id":             "ID",
+	"new_value_json": "NewValueJSON",
+	"old_value_json": "OldValueJSON",
+	"owner_id":       "Owner.ID",
+}
+
+func ListUserAuditLog(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("ListUserAuditLog")
+	runtime.GC()
+
+	// create service
+	cfg := essdk.GetConfig(d.Connection)
+	ke, err := essdk.NewClientCached(cfg, d.ConnectionCache, ctx)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListUserAuditLog NewClientCached", "error", err)
+		return nil, err
+	}
+	k := Client{Client: ke}
+
+	sc, err := steampipesdk.NewSelfClientCached(ctx, d.ConnectionCache)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListUserAuditLog NewSelfClientCached", "error", err)
+		return nil, err
+	}
+	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListUserAuditLog GetConfigTableValueOrNil for OpenGovernanceConfigKeyAccountID", "error", err)
+		return nil, err
+	}
+	encodedResourceCollectionFilters, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyResourceCollectionFilters)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListUserAuditLog GetConfigTableValueOrNil for OpenGovernanceConfigKeyResourceCollectionFilters", "error", err)
+		return nil, err
+	}
+	clientType, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyClientType)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListUserAuditLog GetConfigTableValueOrNil for OpenGovernanceConfigKeyClientType", "error", err)
+		return nil, err
+	}
+
+	paginator, err := k.NewUserAuditLogPaginator(essdk.BuildFilter(ctx, d.QueryContext, listUserAuditLogFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), d.QueryContext.Limit)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListUserAuditLog NewUserAuditLogPaginator", "error", err)
+		return nil, err
+	}
+
+	for paginator.HasNext() {
+		page, err := paginator.NextPage(ctx)
+		if err != nil {
+			plugin.Logger(ctx).Error("ListUserAuditLog paginator.NextPage", "error", err)
+			return nil, err
+		}
+
+		for _, v := range page {
+			d.StreamListItem(ctx, v)
+		}
+	}
+
+	err = paginator.Close(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, nil
+}
+
+var getUserAuditLogFilters = map[string]string{
+	"actor_email":    "Actor.Email",
+	"actor_id":       "Actor.ID",
+	"actor_ip":       "Actor.IP",
+	"actor_type":     "Actor.Type",
+	"id":             "ID",
+	"new_value_json": "NewValueJSON",
+	"old_value_json": "OldValueJSON",
+	"owner_id":       "Owner.ID",
+}
+
+func GetUserAuditLog(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("GetUserAuditLog")
+	runtime.GC()
+	// create service
+	cfg := essdk.GetConfig(d.Connection)
+	ke, err := essdk.NewClientCached(cfg, d.ConnectionCache, ctx)
+	if err != nil {
+		return nil, err
+	}
+	k := Client{Client: ke}
+
+	sc, err := steampipesdk.NewSelfClientCached(ctx, d.ConnectionCache)
+	if err != nil {
+		return nil, err
+	}
+	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	if err != nil {
+		return nil, err
+	}
+	encodedResourceCollectionFilters, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyResourceCollectionFilters)
+	if err != nil {
+		return nil, err
+	}
+	clientType, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyClientType)
+	if err != nil {
+		return nil, err
+	}
+
+	limit := int64(1)
+	paginator, err := k.NewUserAuditLogPaginator(essdk.BuildFilter(ctx, d.QueryContext, getUserAuditLogFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), &limit)
+	if err != nil {
+		return nil, err
+	}
+
+	for paginator.HasNext() {
+		page, err := paginator.NextPage(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, v := range page {
+			return v, nil
+		}
+	}
+
+	err = paginator.Close(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, nil
+}
+
+// ==========================  END: UserAuditLog =============================
+
+// ==========================  START: WorkerRoute =============================
+
+type WorkerRoute struct {
+	ResourceID      string                            `json:"resource_id"`
+	PlatformID      string                            `json:"platform_id"`
+	Description     cloudflare.WorkerRouteDescription `json:"description"`
+	Metadata        cloudflare.Metadata               `json:"metadata"`
+	DescribedBy     string                            `json:"described_by"`
+	ResourceType    string                            `json:"resource_type"`
+	IntegrationType string                            `json:"integration_type"`
+	IntegrationID   string                            `json:"integration_id"`
+}
+
+type WorkerRouteHit struct {
+	ID      string        `json:"_id"`
+	Score   float64       `json:"_score"`
+	Index   string        `json:"_index"`
+	Type    string        `json:"_type"`
+	Version int64         `json:"_version,omitempty"`
+	Source  WorkerRoute   `json:"_source"`
+	Sort    []interface{} `json:"sort"`
+}
+
+type WorkerRouteHits struct {
+	Total essdk.SearchTotal `json:"total"`
+	Hits  []WorkerRouteHit  `json:"hits"`
+}
+
+type WorkerRouteSearchResponse struct {
+	PitID string          `json:"pit_id"`
+	Hits  WorkerRouteHits `json:"hits"`
+}
+
+type WorkerRoutePaginator struct {
+	paginator *essdk.BaseESPaginator
+}
+
+func (k Client) NewWorkerRoutePaginator(filters []essdk.BoolFilter, limit *int64) (WorkerRoutePaginator, error) {
+	paginator, err := essdk.NewPaginator(k.ES(), "cloudflare_workerroute", filters, limit)
+	if err != nil {
+		return WorkerRoutePaginator{}, err
+	}
+
+	p := WorkerRoutePaginator{
+		paginator: paginator,
+	}
+
+	return p, nil
+}
+
+func (p WorkerRoutePaginator) HasNext() bool {
+	return !p.paginator.Done()
+}
+
+func (p WorkerRoutePaginator) Close(ctx context.Context) error {
+	return p.paginator.Deallocate(ctx)
+}
+
+func (p WorkerRoutePaginator) NextPage(ctx context.Context) ([]WorkerRoute, error) {
+	var response WorkerRouteSearchResponse
+	err := p.paginator.Search(ctx, &response)
+	if err != nil {
+		return nil, err
+	}
+
+	var values []WorkerRoute
+	for _, hit := range response.Hits.Hits {
+		values = append(values, hit.Source)
+	}
+
+	hits := int64(len(response.Hits.Hits))
+	if hits > 0 {
+		p.paginator.UpdateState(hits, response.Hits.Hits[hits-1].Sort, response.PitID)
+	} else {
+		p.paginator.UpdateState(hits, nil, "")
+	}
+
+	return values, nil
+}
+
+var listWorkerRouteFilters = map[string]string{
+	"zone_id":   "ID",
+	"zone_name": "Name",
+}
+
+func ListWorkerRoute(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("ListWorkerRoute")
+	runtime.GC()
+
+	// create service
+	cfg := essdk.GetConfig(d.Connection)
+	ke, err := essdk.NewClientCached(cfg, d.ConnectionCache, ctx)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListWorkerRoute NewClientCached", "error", err)
+		return nil, err
+	}
+	k := Client{Client: ke}
+
+	sc, err := steampipesdk.NewSelfClientCached(ctx, d.ConnectionCache)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListWorkerRoute NewSelfClientCached", "error", err)
+		return nil, err
+	}
+	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListWorkerRoute GetConfigTableValueOrNil for OpenGovernanceConfigKeyAccountID", "error", err)
+		return nil, err
+	}
+	encodedResourceCollectionFilters, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyResourceCollectionFilters)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListWorkerRoute GetConfigTableValueOrNil for OpenGovernanceConfigKeyResourceCollectionFilters", "error", err)
+		return nil, err
+	}
+	clientType, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyClientType)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListWorkerRoute GetConfigTableValueOrNil for OpenGovernanceConfigKeyClientType", "error", err)
+		return nil, err
+	}
+
+	paginator, err := k.NewWorkerRoutePaginator(essdk.BuildFilter(ctx, d.QueryContext, listWorkerRouteFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), d.QueryContext.Limit)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListWorkerRoute NewWorkerRoutePaginator", "error", err)
+		return nil, err
+	}
+
+	for paginator.HasNext() {
+		page, err := paginator.NextPage(ctx)
+		if err != nil {
+			plugin.Logger(ctx).Error("ListWorkerRoute paginator.NextPage", "error", err)
+			return nil, err
+		}
+
+		for _, v := range page {
+			d.StreamListItem(ctx, v)
+		}
+	}
+
+	err = paginator.Close(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, nil
+}
+
+var getWorkerRouteFilters = map[string]string{
+	"zone_id":   "ID",
+	"zone_name": "Name",
+}
+
+func GetWorkerRoute(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("GetWorkerRoute")
+	runtime.GC()
+	// create service
+	cfg := essdk.GetConfig(d.Connection)
+	ke, err := essdk.NewClientCached(cfg, d.ConnectionCache, ctx)
+	if err != nil {
+		return nil, err
+	}
+	k := Client{Client: ke}
+
+	sc, err := steampipesdk.NewSelfClientCached(ctx, d.ConnectionCache)
+	if err != nil {
+		return nil, err
+	}
+	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	if err != nil {
+		return nil, err
+	}
+	encodedResourceCollectionFilters, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyResourceCollectionFilters)
+	if err != nil {
+		return nil, err
+	}
+	clientType, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyClientType)
+	if err != nil {
+		return nil, err
+	}
+
+	limit := int64(1)
+	paginator, err := k.NewWorkerRoutePaginator(essdk.BuildFilter(ctx, d.QueryContext, getWorkerRouteFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), &limit)
+	if err != nil {
+		return nil, err
+	}
+
+	for paginator.HasNext() {
+		page, err := paginator.NextPage(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, v := range page {
+			return v, nil
+		}
+	}
+
+	err = paginator.Close(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, nil
+}
+
+// ==========================  END: WorkerRoute =============================
+
+// ==========================  START: Zone =============================
+
+type Zone struct {
+	ResourceID      string                     `json:"resource_id"`
+	PlatformID      string                     `json:"platform_id"`
+	Description     cloudflare.ZoneDescription `json:"description"`
+	Metadata        cloudflare.Metadata        `json:"metadata"`
+	DescribedBy     string                     `json:"described_by"`
+	ResourceType    string                     `json:"resource_type"`
+	IntegrationType string                     `json:"integration_type"`
+	IntegrationID   string                     `json:"integration_id"`
+}
+
+type ZoneHit struct {
+	ID      string        `json:"_id"`
+	Score   float64       `json:"_score"`
+	Index   string        `json:"_index"`
+	Type    string        `json:"_type"`
+	Version int64         `json:"_version,omitempty"`
+	Source  Zone          `json:"_source"`
+	Sort    []interface{} `json:"sort"`
+}
+
+type ZoneHits struct {
+	Total essdk.SearchTotal `json:"total"`
+	Hits  []ZoneHit         `json:"hits"`
+}
+
+type ZoneSearchResponse struct {
+	PitID string   `json:"pit_id"`
+	Hits  ZoneHits `json:"hits"`
+}
+
+type ZonePaginator struct {
+	paginator *essdk.BaseESPaginator
+}
+
+func (k Client) NewZonePaginator(filters []essdk.BoolFilter, limit *int64) (ZonePaginator, error) {
+	paginator, err := essdk.NewPaginator(k.ES(), "cloudflare_zone", filters, limit)
+	if err != nil {
+		return ZonePaginator{}, err
+	}
+
+	p := ZonePaginator{
+		paginator: paginator,
+	}
+
+	return p, nil
+}
+
+func (p ZonePaginator) HasNext() bool {
+	return !p.paginator.Done()
+}
+
+func (p ZonePaginator) Close(ctx context.Context) error {
+	return p.paginator.Deallocate(ctx)
+}
+
+func (p ZonePaginator) NextPage(ctx context.Context) ([]Zone, error) {
+	var response ZoneSearchResponse
+	err := p.paginator.Search(ctx, &response)
+	if err != nil {
+		return nil, err
+	}
+
+	var values []Zone
+	for _, hit := range response.Hits.Hits {
+		values = append(values, hit.Source)
+	}
+
+	hits := int64(len(response.Hits.Hits))
+	if hits > 0 {
+		p.paginator.UpdateState(hits, response.Hits.Hits[hits-1].Sort, response.PitID)
+	} else {
+		p.paginator.UpdateState(hits, nil, "")
+	}
+
+	return values, nil
+}
+
+var listZoneFilters = map[string]string{}
+
+func ListZone(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("ListZone")
+	runtime.GC()
+
+	// create service
+	cfg := essdk.GetConfig(d.Connection)
+	ke, err := essdk.NewClientCached(cfg, d.ConnectionCache, ctx)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListZone NewClientCached", "error", err)
+		return nil, err
+	}
+	k := Client{Client: ke}
+
+	sc, err := steampipesdk.NewSelfClientCached(ctx, d.ConnectionCache)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListZone NewSelfClientCached", "error", err)
+		return nil, err
+	}
+	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListZone GetConfigTableValueOrNil for OpenGovernanceConfigKeyAccountID", "error", err)
+		return nil, err
+	}
+	encodedResourceCollectionFilters, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyResourceCollectionFilters)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListZone GetConfigTableValueOrNil for OpenGovernanceConfigKeyResourceCollectionFilters", "error", err)
+		return nil, err
+	}
+	clientType, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyClientType)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListZone GetConfigTableValueOrNil for OpenGovernanceConfigKeyClientType", "error", err)
+		return nil, err
+	}
+
+	paginator, err := k.NewZonePaginator(essdk.BuildFilter(ctx, d.QueryContext, listZoneFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), d.QueryContext.Limit)
+	if err != nil {
+		plugin.Logger(ctx).Error("ListZone NewZonePaginator", "error", err)
+		return nil, err
+	}
+
+	for paginator.HasNext() {
+		page, err := paginator.NextPage(ctx)
+		if err != nil {
+			plugin.Logger(ctx).Error("ListZone paginator.NextPage", "error", err)
+			return nil, err
+		}
+
+		for _, v := range page {
+			d.StreamListItem(ctx, v)
+		}
+	}
+
+	err = paginator.Close(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, nil
+}
+
+var getZoneFilters = map[string]string{}
+
+func GetZone(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("GetZone")
+	runtime.GC()
+	// create service
+	cfg := essdk.GetConfig(d.Connection)
+	ke, err := essdk.NewClientCached(cfg, d.ConnectionCache, ctx)
+	if err != nil {
+		return nil, err
+	}
+	k := Client{Client: ke}
+
+	sc, err := steampipesdk.NewSelfClientCached(ctx, d.ConnectionCache)
+	if err != nil {
+		return nil, err
+	}
+	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	if err != nil {
+		return nil, err
+	}
+	encodedResourceCollectionFilters, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyResourceCollectionFilters)
+	if err != nil {
+		return nil, err
+	}
+	clientType, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyClientType)
+	if err != nil {
+		return nil, err
+	}
+
+	limit := int64(1)
+	paginator, err := k.NewZonePaginator(essdk.BuildFilter(ctx, d.QueryContext, getZoneFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), &limit)
+	if err != nil {
+		return nil, err
+	}
+
+	for paginator.HasNext() {
+		page, err := paginator.NextPage(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, v := range page {
+			return v, nil
+		}
+	}
+
+	err = paginator.Close(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, nil
+}
+
+// ==========================  END: Zone =============================

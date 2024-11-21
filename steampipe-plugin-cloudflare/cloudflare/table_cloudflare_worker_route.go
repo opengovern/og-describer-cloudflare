@@ -2,6 +2,7 @@ package cloudflare
 
 import (
 	"context"
+	opengovernance "github.com/opengovern/og-describer-cloudflare/pkg/sdk/es"
 
 	"github.com/cloudflare/cloudflare-go"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
@@ -14,7 +15,7 @@ func tableCloudflareWorkerRoute(ctx context.Context) *plugin.Table {
 		Name:        "cloudflare_worker_route",
 		Description: "Routes are basic patterns used to enable or disable workers that match requests.",
 		List: &plugin.ListConfig{
-			Hydrate:       listWorkerRoutes,
+			Hydrate:       opengovernance.ListWorkerRoute,
 			ParentHydrate: listZones,
 			KeyColumns: plugin.KeyColumnSlice{
 				{Name: "zone_id", Require: plugin.Optional},

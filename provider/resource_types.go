@@ -16,8 +16,8 @@ var ResourceTypes = map[string]model.ResourceType{
 		},
 		Labels:        map[string]string{},
 		Annotations:   map[string]string{},
-		ListDescriber: DescribeByCloudFlareList(describer.ListAccessApplications),
-		GetDescriber:  nil,
+		ListDescriber: DescribeListByCloudFlare(describer.ListAccessApplications),
+		GetDescriber:  DescribeSingleByCloudFlare(describer.GetAccessApplication),
 	},
 
 	"CloudFlare/Access/Group": {
@@ -28,8 +28,8 @@ var ResourceTypes = map[string]model.ResourceType{
 		},
 		Labels:        map[string]string{},
 		Annotations:   map[string]string{},
-		ListDescriber: DescribeByCloudFlareList(describer.ListAccessGroups),
-		GetDescriber:  nil,
+		ListDescriber: DescribeListByCloudFlare(describer.ListAccessGroups),
+		GetDescriber:  DescribeSingleByCloudFlare(describer.GetAccessGroup),
 	},
 
 	"CloudFlare/Access/Policy": {
@@ -40,8 +40,8 @@ var ResourceTypes = map[string]model.ResourceType{
 		},
 		Labels:        map[string]string{},
 		Annotations:   map[string]string{},
-		ListDescriber: DescribeByCloudFlareList(describer.ListAccessPolicies),
-		GetDescriber:  nil,
+		ListDescriber: DescribeListByCloudFlare(describer.ListAccessPolicies),
+		GetDescriber:  DescribeSingleByCloudFlare(describer.GetAccessPolicy),
 	},
 
 	"CloudFlare/Account": {
@@ -52,9 +52,44 @@ var ResourceTypes = map[string]model.ResourceType{
 		},
 		Labels:        map[string]string{},
 		Annotations:   map[string]string{},
+		ListDescriber: DescribeListByCloudFlare(describer.ListAccounts),
+		GetDescriber:  DescribeSingleByCloudFlare(describer.GetAccount),
+	},
+
+	"CloudFlare/Account/Member": {
+		IntegrationType: configs.IntegrationName,
+		ResourceName:    "CloudFlare/Account/Member",
+		Tags: map[string][]string{
+			"category": {"Account"},
+		},
+		Labels:        map[string]string{},
+		Annotations:   map[string]string{},
+		ListDescriber: DescribeListByCloudFlare(describer.ListAccountMembers),
+		GetDescriber:  DescribeSingleByCloudFlare(describer.GetAccountMember),
+	},
+
+	"CloudFlare/Account/Role": {
+		IntegrationType: configs.IntegrationName,
+		ResourceName:    "CloudFlare/Account/Role",
+		Tags: map[string][]string{
+			"category": {"Account"},
+		},
+		Labels:        map[string]string{},
+		Annotations:   map[string]string{},
+		ListDescriber: DescribeListByCloudFlare(describer.ListAccountRoles),
+		GetDescriber:  DescribeSingleByCloudFlare(describer.GetAccountRole),
+	},
+
+	"CloudFlare/ApiToken": {
+		IntegrationType: configs.IntegrationName,
+		ResourceName:    "CloudFlare/ApiToken",
+		Tags: map[string][]string{
+			"category": {"ApiToken"},
+		},
+		Labels:        map[string]string{},
+		Annotations:   map[string]string{},
 		ListDescriber: nil,
-		//GetDescriber:         DescribeByCloudFlareGet(describer.GetAccount),
-		GetDescriber: nil,
+		GetDescriber:  DescribeSingleByCloudFlare(describer.GetApiToken),
 	},
 
 	"CloudFlare/DNSRecord": {
@@ -65,9 +100,8 @@ var ResourceTypes = map[string]model.ResourceType{
 		},
 		Labels:        map[string]string{},
 		Annotations:   map[string]string{},
-		ListDescriber: DescribeByCloudFlareList(describer.ListDNSRecords),
-		//GetDescriber:         DescribeByCloudFlareGet(describer.GetDNSRecord),
-		GetDescriber: nil,
+		ListDescriber: DescribeListByCloudFlare(describer.ListDNSRecords),
+		GetDescriber:  DescribeSingleByCloudFlare(describer.GetDNSRecord),
 	},
 
 	"CloudFlare/Firewall/Rule": {
@@ -78,9 +112,8 @@ var ResourceTypes = map[string]model.ResourceType{
 		},
 		Labels:        map[string]string{},
 		Annotations:   map[string]string{},
-		ListDescriber: DescribeByCloudFlareList(describer.ListFireWallRules),
-		//GetDescriber:         DescribeByCloudFlareGet(describer.GetFireWallRule),
-		GetDescriber: nil,
+		ListDescriber: DescribeListByCloudFlare(describer.ListFireWallRules),
+		GetDescriber:  DescribeSingleByCloudFlare(describer.GetFireWallRule),
 	},
 
 	"CloudFlare/LoadBalancer": {
@@ -91,8 +124,91 @@ var ResourceTypes = map[string]model.ResourceType{
 		},
 		Labels:        map[string]string{},
 		Annotations:   map[string]string{},
-		ListDescriber: DescribeByCloudFlareList(describer.ListLoadBalancers),
-		//GetDescriber:         DescribeByCloudFlareGet(describer.GetLoadBalancer),
-		GetDescriber: nil,
+		ListDescriber: DescribeListByCloudFlare(describer.ListLoadBalancers),
+		GetDescriber:  DescribeSingleByCloudFlare(describer.GetLoadBalancer),
+	},
+
+	"CloudFlare/LoadBalancer/Monitor": {
+		IntegrationType: configs.IntegrationName,
+		ResourceName:    "CloudFlare/LoadBalancer/Monitor",
+		Tags: map[string][]string{
+			"category": {"LoadBalancer"},
+		},
+		Labels:        map[string]string{},
+		Annotations:   map[string]string{},
+		ListDescriber: DescribeListByCloudFlare(describer.ListLoadBalancerMonitors),
+		GetDescriber:  DescribeSingleByCloudFlare(describer.GetLoadBalancerMonitor),
+	},
+
+	"CloudFlare/LoadBalancer/Pool": {
+		IntegrationType: configs.IntegrationName,
+		ResourceName:    "CloudFlare/LoadBalancer/Pool",
+		Tags: map[string][]string{
+			"category": {"LoadBalancer"},
+		},
+		Labels:        map[string]string{},
+		Annotations:   map[string]string{},
+		ListDescriber: DescribeListByCloudFlare(describer.ListLoadBalancerPools),
+		GetDescriber:  DescribeSingleByCloudFlare(describer.GetLoadBalancerPool),
+	},
+
+	"CloudFlare/PageRule": {
+		IntegrationType: configs.IntegrationName,
+		ResourceName:    "CloudFlare/PageRule",
+		Tags: map[string][]string{
+			"category": {"PageRule"},
+		},
+		Labels:        map[string]string{},
+		Annotations:   map[string]string{},
+		ListDescriber: DescribeListByCloudFlare(describer.ListPageRules),
+		GetDescriber:  DescribeSingleByCloudFlare(describer.GetPageRule),
+	},
+
+	"CloudFlare/User": {
+		IntegrationType: configs.IntegrationName,
+		ResourceName:    "CloudFlare/User",
+		Tags: map[string][]string{
+			"category": {"User"},
+		},
+		Labels:        map[string]string{},
+		Annotations:   map[string]string{},
+		ListDescriber: DescribeListByCloudFlare(describer.ListUsers),
+		GetDescriber:  DescribeSingleByCloudFlare(describer.GetUser),
+	},
+
+	"CloudFlare/User/AuditLog": {
+		IntegrationType: configs.IntegrationName,
+		ResourceName:    "CloudFlare/User/AuditLog",
+		Tags: map[string][]string{
+			"category": {"User"},
+		},
+		Labels:        map[string]string{},
+		Annotations:   map[string]string{},
+		ListDescriber: DescribeListByCloudFlare(describer.ListUserAuditLogs),
+		GetDescriber:  nil,
+	},
+
+	"CloudFlare/WorkerRoute": {
+		IntegrationType: configs.IntegrationName,
+		ResourceName:    "CloudFlare/WorkerRoute",
+		Tags: map[string][]string{
+			"category": {"WorkerRoute"},
+		},
+		Labels:        map[string]string{},
+		Annotations:   map[string]string{},
+		ListDescriber: DescribeListByCloudFlare(describer.ListWorkerRoutes),
+		GetDescriber:  DescribeSingleByCloudFlare(describer.GetWorkerRoute),
+	},
+
+	"CloudFlare/Zone": {
+		IntegrationType: configs.IntegrationName,
+		ResourceName:    "CloudFlare/Zone",
+		Tags: map[string][]string{
+			"category": {"Zone"},
+		},
+		Labels:        map[string]string{},
+		Annotations:   map[string]string{},
+		ListDescriber: DescribeListByCloudFlare(describer.ListZones),
+		GetDescriber:  DescribeSingleByCloudFlare(describer.GetZone),
 	},
 }

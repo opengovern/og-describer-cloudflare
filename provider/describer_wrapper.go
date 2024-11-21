@@ -9,8 +9,8 @@ import (
 	"golang.org/x/net/context"
 )
 
-// DescribeByCloudFlareList A wrapper to pass cloudflare authorization to describer functions
-func DescribeByCloudFlareList(describe func(context.Context, *cloudflare.API, *model.StreamSender) ([]model.Resource, error)) model.ResourceDescriber {
+// DescribeListByCloudFlare A wrapper to pass cloudflare authorization to describer functions
+func DescribeListByCloudFlare(describe func(context.Context, *cloudflare.API, *model.StreamSender) ([]model.Resource, error)) model.ResourceDescriber {
 	return func(ctx context.Context, cfg configs.IntegrationCredentials, triggerType enums.DescribeTriggerType, additionalParameters map[string]string, stream *model.StreamSender) ([]model.Resource, error) {
 		ctx = describer.WithTriggerType(ctx, triggerType)
 
@@ -43,9 +43,9 @@ func DescribeByCloudFlareList(describe func(context.Context, *cloudflare.API, *m
 	}
 }
 
-// DescribeByCloudFlareGet A wrapper to pass cloudflare authorization to describer functions
-func DescribeByCloudFlareGet(describe func(context.Context, *cloudflare.API, string) ([]model.Resource, error)) model.ResourceDescriber {
-	return func(ctx context.Context, cfg configs.IntegrationCredentials, triggerType enums.DescribeTriggerType, additionalParameters map[string]string, stream *model.StreamSender) ([]model.Resource, error) {
+// DescribeSingleByCloudFlare A wrapper to pass cloudflare authorization to describer functions
+func DescribeSingleByCloudFlare(describe func(context.Context, *cloudflare.API, string) (*model.Resource, error)) model.SingleResourceDescriber {
+	return func(ctx context.Context, cfg configs.IntegrationCredentials, triggerType enums.DescribeTriggerType, additionalParameters map[string]string, resourceID string) (*model.Resource, error) {
 		ctx = describer.WithTriggerType(ctx, triggerType)
 
 		// Create cloudflare client using token or (email, api key)
@@ -66,13 +66,11 @@ func DescribeByCloudFlareGet(describe func(context.Context, *cloudflare.API, str
 			}
 		}
 
-		// Get values from describer
-		var values []model.Resource
-		result, err := describe(ctx, conn, "")
+		// Get value from describer
+		value, err := describe(ctx, conn, resourceID)
 		if err != nil {
 			return nil, err
 		}
-		values = append(values, result...)
-		return values, nil
+		return value, nil
 	}
 }

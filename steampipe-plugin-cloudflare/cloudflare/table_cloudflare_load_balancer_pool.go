@@ -2,6 +2,7 @@ package cloudflare
 
 import (
 	"context"
+	opengovernance "github.com/opengovern/og-describer-cloudflare/pkg/sdk/es"
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
@@ -12,7 +13,7 @@ func tableCloudflareLoadBalancerPool(ctx context.Context) *plugin.Table {
 		Name:        "cloudflare_load_balancer_pool",
 		Description: "A pool is a group of origin servers, with each origin identified by its IP address or hostname.",
 		List: &plugin.ListConfig{
-			Hydrate:       listLoadBalancerPools,
+			Hydrate:       opengovernance.ListLoadBalancerPool,
 			ParentHydrate: listZones,
 		},
 		Columns: commonColumns([]*plugin.Column{

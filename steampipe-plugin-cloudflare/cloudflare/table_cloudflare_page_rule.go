@@ -2,6 +2,7 @@ package cloudflare
 
 import (
 	"context"
+	opengovernance "github.com/opengovern/og-describer-cloudflare/pkg/sdk/es"
 	"time"
 
 	"github.com/cloudflare/cloudflare-go"
@@ -29,13 +30,13 @@ func tableCloudflarePageRule(ctx context.Context) *plugin.Table {
 		Name:        "cloudflare_page_rule",
 		Description: "Page Rules gives the ability to control how Cloudflare works on a URL or subdomain basis.",
 		List: &plugin.ListConfig{
-			Hydrate:       listPageRules,
+			Hydrate:       opengovernance.ListPageRule,
 			ParentHydrate: listZones,
 		},
 		Get: &plugin.GetConfig{
 			KeyColumns:        plugin.AllColumns([]string{"zone_id", "id"}),
 			ShouldIgnoreError: isNotFoundError([]string{"HTTP status 404"}),
-			Hydrate:           getPageRule,
+			Hydrate:           opengovernance.GetPageRule,
 		},
 		Columns: commonColumns([]*plugin.Column{
 			// Top columns

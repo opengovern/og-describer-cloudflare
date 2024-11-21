@@ -2,6 +2,7 @@ package cloudflare
 
 import (
 	"context"
+	opengovernance "github.com/opengovern/og-describer-cloudflare/pkg/sdk/es"
 
 	"github.com/cloudflare/cloudflare-go"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
@@ -24,14 +25,14 @@ func tableCloudflareAccountRole(ctx context.Context) *plugin.Table {
 		Name:        "cloudflare_account_role",
 		Description: "A Role defines what permissions a Member of an Account has.",
 		List: &plugin.ListConfig{
-			Hydrate:       listRoles,
+			Hydrate:       opengovernance.ListAccountRole,
 			ParentHydrate: listAccount,
 			KeyColumns: plugin.KeyColumnSlice{
 				{Name: "account_id", Require: plugin.Optional},
 			},
 		},
 		Get: &plugin.GetConfig{
-			Hydrate:           getAccountRole,
+			Hydrate:           opengovernance.GetAccountRole,
 			KeyColumns:        plugin.AllColumns([]string{"account_id", "id"}),
 			ShouldIgnoreError: isNotFoundError([]string{"HTTP status 403"}),
 		},

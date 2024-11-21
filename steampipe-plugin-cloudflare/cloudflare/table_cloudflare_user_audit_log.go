@@ -2,6 +2,7 @@ package cloudflare
 
 import (
 	"context"
+	opengovernance "github.com/opengovern/og-describer-cloudflare/pkg/sdk/es"
 	"time"
 
 	"github.com/cloudflare/cloudflare-go"
@@ -37,7 +38,7 @@ func tableCloudflareUserAuditLog(ctx context.Context) *plugin.Table {
 					Require: plugin.Optional,
 				},
 			},
-			Hydrate: listUserAuditLogs,
+			Hydrate: opengovernance.ListUserAuditLog,
 		},
 		Columns: commonColumns([]*plugin.Column{
 			{

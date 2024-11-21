@@ -16,7 +16,7 @@ func tableCloudflareAccount(ctx context.Context) *plugin.Table {
 		Name:        "cloudflare_account",
 		Description: "Accounts the user has access to.",
 		List: &plugin.ListConfig{
-			Hydrate: listAccount,
+			Hydrate: opengovernance.ListAccount,
 		},
 		Get: &plugin.GetConfig{
 			KeyColumns:        plugin.SingleColumn("id"),

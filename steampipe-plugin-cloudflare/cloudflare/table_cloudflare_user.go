@@ -2,6 +2,7 @@ package cloudflare
 
 import (
 	"context"
+	opengovernance "github.com/opengovern/og-describer-cloudflare/pkg/sdk/es"
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
@@ -12,7 +13,7 @@ func tableCloudflareUser(ctx context.Context) *plugin.Table {
 		Name:        "cloudflare_user",
 		Description: "Information about the current user making the request.",
 		List: &plugin.ListConfig{
-			Hydrate: listUser,
+			Hydrate: opengovernance.ListUser,
 		},
 		Columns: commonColumns([]*plugin.Column{
 			// Top columns

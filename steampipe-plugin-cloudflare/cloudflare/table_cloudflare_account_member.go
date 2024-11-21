@@ -2,6 +2,7 @@ package cloudflare
 
 import (
 	"context"
+	opengovernance "github.com/opengovern/og-describer-cloudflare/pkg/sdk/es"
 	"strings"
 
 	"github.com/cloudflare/cloudflare-go"
@@ -26,11 +27,11 @@ func tableCloudflareAccountMember(ctx context.Context) *plugin.Table {
 		Name:        "cloudflare_account_member",
 		Description: "Cloudflare Account Member",
 		List: &plugin.ListConfig{
-			Hydrate:       listAccountMembers,
+			Hydrate:       opengovernance.ListAccountMember,
 			ParentHydrate: listAccount,
 		},
 		Get: &plugin.GetConfig{
-			Hydrate:           getAccountMember,
+			Hydrate:           opengovernance.GetAccountMember,
 			KeyColumns:        plugin.AllColumns([]string{"account_id", "id"}),
 			ShouldIgnoreError: isNotFoundError([]string{"HTTP status 403", "HTTP status 404"}),
 		},
