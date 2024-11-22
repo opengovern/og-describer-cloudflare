@@ -23,10 +23,12 @@ func ListAccessPolicies(ctx context.Context, handler *CloudFlareAPIHandler, stre
 	for _, app := range apps {
 		go func(app cloudflare.AccessApplication) {
 			processAccessPolicies(ctx, handler, account, app, cloudFlareChan, &wg)
-			wg.Wait()
-			close(cloudFlareChan)
 		}(app)
 	}
+	go func() {
+		wg.Wait()
+		close(cloudFlareChan)
+	}()
 	var values []models.Resource
 	for value := range cloudFlareChan {
 		if stream != nil {

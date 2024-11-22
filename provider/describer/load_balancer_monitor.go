@@ -14,6 +14,8 @@ func ListLoadBalancerMonitors(ctx context.Context, handler *CloudFlareAPIHandler
 	cloudFlareChan := make(chan models.Resource)
 	go func() {
 		processLoadBalancerMonitors(ctx, handler, cloudFlareChan, &wg)
+	}()
+	go func() {
 		wg.Wait()
 		close(cloudFlareChan)
 	}()

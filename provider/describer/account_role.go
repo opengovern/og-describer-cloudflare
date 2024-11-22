@@ -18,6 +18,8 @@ func ListAccountRoles(ctx context.Context, handler *CloudFlareAPIHandler, stream
 	}
 	go func() {
 		processAccountRoles(ctx, handler, account, cloudFlareChan, &wg)
+	}()
+	go func() {
 		wg.Wait()
 		close(cloudFlareChan)
 	}()

@@ -14,6 +14,8 @@ func ListZones(ctx context.Context, handler *CloudFlareAPIHandler, stream *model
 	cloudFlareChan := make(chan models.Resource)
 	go func() {
 		processZones(ctx, handler, cloudFlareChan, &wg)
+	}()
+	go func() {
 		wg.Wait()
 		close(cloudFlareChan)
 	}()

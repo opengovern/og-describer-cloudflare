@@ -19,10 +19,12 @@ func ListFireWallRules(ctx context.Context, handler *CloudFlareAPIHandler, strea
 	for _, zone := range zones {
 		go func(zone cloudflare.Zone) {
 			processFirewallRules(ctx, handler, zone, cloudFlareChan, &wg)
-			wg.Wait()
-			close(cloudFlareChan)
 		}(zone)
 	}
+	go func() {
+		wg.Wait()
+		close(cloudFlareChan)
+	}()
 	var values []models.Resource
 	for value := range cloudFlareChan {
 		if stream != nil {

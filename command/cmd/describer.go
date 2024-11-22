@@ -53,7 +53,7 @@ var describerCmd = &cobra.Command{
 		logger, _ := zap.NewProduction()
 
 		creds := configs.IntegrationCredentials{
-			Token:  os.Getenv("CloudFlareToken"),
+			Token:  "7zO_FQ1vSdZVgaD5jCE32VZbK9y5MCKsY6HXWpDM",
 			Email:  "",
 			APIKey: "",
 		}
