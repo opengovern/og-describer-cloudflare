@@ -19,16 +19,9 @@ func DescribeListByCloudFlare(describe func(context.Context, *describer.CloudFla
 		// Create cloudflare client using token or (email, api key)
 		var conn *cloudflare.API
 		var err error
-		// First: check for the token
+		// Check for the token
 		if cfg.Token != "" {
 			conn, err = cloudflare.NewWithAPIToken(cfg.Token)
-			if err != nil {
-				return nil, err
-			}
-		}
-		// Second: Email + API Key
-		if cfg.Email != "" && cfg.APIKey != "" {
-			conn, err = cloudflare.New(cfg.APIKey, cfg.Email)
 			if err != nil {
 				return nil, err
 			}
@@ -55,16 +48,9 @@ func DescribeSingleByCloudFlare(describe func(context.Context, *describer.CloudF
 		// Create cloudflare client using token or (email, api key)
 		var conn *cloudflare.API
 		var err error
-		// First: check for the token
+		// Check for the token
 		if cfg.Token != "" {
 			conn, err = cloudflare.NewWithAPIToken(cfg.Token)
-			if err != nil {
-				return nil, err
-			}
-		}
-		// Second: Email + API Key
-		if cfg.Email != "" && cfg.APIKey != "" {
-			conn, err = cloudflare.New(cfg.APIKey, cfg.Email)
 			if err != nil {
 				return nil, err
 			}
