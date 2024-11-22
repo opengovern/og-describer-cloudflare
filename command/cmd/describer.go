@@ -56,8 +56,6 @@ var describerCmd = &cobra.Command{
 			Token:  os.Getenv("CloudFlareToken"),
 			Email:  "",
 			APIKey: "",
-			//AccessKey: "",
-			//SecretKey: "",
 		}
 
 		additionalParameters, err := provider.GetAdditionalParameters(job)

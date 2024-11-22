@@ -30,7 +30,7 @@ func ListAPITokens(ctx context.Context, handler *CloudFlareAPIHandler, stream *m
 	return values, nil
 }
 
-func GetApiToken(ctx context.Context, handler *CloudFlareAPIHandler, resourceID string) (*models.Resource, error) {
+func GetAPIToken(ctx context.Context, handler *CloudFlareAPIHandler, resourceID string) (*models.Resource, error) {
 	token, err := processAPIToken(ctx, handler, resourceID)
 	if err != nil {
 		return nil, err

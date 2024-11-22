@@ -88,8 +88,8 @@ var ResourceTypes = map[string]model.ResourceType{
 		},
 		Labels:        map[string]string{},
 		Annotations:   map[string]string{},
-		ListDescriber: nil,
-		GetDescriber:  DescribeSingleByCloudFlare(describer.GetApiToken),
+		ListDescriber: DescribeListByCloudFlare(describer.ListAPITokens),
+		GetDescriber:  DescribeSingleByCloudFlare(describer.GetAPIToken),
 	},
 
 	"CloudFlare/DNSRecord": {

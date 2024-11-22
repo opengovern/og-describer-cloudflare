@@ -78,8 +78,8 @@
         "ApiToken"
       ]
     },
-    "ListDescriber": "DescribeListByCloudFlare(describer.ListApiTokens)",
-    "GetDescriber": "DescribeSingleByCloudFlare(describer.GetApiToken)",
+    "ListDescriber": "DescribeListByCloudFlare(describer.ListAPITokens)",
+    "GetDescriber": "DescribeSingleByCloudFlare(describer.GetAPIToken)",
     "SteampipeTable": "cloudflare_api_token",
     "Model": "ApiToken"
   },
