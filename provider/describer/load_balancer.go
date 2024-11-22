@@ -16,12 +16,10 @@ func ListLoadBalancers(ctx context.Context, handler *CloudFlareAPIHandler, strea
 	if err != nil {
 		return nil, err
 	}
-	for _, zone := range zones {
-		go func(zone cloudflare.Zone) {
-			processLoadBalancers(ctx, handler, zone, cloudFlareChan, &wg)
-		}(zone)
-	}
 	go func() {
+		for _, zone := range zones {
+			processLoadBalancers(ctx, handler, zone, cloudFlareChan, &wg)
+		}
 		wg.Wait()
 		close(cloudFlareChan)
 	}()

@@ -14,8 +14,6 @@ func ListAccounts(ctx context.Context, handler *CloudFlareAPIHandler, stream *mo
 	cloudFlareChan := make(chan models.Resource)
 	go func() {
 		processAccounts(ctx, handler, cloudFlareChan, &wg)
-	}()
-	go func() {
 		wg.Wait()
 		close(cloudFlareChan)
 	}()

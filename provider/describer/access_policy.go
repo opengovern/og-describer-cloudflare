@@ -20,12 +20,10 @@ func ListAccessPolicies(ctx context.Context, handler *CloudFlareAPIHandler, stre
 	if err != nil {
 		return nil, err
 	}
-	for _, app := range apps {
-		go func(app cloudflare.AccessApplication) {
-			processAccessPolicies(ctx, handler, account, app, cloudFlareChan, &wg)
-		}(app)
-	}
 	go func() {
+		for _, app := range apps {
+			processAccessPolicies(ctx, handler, account, app, cloudFlareChan, &wg)
+		}
 		wg.Wait()
 		close(cloudFlareChan)
 	}()

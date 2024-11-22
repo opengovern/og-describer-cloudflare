@@ -16,12 +16,10 @@ func ListFireWallRules(ctx context.Context, handler *CloudFlareAPIHandler, strea
 	if err != nil {
 		return nil, err
 	}
-	for _, zone := range zones {
-		go func(zone cloudflare.Zone) {
-			processFirewallRules(ctx, handler, zone, cloudFlareChan, &wg)
-		}(zone)
-	}
 	go func() {
+		for _, zone := range zones {
+			processFirewallRules(ctx, handler, zone, cloudFlareChan, &wg)
+		}
 		wg.Wait()
 		close(cloudFlareChan)
 	}()

@@ -14,8 +14,6 @@ func ListLoadBalancerPools(ctx context.Context, handler *CloudFlareAPIHandler, s
 	cloudFlareChan := make(chan models.Resource)
 	go func() {
 		processLoadBalancerPools(ctx, handler, cloudFlareChan, &wg)
-	}()
-	go func() {
 		wg.Wait()
 		close(cloudFlareChan)
 	}()

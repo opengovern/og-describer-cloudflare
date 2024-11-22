@@ -19,8 +19,6 @@ func ListAccountMembers(ctx context.Context, handler *CloudFlareAPIHandler, stre
 	}
 	go func() {
 		processAccountMembers(ctx, handler, account, cloudFlareChan, &wg)
-	}()
-	go func() {
 		wg.Wait()
 		close(cloudFlareChan)
 	}()

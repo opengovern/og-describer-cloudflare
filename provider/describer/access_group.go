@@ -18,8 +18,6 @@ func ListAccessGroups(ctx context.Context, handler *CloudFlareAPIHandler, stream
 	}
 	go func() {
 		processAccessGroups(ctx, handler, account, cloudFlareChan, &wg)
-	}()
-	go func() {
 		wg.Wait()
 		close(cloudFlareChan)
 	}()

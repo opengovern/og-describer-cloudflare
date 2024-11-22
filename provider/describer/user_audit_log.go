@@ -15,8 +15,6 @@ func ListUserAuditLogs(ctx context.Context, handler *CloudFlareAPIHandler, strea
 	cloudFlareChan := make(chan models.Resource)
 	go func() {
 		processUserAuditLogs(ctx, handler, cloudFlareChan, &wg)
-	}()
-	go func() {
 		wg.Wait()
 		close(cloudFlareChan)
 	}()

@@ -18,8 +18,6 @@ func ListAccessApplications(ctx context.Context, handler *CloudFlareAPIHandler, 
 	}
 	go func() {
 		processAccessApps(ctx, handler, account, cloudFlareChan, &wg)
-	}()
-	go func() {
 		wg.Wait()
 		close(cloudFlareChan)
 	}()

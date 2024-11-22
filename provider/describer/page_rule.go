@@ -16,12 +16,10 @@ func ListPageRules(ctx context.Context, handler *CloudFlareAPIHandler, stream *m
 	if err != nil {
 		return nil, err
 	}
-	for _, zone := range zones {
-		go func(zone cloudflare.Zone) {
-			processPageRules(ctx, handler, zone, cloudFlareChan, &wg)
-		}(zone)
-	}
 	go func() {
+		for _, zone := range zones {
+			processPageRules(ctx, handler, zone, cloudFlareChan, &wg)
+		}
 		wg.Wait()
 		close(cloudFlareChan)
 	}()

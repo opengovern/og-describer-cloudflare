@@ -14,8 +14,6 @@ func ListAPITokens(ctx context.Context, handler *CloudFlareAPIHandler, stream *m
 	cloudFlareChan := make(chan models.Resource)
 	go func() {
 		processAPITokens(ctx, handler, cloudFlareChan, &wg)
-	}()
-	go func() {
 		wg.Wait()
 		close(cloudFlareChan)
 	}()
