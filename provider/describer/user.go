@@ -2,13 +2,14 @@ package describer
 
 import (
 	"context"
+	"errors"
 	"github.com/cloudflare/cloudflare-go"
 	"github.com/opengovern/og-describer-cloudflare/pkg/sdk/models"
 	"github.com/opengovern/og-describer-cloudflare/provider/model"
 )
 
-func ListUsers(ctx context.Context, conn *cloudflare.API, stream *models.StreamSender) ([]models.Resource, error) {
-	user, err := conn.UserDetails(ctx)
+func ListUsers(ctx context.Context, handler *CloudFlareAPIHandler, stream *models.StreamSender) ([]models.Resource, error) {
+	user, err := processUser(ctx, handler)
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +37,7 @@ func ListUsers(ctx context.Context, conn *cloudflare.API, stream *models.StreamS
 		},
 	}
 	if stream != nil {
-		if err := (*stream)(value); err != nil {
+		if err = (*stream)(value); err != nil {
 			return nil, err
 		}
 	} else {
@@ -45,8 +46,8 @@ func ListUsers(ctx context.Context, conn *cloudflare.API, stream *models.StreamS
 	return values, nil
 }
 
-func GetUser(ctx context.Context, conn *cloudflare.API, resourceID string) (*models.Resource, error) {
-	user, err := conn.UserDetails(ctx)
+func GetUser(ctx context.Context, handler *CloudFlareAPIHandler, resourceID string) (*models.Resource, error) {
+	user, err := processUser(ctx, handler)
 	if err != nil {
 		return nil, err
 	}
@@ -73,4 +74,25 @@ func GetUser(ctx context.Context, conn *cloudflare.API, resourceID string) (*mod
 		},
 	}
 	return &value, nil
+}
+
+func processUser(ctx context.Context, handler *CloudFlareAPIHandler) (*cloudflare.User, error) {
+	var user cloudflare.User
+	var statusCode *int
+	requestFunc := func() (*int, error) {
+		var e error
+		user, e = handler.Conn.UserDetails(ctx)
+		if e != nil {
+			var httpErr *cloudflare.APIRequestError
+			if errors.As(e, &httpErr) {
+				statusCode = &httpErr.StatusCode
+			}
+		}
+		return statusCode, e
+	}
+	err := handler.DoRequest(ctx, requestFunc)
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
 }

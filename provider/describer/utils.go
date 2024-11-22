@@ -91,8 +91,21 @@ func getApplications(ctx context.Context, handler *CloudFlareAPIHandler, account
 	return accessApps, nil
 }
 
-func getZones(ctx context.Context, conn *cloudflare.API) ([]cloudflare.Zone, error) {
-	zones, err := conn.ListZones(ctx)
+func getZones(ctx context.Context, handler *CloudFlareAPIHandler) ([]cloudflare.Zone, error) {
+	var zones []cloudflare.Zone
+	var statusCode *int
+	requestFunc := func() (*int, error) {
+		var e error
+		zones, e = handler.Conn.ListZones(ctx)
+		if e != nil {
+			var httpErr *cloudflare.APIRequestError
+			if errors.As(e, &httpErr) {
+				statusCode = &httpErr.StatusCode
+			}
+		}
+		return statusCode, e
+	}
+	err := handler.DoRequest(ctx, requestFunc)
 	if err != nil {
 		return nil, err
 	}

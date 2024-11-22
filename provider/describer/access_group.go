@@ -24,7 +24,7 @@ func ListAccessGroups(ctx context.Context, handler *CloudFlareAPIHandler, stream
 	var values []models.Resource
 	for value := range cloudFlareChan {
 		if stream != nil {
-			if err := (*stream)(value); err != nil {
+			if err = (*stream)(value); err != nil {
 				return nil, err
 			}
 		} else {

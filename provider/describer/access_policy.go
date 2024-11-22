@@ -20,11 +20,6 @@ func ListAccessPolicies(ctx context.Context, handler *CloudFlareAPIHandler, stre
 	if err != nil {
 		return nil, err
 	}
-	go func() {
-		processAccessGroups(ctx, handler, account, cloudFlareChan, &wg)
-		wg.Wait()
-		close(cloudFlareChan)
-	}()
 	for _, app := range apps {
 		go func(app cloudflare.AccessApplication) {
 			processAccessPolicies(ctx, handler, account, app, cloudFlareChan, &wg)
@@ -35,7 +30,7 @@ func ListAccessPolicies(ctx context.Context, handler *CloudFlareAPIHandler, stre
 	var values []models.Resource
 	for value := range cloudFlareChan {
 		if stream != nil {
-			if err := (*stream)(value); err != nil {
+			if err = (*stream)(value); err != nil {
 				return nil, err
 			}
 		} else {

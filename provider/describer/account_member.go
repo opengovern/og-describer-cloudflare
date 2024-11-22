@@ -25,7 +25,7 @@ func ListAccountMembers(ctx context.Context, handler *CloudFlareAPIHandler, stre
 	var values []models.Resource
 	for value := range cloudFlareChan {
 		if stream != nil {
-			if err := (*stream)(value); err != nil {
+			if err = (*stream)(value); err != nil {
 				return nil, err
 			}
 		} else {
