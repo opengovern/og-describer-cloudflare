@@ -15,11 +15,7 @@ func tableCloudflareWorkerRoute(ctx context.Context) *plugin.Table {
 		Name:        "cloudflare_worker_route",
 		Description: "Routes are basic patterns used to enable or disable workers that match requests.",
 		List: &plugin.ListConfig{
-			Hydrate:       opengovernance.ListWorkerRoute,
-			ParentHydrate: listZones,
-			KeyColumns: plugin.KeyColumnSlice{
-				{Name: "zone_id", Require: plugin.Optional},
-			},
+			Hydrate: opengovernance.ListWorkerRoute,
 		},
 		Columns: commonColumns([]*plugin.Column{
 			// Top columns

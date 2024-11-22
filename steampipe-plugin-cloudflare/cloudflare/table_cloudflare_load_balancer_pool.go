@@ -13,8 +13,7 @@ func tableCloudflareLoadBalancerPool(ctx context.Context) *plugin.Table {
 		Name:        "cloudflare_load_balancer_pool",
 		Description: "A pool is a group of origin servers, with each origin identified by its IP address or hostname.",
 		List: &plugin.ListConfig{
-			Hydrate:       opengovernance.ListLoadBalancerPool,
-			ParentHydrate: listZones,
+			Hydrate: opengovernance.ListLoadBalancerPool,
 		},
 		Columns: commonColumns([]*plugin.Column{
 			// Top columns

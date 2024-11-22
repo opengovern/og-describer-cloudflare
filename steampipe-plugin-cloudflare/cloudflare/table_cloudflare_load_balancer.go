@@ -16,8 +16,7 @@ func tableCloudflareLoadBalancer(ctx context.Context) *plugin.Table {
 		Name:        "cloudflare_load_balancer",
 		Description: "Cloudflare Load balancers allows to distribute traffic across servers, which reduces server strain and latency and improves the experience for end users.",
 		List: &plugin.ListConfig{
-			Hydrate:       opengovernance.ListLoadBalancer,
-			ParentHydrate: listZones,
+			Hydrate: opengovernance.ListLoadBalancer,
 		},
 		Columns: commonColumns([]*plugin.Column{
 			// Top columns

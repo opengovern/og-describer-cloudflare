@@ -30,11 +30,9 @@ func tableCloudflarePageRule(ctx context.Context) *plugin.Table {
 		Name:        "cloudflare_page_rule",
 		Description: "Page Rules gives the ability to control how Cloudflare works on a URL or subdomain basis.",
 		List: &plugin.ListConfig{
-			Hydrate:       opengovernance.ListPageRule,
-			ParentHydrate: listZones,
+			Hydrate: opengovernance.ListPageRule,
 		},
 		Get: &plugin.GetConfig{
-			KeyColumns:        plugin.AllColumns([]string{"zone_id", "id"}),
 			ShouldIgnoreError: isNotFoundError([]string{"HTTP status 404"}),
 			Hydrate:           opengovernance.GetPageRule,
 		},

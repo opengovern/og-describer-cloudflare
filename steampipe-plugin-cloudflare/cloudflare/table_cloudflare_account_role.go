@@ -25,15 +25,10 @@ func tableCloudflareAccountRole(ctx context.Context) *plugin.Table {
 		Name:        "cloudflare_account_role",
 		Description: "A Role defines what permissions a Member of an Account has.",
 		List: &plugin.ListConfig{
-			Hydrate:       opengovernance.ListAccountRole,
-			ParentHydrate: listAccount,
-			KeyColumns: plugin.KeyColumnSlice{
-				{Name: "account_id", Require: plugin.Optional},
-			},
+			Hydrate: opengovernance.ListAccountRole,
 		},
 		Get: &plugin.GetConfig{
 			Hydrate:           opengovernance.GetAccountRole,
-			KeyColumns:        plugin.AllColumns([]string{"account_id", "id"}),
 			ShouldIgnoreError: isNotFoundError([]string{"HTTP status 403"}),
 		},
 		Columns: commonColumns([]*plugin.Column{

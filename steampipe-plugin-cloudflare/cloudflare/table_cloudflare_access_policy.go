@@ -20,11 +20,7 @@ func tableCloudflareAccessPolicy(ctx context.Context) *plugin.Table {
 		Name:        "cloudflare_access_policy",
 		Description: "Access Policies define the users or groups who can, or cannot, reach the Application Resource.",
 		List: &plugin.ListConfig{
-			Hydrate:       opengovernance.ListAccessPolicy,
-			ParentHydrate: listParentAccessApplications,
-			KeyColumns: plugin.KeyColumnSlice{
-				{Name: "application_id", Require: plugin.Optional},
-			},
+			Hydrate: opengovernance.ListAccessPolicy,
 		},
 		GetMatrixItemFunc: BuildAccountmatrix,
 		Columns: commonColumns([]*plugin.Column{

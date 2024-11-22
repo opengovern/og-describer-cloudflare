@@ -20,12 +20,7 @@ func tableCloudflareAccessGroup(ctx context.Context) *plugin.Table {
 		Name:        "cloudflare_access_group",
 		Description: "Access Groups allows to define a set of users to which an application policy can be applied.",
 		List: &plugin.ListConfig{
-			ParentHydrate: listAccount,
-			Hydrate:       opengovernance.ListAccessGroup,
-			KeyColumns: plugin.KeyColumnSlice{
-				{Name: "account_id", Require: plugin.Optional},
-				{Name: "account_name", Require: plugin.Optional},
-			},
+			Hydrate: opengovernance.ListAccessGroup,
 		},
 		// Get Config - Currently SDK is not supporting get call
 		Columns: commonColumns([]*plugin.Column{

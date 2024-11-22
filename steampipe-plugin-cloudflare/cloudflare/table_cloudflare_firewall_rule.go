@@ -33,11 +33,9 @@ func tableCloudflareFirewallRule(ctx context.Context) *plugin.Table {
 		Name:        "cloudflare_firewall_rule",
 		Description: "Cloudflare Firewall Rules is a flexible and intuitive framework for filtering HTTP requests.",
 		List: &plugin.ListConfig{
-			Hydrate:       opengovernance.ListFireWallRule,
-			ParentHydrate: listZones,
+			Hydrate: opengovernance.ListFireWallRule,
 		},
 		Get: &plugin.GetConfig{
-			KeyColumns:        plugin.AllColumns([]string{"zone_id", "id"}),
 			ShouldIgnoreError: isNotFoundError([]string{"HTTP status 404"}),
 			Hydrate:           opengovernance.GetFireWallRule,
 		},

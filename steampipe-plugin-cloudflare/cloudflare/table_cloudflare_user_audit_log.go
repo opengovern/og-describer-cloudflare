@@ -18,26 +18,6 @@ func tableCloudflareUserAuditLog(ctx context.Context) *plugin.Table {
 		Description:      "Cloudflare User Audit Logs",
 		DefaultTransform: transform.FromCamel(),
 		List: &plugin.ListConfig{
-			KeyColumns: []*plugin.KeyColumn{
-				{
-					Name:       "when",
-					Operators:  []string{">", ">=", "<", "<=", "="},
-					Require:    plugin.Optional,
-					CacheMatch: "exact",
-				},
-				{
-					Name:    "actor_ip",
-					Require: plugin.Optional,
-				},
-				{
-					Name:    "actor_email",
-					Require: plugin.Optional,
-				},
-				{
-					Name:    "id",
-					Require: plugin.Optional,
-				},
-			},
 			Hydrate: opengovernance.ListUserAuditLog,
 		},
 		Columns: commonColumns([]*plugin.Column{
