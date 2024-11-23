@@ -33,7 +33,6 @@ func ExtractTableName(resourceType string) string {
 
 }
 
-// Plugin TODO
 func Plugin() *plugin.Plugin {
 	return cloudflare.Plugin(buildContext())
 }
