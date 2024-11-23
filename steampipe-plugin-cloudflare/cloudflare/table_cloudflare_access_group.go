@@ -25,19 +25,19 @@ func tableCloudflareAccessGroup(ctx context.Context) *plugin.Table {
 		// Get Config - Currently SDK is not supporting get call
 		Columns: commonColumns([]*plugin.Column{
 			// Top columns
-			{Name: "id", Type: proto.ColumnType_STRING, Description: "Identifier of the access group."},
-			{Name: "name", Type: proto.ColumnType_STRING, Description: "Friendly name of the access group."},
-			{Name: "account_id", Type: proto.ColumnType_STRING, Hydrate: getAccountDetails, Transform: transform.FromField("ID"), Description: "ID of the account, access group belongs."},
-			{Name: "account_name", Type: proto.ColumnType_STRING, Hydrate: getAccountDetails, Transform: transform.FromField("Name"), Description: "Name of the account, access group belongs."},
+			{Name: "id", Type: proto.ColumnType_STRING, Transform: transform.FromField("Description.ID"), Description: "Identifier of the access group."},
+			{Name: "name", Type: proto.ColumnType_STRING, Transform: transform.FromField("Description.Name"), Description: "Friendly name of the access group."},
+			{Name: "account_id", Type: proto.ColumnType_STRING, Transform: transform.FromField("Description.AccountID"), Description: "ID of the account, access group belongs."},
+			{Name: "account_name", Type: proto.ColumnType_STRING, Transform: transform.FromField("Description.AccountName"), Description: "Name of the account, access group belongs."},
 
 			// Other columns
-			{Name: "created_at", Type: proto.ColumnType_TIMESTAMP, Description: "Timestamp when access group was created."},
-			{Name: "updated_at", Type: proto.ColumnType_TIMESTAMP, Description: "TImestamp when access group was last modified."},
+			{Name: "created_at", Type: proto.ColumnType_TIMESTAMP, Transform: transform.FromField("Description.CreatedAt"), Description: "Timestamp when access group was created."},
+			{Name: "updated_at", Type: proto.ColumnType_TIMESTAMP, Transform: transform.FromField("Description.UpdatedAt"), Description: "TImestamp when access group was last modified."},
 
 			// JSON columns
-			{Name: "exclude", Type: proto.ColumnType_JSON, Description: "The exclude policy works like a NOT logical operator. The user must not satisfy all of the rules in exclude."},
-			{Name: "include", Type: proto.ColumnType_JSON, Description: "The include policy works like an OR logical operator. The user must satisfy one of the rules in includes."},
-			{Name: "require", Type: proto.ColumnType_JSON, Description: "The require policy works like a AND logical operator. The user must satisfy all of the rules in require."},
+			{Name: "exclude", Type: proto.ColumnType_JSON, Transform: transform.FromField("Description.Exclude"), Description: "The exclude policy works like a NOT logical operator. The user must not satisfy all of the rules in exclude."},
+			{Name: "include", Type: proto.ColumnType_JSON, Transform: transform.FromField("Description.Include"), Description: "The include policy works like an OR logical operator. The user must satisfy one of the rules in includes."},
+			{Name: "require", Type: proto.ColumnType_JSON, Transform: transform.FromField("Description.Require"), Description: "The require policy works like a AND logical operator. The user must satisfy all of the rules in require."},
 		}),
 	}
 }

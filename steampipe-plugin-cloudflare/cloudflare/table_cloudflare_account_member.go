@@ -38,39 +38,43 @@ func tableCloudflareAccountMember(ctx context.Context) *plugin.Table {
 				Name:        "user_email",
 				Description: "Specifies the user email.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("User.Email"),
+				Transform:   transform.FromField("Description.UserEmail"),
 			},
 			{
 				Name:        "id",
 				Description: "Specifies the account membership identifier.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromGo(),
+				Transform:   transform.FromField("Description.ID"),
 			},
 			{
 				Name:        "status",
 				Description: "A member's status in the account.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Description.Status"),
 			},
 			{
 				Name:        "account_id",
 				Description: "Specifies the account id, the member is associated with.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("AccountID"),
+				Transform:   transform.FromField("Description.AccountID"),
 			},
 			{
 				Name:        "code",
 				Description: "The unique activation code for the account membership.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Description.Code"),
 			},
 			{
 				Name:        "user",
 				Description: "A set of information about the user.",
 				Type:        proto.ColumnType_JSON,
+				Transform:   transform.FromField("Description.User"),
 			},
 			{
 				Name:        "roles",
 				Description: "A list of permissions that a Member of an Account has.",
 				Type:        proto.ColumnType_JSON,
+				Transform:   transform.FromField("Description.Roles"),
 			},
 
 			// steampipe standard columns
@@ -78,7 +82,7 @@ func tableCloudflareAccountMember(ctx context.Context) *plugin.Table {
 				Name:        "title",
 				Description: "Title of the resource.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.From(accountMemberTitle),
+				Transform:   transform.FromField("Description.Title"),
 			},
 		}),
 	}

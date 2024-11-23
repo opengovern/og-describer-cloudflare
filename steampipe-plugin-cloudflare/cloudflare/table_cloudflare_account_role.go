@@ -37,18 +37,19 @@ func tableCloudflareAccountRole(ctx context.Context) *plugin.Table {
 				Name:        "id",
 				Description: "Specifies the Role identifier.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("ID"),
+				Transform:   transform.FromField("Description.ID"),
 			},
 			{
 				Name:        "name",
 				Description: "Specifies the name of the role.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Description.Name"),
 			},
 			{
 				Name:        "account_id",
 				Description: "Specifies the account id where the role is created at.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("AccountID"),
+				Transform:   transform.FromField("Description.AccountID"),
 			},
 
 			// Other columns
@@ -56,17 +57,19 @@ func tableCloudflareAccountRole(ctx context.Context) *plugin.Table {
 				Name:        "description",
 				Description: "A description of the role.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Description.Description"),
 			},
 			{
 				Name:        "permissions",
 				Description: "A list of permissions attached with the role.",
 				Type:        proto.ColumnType_JSON,
+				Transform:   transform.FromField("Description.Permissions"),
 			},
 			{
 				Name:        "title",
 				Description: "Title of the resource.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("Name"),
+				Transform:   transform.FromField("Description.Title"),
 			},
 		}),
 	}
