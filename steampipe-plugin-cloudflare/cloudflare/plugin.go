@@ -2,6 +2,7 @@ package cloudflare
 
 import (
 	"context"
+	essdk "github.com/opengovern/og-util/pkg/opengovernance-es-sdk"
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
@@ -11,15 +12,10 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 	p := &plugin.Plugin{
 		Name: "steampipe-plugin-cloudflare",
 		ConnectionConfigSchema: &plugin.ConnectionConfigSchema{
-			NewInstance: ConfigInstance,
+			NewInstance: essdk.ConfigInstance,
+			Schema:      essdk.ConfigSchema(),
 		},
-		ConnectionKeyColumns: []plugin.ConnectionKeyColumn{
-			{
-				Name:    "user_id",
-				Hydrate: getUserId,
-			},
-		},
-		DefaultTransform: transform.FromJSONTag(),
+		DefaultTransform: transform.FromCamel(),
 		TableMap: map[string]*plugin.Table{
 			"cloudflare_access_application":    tableCloudflareAccessApplication(ctx),
 			"cloudflare_access_group":          tableCloudflareAccessGroup(ctx),
