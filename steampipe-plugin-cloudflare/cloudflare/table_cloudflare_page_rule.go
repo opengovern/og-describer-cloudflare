@@ -3,27 +3,10 @@ package cloudflare
 import (
 	"context"
 	opengovernance "github.com/opengovern/og-describer-cloudflare/pkg/sdk/es"
-	"time"
-
-	"github.com/cloudflare/cloudflare-go"
-
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
-
-type pageRuleInfo = struct {
-	ID         string                      `json:"id,omitempty"`
-	Targets    []cloudflare.PageRuleTarget `json:"targets"`
-	Actions    []cloudflare.PageRuleAction `json:"actions"`
-	Priority   int                         `json:"priority"`
-	Status     string                      `json:"status"`
-	ModifiedOn time.Time                   `json:"modified_on,omitempty"`
-	CreatedOn  time.Time                   `json:"created_on,omitempty"`
-	ZoneID     string
-}
-
-//// TABLE DEFINITION
 
 func tableCloudflarePageRule(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
@@ -33,9 +16,8 @@ func tableCloudflarePageRule(ctx context.Context) *plugin.Table {
 			Hydrate: opengovernance.ListPageRule,
 		},
 		Get: &plugin.GetConfig{
-			KeyColumns:        plugin.AllColumns([]string{"zone_id", "id"}),
-			ShouldIgnoreError: isNotFoundError([]string{"HTTP status 404"}),
-			Hydrate:           opengovernance.GetPageRule,
+			KeyColumns: plugin.AllColumns([]string{"zone_id", "id"}),
+			Hydrate:    opengovernance.GetPageRule,
 		},
 		Columns: commonColumns([]*plugin.Column{
 			// Top columns
@@ -54,60 +36,4 @@ func tableCloudflarePageRule(ctx context.Context) *plugin.Table {
 			{Name: "targets", Type: proto.ColumnType_JSON, Transform: transform.FromField("Description.Targets"), Description: "A list of targets to evaluate on a request."},
 		}),
 	}
-}
-
-//// LIST FUNCTION
-
-func listPageRules(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	conn, err := connect(ctx, d)
-	if err != nil {
-		return nil, err
-	}
-	zoneDetails := h.Item.(cloudflare.Zone)
-
-	resp, err := conn.ListPageRules(ctx, zoneDetails.ID)
-	if err != nil {
-		return nil, err
-	}
-	for _, i := range resp {
-		d.StreamLeafListItem(ctx, pageRuleInfo{
-			ID:         i.ID,
-			Status:     i.Status,
-			CreatedOn:  i.CreatedOn,
-			ModifiedOn: i.ModifiedOn,
-			Priority:   i.Priority,
-			Actions:    i.Actions,
-			Targets:    i.Targets,
-			ZoneID:     zoneDetails.ID,
-		})
-	}
-
-	return nil, nil
-}
-
-//// HYDRATE FUNCTIONS
-
-func getPageRule(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	conn, err := connect(ctx, d)
-	if err != nil {
-		return nil, err
-	}
-
-	zoneID := d.EqualsQuals["zone_id"].GetStringValue()
-	id := d.EqualsQuals["id"].GetStringValue()
-
-	op, err := conn.PageRule(ctx, zoneID, id)
-	if err != nil {
-		return nil, err
-	}
-	return pageRuleInfo{
-		ID:         op.ID,
-		Status:     op.Status,
-		CreatedOn:  op.CreatedOn,
-		ModifiedOn: op.ModifiedOn,
-		Priority:   op.Priority,
-		Actions:    op.Actions,
-		Targets:    op.Targets,
-		ZoneID:     zoneID,
-	}, nil
 }

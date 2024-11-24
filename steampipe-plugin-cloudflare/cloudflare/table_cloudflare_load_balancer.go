@@ -3,7 +3,6 @@ package cloudflare
 import (
 	"context"
 
-	"github.com/cloudflare/cloudflare-go"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
@@ -44,24 +43,4 @@ func tableCloudflareLoadBalancer(ctx context.Context) *plugin.Table {
 			{Name: "session_affinity_attributes", Type: proto.ColumnType_JSON, Transform: transform.FromField("Description.SessionAffinityAttributes"), Description: "session affinity cookie attributes."},
 		}),
 	}
-}
-
-func listLoadBalancers(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	logger := plugin.Logger(ctx)
-	zoneID := h.Item.(cloudflare.Zone).ID
-
-	conn, err := connect(ctx, d)
-	if err != nil {
-		logger.Error("listLoadBalancers", "connection_error", err)
-		return nil, err
-	}
-	loadBalancers, err := conn.ListLoadBalancers(ctx, zoneID)
-	if err != nil {
-		logger.Error("ListLoadBalancers", "api error", err)
-		return nil, err
-	}
-	for _, resource := range loadBalancers {
-		d.StreamListItem(ctx, resource)
-	}
-	return nil, nil
 }

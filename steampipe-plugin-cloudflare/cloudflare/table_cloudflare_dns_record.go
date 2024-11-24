@@ -4,8 +4,6 @@ import (
 	"context"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 
-	"github.com/cloudflare/cloudflare-go"
-
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 
@@ -20,9 +18,8 @@ func tableCloudflareDNSRecord(ctx context.Context) *plugin.Table {
 			Hydrate: opengovernance.ListDNSRecord,
 		},
 		Get: &plugin.GetConfig{
-			KeyColumns:        plugin.AllColumns([]string{"zone_id", "id"}),
-			ShouldIgnoreError: isNotFoundError([]string{"HTTP status 404"}),
-			Hydrate:           opengovernance.GetDNSRecord,
+			KeyColumns: plugin.AllColumns([]string{"zone_id", "id"}),
+			Hydrate:    opengovernance.GetDNSRecord,
 		},
 		Columns: commonColumns([]*plugin.Column{
 			// Top columns
@@ -47,36 +44,4 @@ func tableCloudflareDNSRecord(ctx context.Context) *plugin.Table {
 			{Name: "meta", Type: proto.ColumnType_JSON, Transform: transform.FromField("Description.Meta"), Description: "Cloudflare metadata for this record."},
 		}),
 	}
-}
-
-func listDNSRecord(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	conn, err := connect(ctx, d)
-	if err != nil {
-		return nil, err
-	}
-	quals := d.EqualsQuals
-	zoneID := quals["zone_id"].GetStringValue()
-	items, err := conn.DNSRecords(ctx, zoneID, cloudflare.DNSRecord{})
-	if err != nil {
-		return nil, err
-	}
-	for _, i := range items {
-		d.StreamListItem(ctx, i)
-	}
-	return nil, nil
-}
-
-func getDNSRecord(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	conn, err := connect(ctx, d)
-	if err != nil {
-		return nil, err
-	}
-	quals := d.EqualsQuals
-	zoneID := quals["zone_id"].GetStringValue()
-	id := quals["id"].GetStringValue()
-	item, err := conn.DNSRecord(ctx, zoneID, id)
-	if err != nil {
-		return nil, err
-	}
-	return item, nil
 }

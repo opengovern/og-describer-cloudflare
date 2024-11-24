@@ -39,12 +39,3 @@ func tableCloudflareUser(ctx context.Context) *plugin.Table {
 		}),
 	}
 }
-
-func listUser(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	item, err := getUserInfo(ctx, d, h)
-	if err != nil {
-		return nil, err
-	}
-	d.StreamListItem(ctx, item)
-	return nil, nil
-}

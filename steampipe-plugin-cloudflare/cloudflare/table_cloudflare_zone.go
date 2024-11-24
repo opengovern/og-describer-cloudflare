@@ -19,9 +19,8 @@ func tableCloudflareZone(ctx context.Context) *plugin.Table {
 			Hydrate: opengovernance.ListZone,
 		},
 		Get: &plugin.GetConfig{
-			KeyColumns:        plugin.SingleColumn("id"),
-			ShouldIgnoreError: isNotFoundError([]string{"Invalid zone identifier"}),
-			Hydrate:           opengovernance.GetZone,
+			KeyColumns: plugin.SingleColumn("id"),
+			Hydrate:    opengovernance.GetZone,
 		},
 		Columns: commonColumns([]*plugin.Column{
 			// Top columns
@@ -58,51 +57,6 @@ func tableCloudflareZone(ctx context.Context) *plugin.Table {
 	}
 }
 
-func listZones(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	logger := plugin.Logger(ctx)
-	conn, err := connect(ctx, d)
-	if err != nil {
-		logger.Error("listZones", "connection_error", err)
-		return nil, err
-	}
-	resp, err := conn.ListZonesContext(ctx)
-	if err != nil {
-		logger.Error("listZones", "ListZonesContext api error", err)
-		return nil, err
-	}
-	for _, i := range resp.Result {
-		d.StreamListItem(ctx, i)
-	}
-	return nil, nil
-}
-
-func getZone(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	conn, err := connect(ctx, d)
-	if err != nil {
-		return nil, err
-	}
-	quals := d.EqualsQuals
-	zoneID := quals["id"].GetStringValue()
-	item, err := conn.ZoneDetails(ctx, zoneID)
-	if err != nil {
-		return nil, err
-	}
-	return item, nil
-}
-
-func getZoneSettings(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	conn, err := connect(ctx, d)
-	if err != nil {
-		return nil, err
-	}
-	zone := h.Item.(cloudflare.Zone)
-	item, err := conn.ZoneSettings(ctx, zone.ID)
-	if err != nil {
-		return nil, err
-	}
-	return item.Result, nil
-}
-
 func settingsToStandard(ctx context.Context, d *transform.TransformData) (interface{}, error) {
 	settings := d.HydrateItem.([]cloudflare.ZoneSetting)
 	// Convert the settings into a map, which makes them a lot easier to query by name
@@ -111,17 +65,4 @@ func settingsToStandard(ctx context.Context, d *transform.TransformData) (interf
 		settingsMap[i.ID] = i.Value
 	}
 	return settingsMap, nil
-}
-
-func getZoneDNSSEC(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	conn, err := connect(ctx, d)
-	if err != nil {
-		return nil, err
-	}
-	zone := h.Item.(cloudflare.Zone)
-	item, err := conn.ZoneDNSSECSetting(ctx, zone.ID)
-	if err != nil {
-		return nil, err
-	}
-	return item, nil
 }

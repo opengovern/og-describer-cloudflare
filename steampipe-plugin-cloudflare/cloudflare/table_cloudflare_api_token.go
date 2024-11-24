@@ -34,18 +34,3 @@ func tableCloudflareAPIToken(ctx context.Context) *plugin.Table {
 		}),
 	}
 }
-
-func listAPIToken(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	conn, err := connect(ctx, d)
-	if err != nil {
-		return nil, err
-	}
-	items, err := conn.APITokens(ctx)
-	if err != nil {
-		return nil, err
-	}
-	for _, i := range items {
-		d.StreamListItem(ctx, i)
-	}
-	return nil, nil
-}

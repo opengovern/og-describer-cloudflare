@@ -4,7 +4,6 @@ import (
 	"context"
 	opengovernance "github.com/opengovern/og-describer-cloudflare/pkg/sdk/es"
 
-	"github.com/cloudflare/cloudflare-go"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
@@ -26,36 +25,4 @@ func tableCloudflareWorkerRoute(ctx context.Context) *plugin.Table {
 			{Name: "zone_id", Type: proto.ColumnType_STRING, Transform: transform.FromField("Description.ZoneID"), Description: "Specifies the zone identifier."},
 		}),
 	}
-}
-
-func listWorkerRoutes(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	logger := plugin.Logger(ctx)
-	zoneDetails := h.Item.(cloudflare.Zone)
-
-	inputZoneId := d.EqualsQualString("zone_id")
-
-	// Only list routes for zones stated in the input query
-	if inputZoneId != "" && inputZoneId != zoneDetails.ID {
-		return nil, nil
-	}
-
-	conn, err := connect(ctx, d)
-	if err != nil {
-		logger.Error("listWorkerRoutes", "connect error", err)
-		return nil, err
-	}
-
-	resp, err := conn.ListWorkerRoutes(ctx, zoneDetails.ID)
-	if err != nil {
-		logger.Error("listWorkerRoutes", "api call error", err)
-		return nil, err
-	}
-	for _, resource := range resp.Routes {
-		d.StreamListItem(ctx, resource)
-	}
-	return nil, nil
-}
-
-func getParentZoneDetails(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	return h.ParentItem.(cloudflare.Zone), nil
 }

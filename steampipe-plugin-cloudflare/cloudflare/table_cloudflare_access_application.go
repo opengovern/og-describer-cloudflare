@@ -2,11 +2,6 @@ package cloudflare
 
 import (
 	"context"
-	"errors"
-	"fmt"
-	"github.com/cloudflare/cloudflare-go"
-
-	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
@@ -45,87 +40,4 @@ func tableCloudflareAccessApplication(ctx context.Context) *plugin.Table {
 			{Name: "cors_headers", Type: proto.ColumnType_JSON, Transform: transform.FromField("Description.CORSHeaders"), Description: "CORS configuration for the access application. See below for reference structure."},
 		}),
 	}
-}
-
-func listAccessApplications(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	logger := plugin.Logger(ctx)
-	account := h.Item.(cloudflare.Account)
-
-	if accountID := d.EqualsQualString("account_id"); accountID != "" && account.ID != accountID {
-		return nil, nil
-	}
-
-	if accountName := d.EqualsQualString("account_name"); accountName != "" && account.Name != accountName {
-		return nil, nil
-	}
-
-	conn, err := connect(ctx, d)
-	if err != nil {
-		logger.Error("listAccessApplications", "connection error", err)
-		return nil, err
-	}
-
-	opts := cloudflare.PaginationOptions{
-		PerPage: 100,
-		Page:    1,
-	}
-
-	type ListPageResponse struct {
-		Applications []cloudflare.AccessApplication
-		resp         cloudflare.ResultInfo
-	}
-
-	limit := d.QueryContext.Limit
-	if limit != nil {
-		if *limit < int64(opts.PerPage) {
-			opts.PerPage = int(*limit)
-		}
-	}
-
-	listPage := func(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-		applications, resp, err := conn.AccessApplications(ctx, account.ID, opts)
-		return ListPageResponse{
-			Applications: applications,
-			resp:         resp,
-		}, err
-	}
-
-	for {
-		listPageResponse, err := plugin.RetryHydrate(ctx, d, h, listPage, &plugin.RetryConfig{ShouldRetryError: shouldRetryError})
-		if err != nil {
-			var cloudFlareErr *cloudflare.APIRequestError
-			if errors.As(err, &cloudFlareErr) {
-				if helpers.StringSliceContains(cloudFlareErr.ErrorMessages(), "Access is not enabled. Visit the Access dashboard at https://dash.cloudflare.com/ and click the 'Enable Access' button.") {
-					logger.Warn("listAccessApplications", fmt.Sprintf("AccessApplications api error for account: %s", account.ID), err)
-					return nil, nil
-				}
-			}
-			logger.Error("listAccessApplications", "AccessApplications api error", err)
-			return nil, err
-		}
-
-		listResponse := listPageResponse.(ListPageResponse)
-		apps := listResponse.Applications
-		resp := listResponse.resp
-		for _, i := range apps {
-			d.StreamListItem(ctx, i)
-		}
-
-		// Context can be cancelled due to manual cancellation or the limit has been hit
-		if d.RowsRemaining(ctx) == 0 {
-			return nil, nil
-		}
-
-		if resp.Page >= resp.TotalPages {
-			break
-		}
-		opts.Page = opts.Page + 1
-	}
-
-	return nil, nil
-}
-
-func getAccountDetails(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	account := h.ParentItem.(cloudflare.Account)
-	return account, nil
 }

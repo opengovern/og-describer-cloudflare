@@ -28,9 +28,8 @@ func tableCloudflareAccountRole(ctx context.Context) *plugin.Table {
 			Hydrate: opengovernance.ListAccountRole,
 		},
 		Get: &plugin.GetConfig{
-			Hydrate:           opengovernance.GetAccountRole,
-			KeyColumns:        plugin.AllColumns([]string{"account_id", "id"}),
-			ShouldIgnoreError: isNotFoundError([]string{"HTTP status 403"}),
+			Hydrate:    opengovernance.GetAccountRole,
+			KeyColumns: plugin.AllColumns([]string{"account_id", "id"}),
 		},
 		Columns: commonColumns([]*plugin.Column{
 			// Top columns
@@ -74,58 +73,4 @@ func tableCloudflareAccountRole(ctx context.Context) *plugin.Table {
 			},
 		}),
 	}
-}
-
-//// LIST FUNCTIONS
-
-func listRoles(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	account := h.Item.(cloudflare.Account)
-	if accountID := d.EqualsQualString("account_id"); accountID != "" && account.ID != accountID {
-		return nil, nil
-	}
-
-	conn, err := connect(ctx, d)
-	if err != nil {
-		return nil, err
-	}
-
-	resp, err := conn.AccountRoles(ctx, account.ID)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, role := range resp {
-		d.StreamLeafListItem(ctx, accountRoleInfo{
-			ID:          role.ID,
-			Name:        role.Name,
-			Description: role.Description,
-			Permissions: role.Permissions,
-			AccountID:   account.ID,
-		})
-	}
-	return nil, nil
-}
-
-//// HYDRATE FUNCTIONS
-
-func getAccountRole(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	conn, err := connect(ctx, d)
-	if err != nil {
-		return nil, err
-	}
-
-	accountID := d.EqualsQuals["account_id"].GetStringValue()
-	id := d.EqualsQuals["id"].GetStringValue()
-
-	data, err := conn.AccountRole(ctx, accountID, id)
-	if err != nil {
-		return nil, err
-	}
-	return accountRoleInfo{
-		ID:          data.ID,
-		Name:        data.Name,
-		Description: data.Description,
-		Permissions: data.Permissions,
-		AccountID:   accountID,
-	}, nil
 }

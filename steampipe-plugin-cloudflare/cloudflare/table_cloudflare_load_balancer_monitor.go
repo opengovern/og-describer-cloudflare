@@ -40,23 +40,3 @@ func tableCloudflareLoadBalancerMonitor(ctx context.Context) *plugin.Table {
 		}),
 	}
 }
-
-func listLoadBalancerMonitors(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	logger := plugin.Logger(ctx)
-
-	conn, err := connect(ctx, d)
-	if err != nil {
-		logger.Error("listLoadBalancers", "connection_error", err)
-		return nil, err
-	}
-	// Paging not supported by rest api
-	loadBalancersPools, err := conn.ListLoadBalancerMonitors(ctx)
-	if err != nil {
-		logger.Error("ListLoadBalancers", "api error", err)
-		return nil, err
-	}
-	for _, resource := range loadBalancersPools {
-		d.StreamListItem(ctx, resource)
-	}
-	return nil, nil
-}

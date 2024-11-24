@@ -36,5 +36,35 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"cloudflare_zone":                  tableCloudflareZone(ctx),
 		},
 	}
+	for key, table := range p.TableMap {
+		if table == nil {
+			continue
+		}
+		if table.Get != nil && table.Get.Hydrate == nil {
+			delete(p.TableMap, key)
+			continue
+		}
+		if table.List != nil && table.List.Hydrate == nil {
+			delete(p.TableMap, key)
+			continue
+		}
+
+		opengovernanceTable := false
+		for _, col := range table.Columns {
+			if col != nil && col.Name == "og_account_id" {
+				opengovernanceTable = true
+			}
+		}
+
+		if opengovernanceTable {
+			if table.Get != nil {
+				table.Get.KeyColumns = append(table.Get.KeyColumns, plugin.OptionalColumns([]string{"og_account_id", "og_resource_id"})...)
+			}
+
+			if table.List != nil {
+				table.List.KeyColumns = append(table.List.KeyColumns, plugin.OptionalColumns([]string{"og_account_id", "og_resource_id"})...)
+			}
+		}
+	}
 	return p
 }

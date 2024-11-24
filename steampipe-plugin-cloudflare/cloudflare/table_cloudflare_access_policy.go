@@ -2,12 +2,6 @@ package cloudflare
 
 import (
 	"context"
-	"errors"
-	"fmt"
-
-	"github.com/cloudflare/cloudflare-go"
-
-	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
@@ -22,7 +16,6 @@ func tableCloudflareAccessPolicy(ctx context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate: opengovernance.ListAccessPolicy,
 		},
-		GetMatrixItemFunc: BuildAccountmatrix,
 		Columns: commonColumns([]*plugin.Column{
 			// Top columns
 			{Name: "id", Type: proto.ColumnType_STRING, Transform: transform.FromField("Description.ID"), Description: "Access policy unique API identifier."},
@@ -46,107 +39,4 @@ func tableCloudflareAccessPolicy(ctx context.Context) *plugin.Table {
 			{Name: "require", Type: proto.ColumnType_JSON, Transform: transform.FromField("Description.Require"), Description: "The require policy works like a AND logical operator. The user must satisfy all of the rules in require."},
 		}),
 	}
-}
-
-func listAccessPolicies(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	logger := plugin.Logger(ctx)
-
-	accountID := d.EqualsQualString(matrixKeyAccount)
-	appID := h.Item.(cloudflare.AccessApplication).ID
-	inputAppID := d.EqualsQuals["application_id"].GetStringValue()
-
-	// Avoid getting access policies for other applications id
-	// "application_id" mentioned in where clause
-	if inputAppID != "" && appID != inputAppID {
-		return nil, nil
-	}
-
-	conn, err := connect(ctx, d)
-	if err != nil {
-		logger.Error("listAccessPolicies", "connection error", err)
-		return nil, err
-	}
-
-	opts := cloudflare.PaginationOptions{
-		PerPage: 100,
-		Page:    1,
-	}
-
-	for {
-		// items, result_info, err := conn.AccessPolicy(ctx, accountID, appID, opts)
-		items, result_info, err := conn.AccessPolicies(ctx, accountID, appID, opts)
-		if err != nil {
-			logger.Error("listAccessPolicies", "AccessPolicies api error", err)
-			return nil, err
-		}
-		for _, i := range items {
-			d.StreamListItem(ctx, i)
-		}
-
-		if result_info.Page >= result_info.TotalPages {
-			break
-		}
-		opts.Page = opts.Page + 1
-	}
-
-	return nil, nil
-}
-
-func listParentAccessApplications(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	logger := plugin.Logger(ctx)
-	accountID := d.EqualsQualString(matrixKeyAccount)
-
-	conn, err := connect(ctx, d)
-	if err != nil {
-		logger.Error("listParentAccessApplications", "connection error", err)
-		return nil, err
-	}
-
-	opts := cloudflare.PaginationOptions{
-		PerPage: 100,
-		Page:    1,
-	}
-
-	type ListPageResponse struct {
-		Applications []cloudflare.AccessApplication
-		resp         cloudflare.ResultInfo
-	}
-
-	listPage := func(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-		applications, resp, err := conn.AccessApplications(ctx, accountID, opts)
-		return ListPageResponse{
-			Applications: applications,
-			resp:         resp,
-		}, err
-	}
-
-	for {
-		listPageResponse, err := plugin.RetryHydrate(ctx, d, h, listPage, &plugin.RetryConfig{ShouldRetryError: shouldRetryError})
-		if err != nil {
-			var cloudFlareErr *cloudflare.APIRequestError
-			if errors.As(err, &cloudFlareErr) {
-				if helpers.StringSliceContains(cloudFlareErr.ErrorMessages(), "Access is not enabled. Visit the Access dashboard at https://dash.cloudflare.com/ and click the 'Enable Access' button.") {
-					logger.Warn("listParentAccessApplications", fmt.Sprintf("AccessApplications api error for account: %s", accountID), err)
-					return nil, nil
-				}
-			}
-			logger.Error("listParentAccessApplications", "AccessApplications api error", err)
-			return nil, err
-		}
-		listResponse := listPageResponse.(ListPageResponse)
-		for _, i := range listResponse.Applications {
-			d.StreamListItem(ctx, i)
-		}
-
-		if listResponse.resp.Page >= listResponse.resp.TotalPages {
-			break
-		}
-		opts.Page = opts.Page + 1
-	}
-
-	return nil, nil
-}
-
-func getParentApplicationDetails(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	return h.ParentItem.(cloudflare.AccessApplication), nil
 }

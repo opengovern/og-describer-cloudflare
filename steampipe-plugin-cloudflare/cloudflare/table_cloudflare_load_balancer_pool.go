@@ -39,23 +39,3 @@ func tableCloudflareLoadBalancerPool(ctx context.Context) *plugin.Table {
 		}),
 	}
 }
-
-func listLoadBalancerPools(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	logger := plugin.Logger(ctx)
-
-	conn, err := connect(ctx, d)
-	if err != nil {
-		logger.Error("listLoadBalancers", "connection_error", err)
-		return nil, err
-	}
-	// Rest api only supports monitor as an input.
-	loadBalancersPools, err := conn.ListLoadBalancerPools(ctx)
-	if err != nil {
-		logger.Error("ListLoadBalancers", "api error", err)
-		return nil, err
-	}
-	for _, resource := range loadBalancersPools {
-		d.StreamListItem(ctx, resource)
-	}
-	return nil, nil
-}
