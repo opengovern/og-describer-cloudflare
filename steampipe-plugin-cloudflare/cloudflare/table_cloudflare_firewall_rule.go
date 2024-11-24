@@ -36,6 +36,7 @@ func tableCloudflareFirewallRule(ctx context.Context) *plugin.Table {
 			Hydrate: opengovernance.ListFireWallRule,
 		},
 		Get: &plugin.GetConfig{
+			KeyColumns:        plugin.AllColumns([]string{"zone_id", "id"}),
 			ShouldIgnoreError: isNotFoundError([]string{"HTTP status 404"}),
 			Hydrate:           opengovernance.GetFireWallRule,
 		},

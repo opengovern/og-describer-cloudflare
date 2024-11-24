@@ -21,6 +21,7 @@ func tableCloudflareAccount(ctx context.Context) *plugin.Table {
 		},
 		Get: &plugin.GetConfig{
 			Hydrate:           opengovernance.GetAccount,
+			KeyColumns:        plugin.SingleColumn("id"),
 			ShouldIgnoreError: isNotFoundError([]string{"HTTP status 404"}),
 		},
 		Columns: commonColumns([]*plugin.Column{

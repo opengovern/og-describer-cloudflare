@@ -20,6 +20,7 @@ func tableCloudflareDNSRecord(ctx context.Context) *plugin.Table {
 			Hydrate: opengovernance.ListDNSRecord,
 		},
 		Get: &plugin.GetConfig{
+			KeyColumns:        plugin.AllColumns([]string{"zone_id", "id"}),
 			ShouldIgnoreError: isNotFoundError([]string{"HTTP status 404"}),
 			Hydrate:           opengovernance.GetDNSRecord,
 		},

@@ -33,6 +33,7 @@ func tableCloudflarePageRule(ctx context.Context) *plugin.Table {
 			Hydrate: opengovernance.ListPageRule,
 		},
 		Get: &plugin.GetConfig{
+			KeyColumns:        plugin.AllColumns([]string{"zone_id", "id"}),
 			ShouldIgnoreError: isNotFoundError([]string{"HTTP status 404"}),
 			Hydrate:           opengovernance.GetPageRule,
 		},
