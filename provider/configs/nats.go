@@ -1,6 +1,6 @@
 package configs
 
-import "github.com/opengovern/opengovernance/services/integration/integration-type/cloudflare-account/configs"
+import "github.com/opengovern/opencomply/services/integration/integration-type/cloudflare-account/configs"
 
 const (
 	StreamName           = configs.StreamName
