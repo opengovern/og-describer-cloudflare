@@ -11,25 +11,25 @@ import (
 func commonColumns(c []*plugin.Column) []*plugin.Column {
 	return append(c, []*plugin.Column{
 		{
-			Name:        "og_account_id",
+			Name:        "platform_account_id",
 			Type:        proto.ColumnType_STRING,
 			Description: "The Platform Account ID in which the resource is located.",
 			Transform:   transform.FromField("IntegrationID"),
 		},
 		{
-			Name:        "og_resource_id",
+			Name:        "platform_resource_id",
 			Type:        proto.ColumnType_STRING,
 			Description: "The unique ID of the resource in opengovernance.",
 			Transform:   transform.FromField("PlatformID"),
 		},
 		{
-			Name:        "og_metadata",
+			Name:        "platform_metadata",
 			Type:        proto.ColumnType_JSON,
 			Description: "The metadata of the resource",
 			Transform:   transform.FromField("Metadata").Transform(marshalJSON),
 		},
 		{
-			Name:        "og_description",
+			Name:        "platform_resource_description",
 			Type:        proto.ColumnType_JSON,
 			Description: "The full model description of the resource",
 			Transform:   transform.FromField("Description").Transform(marshalJSON),
