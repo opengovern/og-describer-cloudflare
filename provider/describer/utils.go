@@ -16,15 +16,17 @@ const (
 
 type CloudFlareAPIHandler struct {
 	Conn         *cloudflare.API
+	AccountID    string
 	RateLimiter  *rate.Limiter
 	Semaphore    chan struct{}
 	MaxRetries   int
 	RetryBackoff time.Duration
 }
 
-func NewCloudFlareAPIHandler(client *cloudflare.API, rateLimit rate.Limit, burst int, maxConcurrency int, maxRetries int, retryBackoff time.Duration) *CloudFlareAPIHandler {
+func NewCloudFlareAPIHandler(client *cloudflare.API, accountID string, rateLimit rate.Limit, burst int, maxConcurrency int, maxRetries int, retryBackoff time.Duration) *CloudFlareAPIHandler {
 	return &CloudFlareAPIHandler{
 		Conn:         client,
+		AccountID:    accountID,
 		RateLimiter:  rate.NewLimiter(rateLimit, burst),
 		Semaphore:    make(chan struct{}, maxConcurrency),
 		MaxRetries:   maxRetries,
@@ -33,15 +35,11 @@ func NewCloudFlareAPIHandler(client *cloudflare.API, rateLimit rate.Limit, burst
 }
 
 func getAccount(ctx context.Context, handler *CloudFlareAPIHandler) (*cloudflare.Account, error) {
-	var accounts []cloudflare.Account
+	var account cloudflare.Account
 	var statusCode *int
 	requestFunc := func() (*int, error) {
 		var e error
-		pageOpts := cloudflare.PaginationOptions{
-			PerPage: perPage,
-			Page:    page,
-		}
-		accounts, _, e = handler.Conn.Accounts(ctx, pageOpts)
+		account, _, e = handler.Conn.Account(ctx, handler.AccountID)
 		if e != nil {
 			var httpErr *cloudflare.APIRequestError
 			if errors.As(e, &httpErr) {
@@ -54,7 +52,7 @@ func getAccount(ctx context.Context, handler *CloudFlareAPIHandler) (*cloudflare
 	if err != nil {
 		return nil, err
 	}
-	return &accounts[0], nil
+	return &account, nil
 }
 
 func getApplications(ctx context.Context, handler *CloudFlareAPIHandler, accountID string) ([]cloudflare.AccessApplication, error) {

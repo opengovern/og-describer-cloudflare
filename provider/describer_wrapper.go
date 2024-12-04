@@ -27,7 +27,7 @@ func DescribeListByCloudFlare(describe func(context.Context, *describer.CloudFla
 			}
 		}
 
-		cloudflareAPIHandler := describer.NewCloudFlareAPIHandler(conn, rate.Every(time.Second/4), 1, 10, 5, 5*time.Minute)
+		cloudflareAPIHandler := describer.NewCloudFlareAPIHandler(conn, cfg.AccountID, rate.Every(time.Second/4), 1, 10, 5, 5*time.Minute)
 
 		// Get values from describer
 		var values []model.Resource
@@ -56,7 +56,7 @@ func DescribeSingleByCloudFlare(describe func(context.Context, *describer.CloudF
 			}
 		}
 
-		cloudflareAPIHandler := describer.NewCloudFlareAPIHandler(conn, rate.Every(time.Second/4), 1, 10, 5, 5*time.Minute)
+		cloudflareAPIHandler := describer.NewCloudFlareAPIHandler(conn, cfg.AccountID, rate.Every(time.Second/4), 1, 10, 5, 5*time.Minute)
 
 		// Get value from describer
 		value, err := describe(ctx, cloudflareAPIHandler, resourceID)
