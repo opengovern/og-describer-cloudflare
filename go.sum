@@ -708,6 +708,8 @@ github.com/olekukonko/tablewriter v0.0.5 h1:P2Ga83D34wi1o9J6Wh1mRuqd4mF/x/lgBS7N
 github.com/olekukonko/tablewriter v0.0.5/go.mod h1:hPp6KlRPjbx+hW8ykQs1w3UBbZlj6HuIJcUGPhkA7kY=
 github.com/opengovern/og-util v1.1.8 h1:Ij/sG074H6KtmkPuaNj1XjiwZvTp3DplFA/MLUzHBK4=
 github.com/opengovern/og-util v1.1.8/go.mod h1:dyn8rhmxq59o1jnbgGfmcUvW7iB/eN6OxoTUUx6jEHA=
+github.com/opengovern/og-util v1.1.9 h1:Pswy4yOEcUS9FZW/3ThTBNNtRdyhhGdW9oj/GJ5WpwY=
+github.com/opengovern/og-util v1.1.9/go.mod h1:dyn8rhmxq59o1jnbgGfmcUvW7iB/eN6OxoTUUx6jEHA=
 github.com/opengovern/opencomply v0.475.2 h1:JHs12+mhJb9HzFZYMLLgw079PRa+qLKntugvwWiCVL0=
 github.com/opengovern/opencomply v0.475.2/go.mod h1:FsJTfdLz+DDRAzW2/KyCFRxVxM89jMysP7ZfQjaS8+A=
 github.com/opensearch-project/opensearch-go/v2 v2.3.0 h1:nQIEMr+A92CkhHrZgUhcfsrZjibvB3APXf2a1VwCmMQ=

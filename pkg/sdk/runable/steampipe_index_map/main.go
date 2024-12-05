@@ -36,12 +36,12 @@ func main() {
 	var resourceTypes []ResourceType
 
 	if resourceTypesFile == nil || len(*resourceTypesFile) == 0 {
-		rt := "C:\\Users\\ASUS\\GolandProjects\\og-describer-cloudflare\\provider\\resource_types\\resource-types.json"
+		rt := "../../../../provider/resource_types/resource-types.json"
 		resourceTypesFile = &rt
 	}
 
 	if indexMap == nil || len(*indexMap) == 0 {
-		v := "C:\\Users\\ASUS\\GolandProjects\\og-describer-cloudflare\\steampipe\\table_index_map.go"
+		v := "../../../../steampipe/table_index_map.go"
 		indexMap = &v
 	}
 

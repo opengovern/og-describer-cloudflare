@@ -95,8 +95,21 @@ func (p AccessApplicationPaginator) NextPage(ctx context.Context) ([]AccessAppli
 }
 
 var listAccessApplicationFilters = map[string]string{
-	"account_id":   "ID",
-	"account_name": "Name",
+	"account_id":                "Description.AccountID",
+	"account_name":              "Description.AccountName",
+	"allowed_idps":              "Description.AllowedIDPs",
+	"aud":                       "Description.AUD",
+	"auto_redirect_to_identity": "Description.AutoRedirectToIdentity",
+	"cors_headers":              "Description.CORSHeaders",
+	"created_at":                "Description.CreatedAt",
+	"custom_deny_message":       "Description.CustomDenyMessage",
+	"custom_deny_url":           "Description.CustomDenyURL",
+	"domain":                    "Description.Domain",
+	"enable_binding_cookie":     "Description.EnableBindingCookie",
+	"id":                        "Description.ID",
+	"name":                      "Description.Name",
+	"session_duration":          "Description.SessionDuration",
+	"updated_at":                "Description.UpdatedAt",
 }
 
 func ListAccessApplication(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
@@ -117,9 +130,9 @@ func ListAccessApplication(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 		plugin.Logger(ctx).Error("ListAccessApplication NewSelfClientCached", "error", err)
 		return nil, err
 	}
-	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	integrationID, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyIntegrationID)
 	if err != nil {
-		plugin.Logger(ctx).Error("ListAccessApplication GetConfigTableValueOrNil for OpenGovernanceConfigKeyAccountID", "error", err)
+		plugin.Logger(ctx).Error("ListAccessApplication GetConfigTableValueOrNil for OpenGovernanceConfigKeyIntegrationID", "error", err)
 		return nil, err
 	}
 	encodedResourceCollectionFilters, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyResourceCollectionFilters)
@@ -133,7 +146,7 @@ func ListAccessApplication(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 		return nil, err
 	}
 
-	paginator, err := k.NewAccessApplicationPaginator(essdk.BuildFilter(ctx, d.QueryContext, listAccessApplicationFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), d.QueryContext.Limit)
+	paginator, err := k.NewAccessApplicationPaginator(essdk.BuildFilter(ctx, d.QueryContext, listAccessApplicationFilters, integrationID, encodedResourceCollectionFilters, clientType), d.QueryContext.Limit)
 	if err != nil {
 		plugin.Logger(ctx).Error("ListAccessApplication NewAccessApplicationPaginator", "error", err)
 		return nil, err
@@ -160,8 +173,21 @@ func ListAccessApplication(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 }
 
 var getAccessApplicationFilters = map[string]string{
-	"account_id":   "ID",
-	"account_name": "Name",
+	"account_id":                "Description.AccountID",
+	"account_name":              "Description.AccountName",
+	"allowed_idps":              "Description.AllowedIDPs",
+	"aud":                       "Description.AUD",
+	"auto_redirect_to_identity": "Description.AutoRedirectToIdentity",
+	"cors_headers":              "Description.CORSHeaders",
+	"created_at":                "Description.CreatedAt",
+	"custom_deny_message":       "Description.CustomDenyMessage",
+	"custom_deny_url":           "Description.CustomDenyURL",
+	"domain":                    "Description.Domain",
+	"enable_binding_cookie":     "Description.EnableBindingCookie",
+	"id":                        "Description.ID",
+	"name":                      "Description.Name",
+	"session_duration":          "Description.SessionDuration",
+	"updated_at":                "Description.UpdatedAt",
 }
 
 func GetAccessApplication(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
@@ -179,7 +205,7 @@ func GetAccessApplication(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 	if err != nil {
 		return nil, err
 	}
-	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	integrationID, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyIntegrationID)
 	if err != nil {
 		return nil, err
 	}
@@ -193,7 +219,7 @@ func GetAccessApplication(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 	}
 
 	limit := int64(1)
-	paginator, err := k.NewAccessApplicationPaginator(essdk.BuildFilter(ctx, d.QueryContext, getAccessApplicationFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), &limit)
+	paginator, err := k.NewAccessApplicationPaginator(essdk.BuildFilter(ctx, d.QueryContext, getAccessApplicationFilters, integrationID, encodedResourceCollectionFilters, clientType), &limit)
 	if err != nil {
 		return nil, err
 	}
@@ -300,8 +326,15 @@ func (p AccessGroupPaginator) NextPage(ctx context.Context) ([]AccessGroup, erro
 }
 
 var listAccessGroupFilters = map[string]string{
-	"account_id":   "ID",
-	"account_name": "Name",
+	"account_id":   "Description.AccountID",
+	"account_name": "Description.AccountName",
+	"created_at":   "Description.CreatedAt",
+	"exclude":      "Description.Exclude",
+	"id":           "Description.ID",
+	"include":      "Description.Include",
+	"name":         "Description.Name",
+	"require":      "Description.Require",
+	"updated_at":   "Description.UpdatedAt",
 }
 
 func ListAccessGroup(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
@@ -322,9 +355,9 @@ func ListAccessGroup(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 		plugin.Logger(ctx).Error("ListAccessGroup NewSelfClientCached", "error", err)
 		return nil, err
 	}
-	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	integrationID, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyIntegrationID)
 	if err != nil {
-		plugin.Logger(ctx).Error("ListAccessGroup GetConfigTableValueOrNil for OpenGovernanceConfigKeyAccountID", "error", err)
+		plugin.Logger(ctx).Error("ListAccessGroup GetConfigTableValueOrNil for OpenGovernanceConfigKeyIntegrationID", "error", err)
 		return nil, err
 	}
 	encodedResourceCollectionFilters, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyResourceCollectionFilters)
@@ -338,7 +371,7 @@ func ListAccessGroup(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 		return nil, err
 	}
 
-	paginator, err := k.NewAccessGroupPaginator(essdk.BuildFilter(ctx, d.QueryContext, listAccessGroupFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), d.QueryContext.Limit)
+	paginator, err := k.NewAccessGroupPaginator(essdk.BuildFilter(ctx, d.QueryContext, listAccessGroupFilters, integrationID, encodedResourceCollectionFilters, clientType), d.QueryContext.Limit)
 	if err != nil {
 		plugin.Logger(ctx).Error("ListAccessGroup NewAccessGroupPaginator", "error", err)
 		return nil, err
@@ -365,8 +398,15 @@ func ListAccessGroup(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 }
 
 var getAccessGroupFilters = map[string]string{
-	"account_id":   "ID",
-	"account_name": "Name",
+	"account_id":   "Description.AccountID",
+	"account_name": "Description.AccountName",
+	"created_at":   "Description.CreatedAt",
+	"exclude":      "Description.Exclude",
+	"id":           "Description.ID",
+	"include":      "Description.Include",
+	"name":         "Description.Name",
+	"require":      "Description.Require",
+	"updated_at":   "Description.UpdatedAt",
 }
 
 func GetAccessGroup(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
@@ -384,7 +424,7 @@ func GetAccessGroup(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 	if err != nil {
 		return nil, err
 	}
-	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	integrationID, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyIntegrationID)
 	if err != nil {
 		return nil, err
 	}
@@ -398,7 +438,7 @@ func GetAccessGroup(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 	}
 
 	limit := int64(1)
-	paginator, err := k.NewAccessGroupPaginator(essdk.BuildFilter(ctx, d.QueryContext, getAccessGroupFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), &limit)
+	paginator, err := k.NewAccessGroupPaginator(essdk.BuildFilter(ctx, d.QueryContext, getAccessGroupFilters, integrationID, encodedResourceCollectionFilters, clientType), &limit)
 	if err != nil {
 		return nil, err
 	}
@@ -505,8 +545,21 @@ func (p AccessPolicyPaginator) NextPage(ctx context.Context) ([]AccessPolicy, er
 }
 
 var listAccessPolicyFilters = map[string]string{
-	"application_id":   "ID",
-	"application_name": "Name",
+	"account_id":                     "Description.AccountID",
+	"application_id":                 "Description.ApplicationID",
+	"application_name":               "Description.ApplicationName",
+	"approval_groups":                "Description.ApprovalGroups",
+	"created_at":                     "Description.CreatedAt",
+	"decision":                       "Description.Decision",
+	"exclude":                        "Description.Exclude",
+	"id":                             "Description.ID",
+	"include":                        "Description.Include",
+	"name":                           "Description.Name",
+	"precedence":                     "Description.Precedence",
+	"purpose_justification_prompt":   "Description.PurposeJustificationPrompt",
+	"purpose_justification_required": "Description.PurposeJustificationRequired",
+	"require":                        "Description.Require",
+	"updated_at":                     "Description.UpdatedAt",
 }
 
 func ListAccessPolicy(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
@@ -527,9 +580,9 @@ func ListAccessPolicy(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 		plugin.Logger(ctx).Error("ListAccessPolicy NewSelfClientCached", "error", err)
 		return nil, err
 	}
-	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	integrationID, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyIntegrationID)
 	if err != nil {
-		plugin.Logger(ctx).Error("ListAccessPolicy GetConfigTableValueOrNil for OpenGovernanceConfigKeyAccountID", "error", err)
+		plugin.Logger(ctx).Error("ListAccessPolicy GetConfigTableValueOrNil for OpenGovernanceConfigKeyIntegrationID", "error", err)
 		return nil, err
 	}
 	encodedResourceCollectionFilters, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyResourceCollectionFilters)
@@ -543,7 +596,7 @@ func ListAccessPolicy(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 		return nil, err
 	}
 
-	paginator, err := k.NewAccessPolicyPaginator(essdk.BuildFilter(ctx, d.QueryContext, listAccessPolicyFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), d.QueryContext.Limit)
+	paginator, err := k.NewAccessPolicyPaginator(essdk.BuildFilter(ctx, d.QueryContext, listAccessPolicyFilters, integrationID, encodedResourceCollectionFilters, clientType), d.QueryContext.Limit)
 	if err != nil {
 		plugin.Logger(ctx).Error("ListAccessPolicy NewAccessPolicyPaginator", "error", err)
 		return nil, err
@@ -570,8 +623,21 @@ func ListAccessPolicy(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 }
 
 var getAccessPolicyFilters = map[string]string{
-	"application_id":   "ID",
-	"application_name": "Name",
+	"account_id":                     "Description.AccountID",
+	"application_id":                 "Description.ApplicationID",
+	"application_name":               "Description.ApplicationName",
+	"approval_groups":                "Description.ApprovalGroups",
+	"created_at":                     "Description.CreatedAt",
+	"decision":                       "Description.Decision",
+	"exclude":                        "Description.Exclude",
+	"id":                             "Description.ID",
+	"include":                        "Description.Include",
+	"name":                           "Description.Name",
+	"precedence":                     "Description.Precedence",
+	"purpose_justification_prompt":   "Description.PurposeJustificationPrompt",
+	"purpose_justification_required": "Description.PurposeJustificationRequired",
+	"require":                        "Description.Require",
+	"updated_at":                     "Description.UpdatedAt",
 }
 
 func GetAccessPolicy(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
@@ -589,7 +655,7 @@ func GetAccessPolicy(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 	if err != nil {
 		return nil, err
 	}
-	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	integrationID, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyIntegrationID)
 	if err != nil {
 		return nil, err
 	}
@@ -603,7 +669,7 @@ func GetAccessPolicy(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 	}
 
 	limit := int64(1)
-	paginator, err := k.NewAccessPolicyPaginator(essdk.BuildFilter(ctx, d.QueryContext, getAccessPolicyFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), &limit)
+	paginator, err := k.NewAccessPolicyPaginator(essdk.BuildFilter(ctx, d.QueryContext, getAccessPolicyFilters, integrationID, encodedResourceCollectionFilters, clientType), &limit)
 	if err != nil {
 		return nil, err
 	}
@@ -709,7 +775,12 @@ func (p AccountPaginator) NextPage(ctx context.Context) ([]Account, error) {
 	return values, nil
 }
 
-var listAccountFilters = map[string]string{}
+var listAccountFilters = map[string]string{
+	"id":       "Description.ID",
+	"name":     "Description.Name",
+	"settings": "Description.Settings",
+	"type":     "Description.Type",
+}
 
 func ListAccount(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("ListAccount")
@@ -729,9 +800,9 @@ func ListAccount(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 		plugin.Logger(ctx).Error("ListAccount NewSelfClientCached", "error", err)
 		return nil, err
 	}
-	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	integrationID, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyIntegrationID)
 	if err != nil {
-		plugin.Logger(ctx).Error("ListAccount GetConfigTableValueOrNil for OpenGovernanceConfigKeyAccountID", "error", err)
+		plugin.Logger(ctx).Error("ListAccount GetConfigTableValueOrNil for OpenGovernanceConfigKeyIntegrationID", "error", err)
 		return nil, err
 	}
 	encodedResourceCollectionFilters, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyResourceCollectionFilters)
@@ -745,7 +816,7 @@ func ListAccount(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 		return nil, err
 	}
 
-	paginator, err := k.NewAccountPaginator(essdk.BuildFilter(ctx, d.QueryContext, listAccountFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), d.QueryContext.Limit)
+	paginator, err := k.NewAccountPaginator(essdk.BuildFilter(ctx, d.QueryContext, listAccountFilters, integrationID, encodedResourceCollectionFilters, clientType), d.QueryContext.Limit)
 	if err != nil {
 		plugin.Logger(ctx).Error("ListAccount NewAccountPaginator", "error", err)
 		return nil, err
@@ -771,7 +842,12 @@ func ListAccount(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 	return nil, nil
 }
 
-var getAccountFilters = map[string]string{}
+var getAccountFilters = map[string]string{
+	"id":       "Description.ID",
+	"name":     "Description.Name",
+	"settings": "Description.Settings",
+	"type":     "Description.Type",
+}
 
 func GetAccount(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("GetAccount")
@@ -788,7 +864,7 @@ func GetAccount(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData)
 	if err != nil {
 		return nil, err
 	}
-	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	integrationID, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyIntegrationID)
 	if err != nil {
 		return nil, err
 	}
@@ -802,7 +878,7 @@ func GetAccount(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData)
 	}
 
 	limit := int64(1)
-	paginator, err := k.NewAccountPaginator(essdk.BuildFilter(ctx, d.QueryContext, getAccountFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), &limit)
+	paginator, err := k.NewAccountPaginator(essdk.BuildFilter(ctx, d.QueryContext, getAccountFilters, integrationID, encodedResourceCollectionFilters, clientType), &limit)
 	if err != nil {
 		return nil, err
 	}
@@ -909,8 +985,14 @@ func (p AccountMemberPaginator) NextPage(ctx context.Context) ([]AccountMember, 
 }
 
 var listAccountMemberFilters = map[string]string{
-	"account_id": "AccountID",
-	"user_email": "User.Email",
+	"account_id": "Description.AccountID",
+	"code":       "Description.Code",
+	"id":         "Description.ID",
+	"roles":      "Description.Roles",
+	"status":     "Description.Status",
+	"title":      "Description.Title",
+	"user":       "Description.User",
+	"user_email": "Description.UserEmail",
 }
 
 func ListAccountMember(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
@@ -931,9 +1013,9 @@ func ListAccountMember(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 		plugin.Logger(ctx).Error("ListAccountMember NewSelfClientCached", "error", err)
 		return nil, err
 	}
-	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	integrationID, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyIntegrationID)
 	if err != nil {
-		plugin.Logger(ctx).Error("ListAccountMember GetConfigTableValueOrNil for OpenGovernanceConfigKeyAccountID", "error", err)
+		plugin.Logger(ctx).Error("ListAccountMember GetConfigTableValueOrNil for OpenGovernanceConfigKeyIntegrationID", "error", err)
 		return nil, err
 	}
 	encodedResourceCollectionFilters, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyResourceCollectionFilters)
@@ -947,7 +1029,7 @@ func ListAccountMember(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 		return nil, err
 	}
 
-	paginator, err := k.NewAccountMemberPaginator(essdk.BuildFilter(ctx, d.QueryContext, listAccountMemberFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), d.QueryContext.Limit)
+	paginator, err := k.NewAccountMemberPaginator(essdk.BuildFilter(ctx, d.QueryContext, listAccountMemberFilters, integrationID, encodedResourceCollectionFilters, clientType), d.QueryContext.Limit)
 	if err != nil {
 		plugin.Logger(ctx).Error("ListAccountMember NewAccountMemberPaginator", "error", err)
 		return nil, err
@@ -974,8 +1056,14 @@ func ListAccountMember(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 }
 
 var getAccountMemberFilters = map[string]string{
-	"account_id": "AccountID",
-	"user_email": "User.Email",
+	"account_id": "Description.AccountID",
+	"code":       "Description.Code",
+	"id":         "Description.ID",
+	"roles":      "Description.Roles",
+	"status":     "Description.Status",
+	"title":      "Description.Title",
+	"user":       "Description.User",
+	"user_email": "Description.UserEmail",
 }
 
 func GetAccountMember(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
@@ -993,7 +1081,7 @@ func GetAccountMember(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 	if err != nil {
 		return nil, err
 	}
-	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	integrationID, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyIntegrationID)
 	if err != nil {
 		return nil, err
 	}
@@ -1007,7 +1095,7 @@ func GetAccountMember(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 	}
 
 	limit := int64(1)
-	paginator, err := k.NewAccountMemberPaginator(essdk.BuildFilter(ctx, d.QueryContext, getAccountMemberFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), &limit)
+	paginator, err := k.NewAccountMemberPaginator(essdk.BuildFilter(ctx, d.QueryContext, getAccountMemberFilters, integrationID, encodedResourceCollectionFilters, clientType), &limit)
 	if err != nil {
 		return nil, err
 	}
@@ -1114,9 +1202,12 @@ func (p AccountRolePaginator) NextPage(ctx context.Context) ([]AccountRole, erro
 }
 
 var listAccountRoleFilters = map[string]string{
-	"account_id": "AccountID",
-	"id":         "ID",
-	"title":      "Name",
+	"account_id":  "Description.AccountID",
+	"description": "Description.Description",
+	"id":          "Description.ID",
+	"name":        "Description.Name",
+	"permissions": "Description.Permissions",
+	"title":       "Description.Title",
 }
 
 func ListAccountRole(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
@@ -1137,9 +1228,9 @@ func ListAccountRole(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 		plugin.Logger(ctx).Error("ListAccountRole NewSelfClientCached", "error", err)
 		return nil, err
 	}
-	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	integrationID, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyIntegrationID)
 	if err != nil {
-		plugin.Logger(ctx).Error("ListAccountRole GetConfigTableValueOrNil for OpenGovernanceConfigKeyAccountID", "error", err)
+		plugin.Logger(ctx).Error("ListAccountRole GetConfigTableValueOrNil for OpenGovernanceConfigKeyIntegrationID", "error", err)
 		return nil, err
 	}
 	encodedResourceCollectionFilters, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyResourceCollectionFilters)
@@ -1153,7 +1244,7 @@ func ListAccountRole(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 		return nil, err
 	}
 
-	paginator, err := k.NewAccountRolePaginator(essdk.BuildFilter(ctx, d.QueryContext, listAccountRoleFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), d.QueryContext.Limit)
+	paginator, err := k.NewAccountRolePaginator(essdk.BuildFilter(ctx, d.QueryContext, listAccountRoleFilters, integrationID, encodedResourceCollectionFilters, clientType), d.QueryContext.Limit)
 	if err != nil {
 		plugin.Logger(ctx).Error("ListAccountRole NewAccountRolePaginator", "error", err)
 		return nil, err
@@ -1180,9 +1271,12 @@ func ListAccountRole(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 }
 
 var getAccountRoleFilters = map[string]string{
-	"account_id": "AccountID",
-	"id":         "ID",
-	"title":      "Name",
+	"account_id":  "Description.AccountID",
+	"description": "Description.Description",
+	"id":          "Description.ID",
+	"name":        "Description.Name",
+	"permissions": "Description.Permissions",
+	"title":       "Description.Title",
 }
 
 func GetAccountRole(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
@@ -1200,7 +1294,7 @@ func GetAccountRole(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 	if err != nil {
 		return nil, err
 	}
-	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	integrationID, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyIntegrationID)
 	if err != nil {
 		return nil, err
 	}
@@ -1214,7 +1308,7 @@ func GetAccountRole(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 	}
 
 	limit := int64(1)
-	paginator, err := k.NewAccountRolePaginator(essdk.BuildFilter(ctx, d.QueryContext, getAccountRoleFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), &limit)
+	paginator, err := k.NewAccountRolePaginator(essdk.BuildFilter(ctx, d.QueryContext, getAccountRoleFilters, integrationID, encodedResourceCollectionFilters, clientType), &limit)
 	if err != nil {
 		return nil, err
 	}
@@ -1320,7 +1414,17 @@ func (p ApiTokenPaginator) NextPage(ctx context.Context) ([]ApiToken, error) {
 	return values, nil
 }
 
-var listApiTokenFilters = map[string]string{}
+var listApiTokenFilters = map[string]string{
+	"condition":   "Description.Condition",
+	"expires_on":  "Description.ExpiresOn",
+	"id":          "Description.ID",
+	"issued_on":   "Description.IssuedOn",
+	"modified_on": "Description.ModifiedOn",
+	"name":        "Description.Name",
+	"not_before":  "Description.NotBefore",
+	"policies":    "Description.Policies",
+	"status":      "Description.Status",
+}
 
 func ListApiToken(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("ListApiToken")
@@ -1340,9 +1444,9 @@ func ListApiToken(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 		plugin.Logger(ctx).Error("ListApiToken NewSelfClientCached", "error", err)
 		return nil, err
 	}
-	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	integrationID, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyIntegrationID)
 	if err != nil {
-		plugin.Logger(ctx).Error("ListApiToken GetConfigTableValueOrNil for OpenGovernanceConfigKeyAccountID", "error", err)
+		plugin.Logger(ctx).Error("ListApiToken GetConfigTableValueOrNil for OpenGovernanceConfigKeyIntegrationID", "error", err)
 		return nil, err
 	}
 	encodedResourceCollectionFilters, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyResourceCollectionFilters)
@@ -1356,7 +1460,7 @@ func ListApiToken(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 		return nil, err
 	}
 
-	paginator, err := k.NewApiTokenPaginator(essdk.BuildFilter(ctx, d.QueryContext, listApiTokenFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), d.QueryContext.Limit)
+	paginator, err := k.NewApiTokenPaginator(essdk.BuildFilter(ctx, d.QueryContext, listApiTokenFilters, integrationID, encodedResourceCollectionFilters, clientType), d.QueryContext.Limit)
 	if err != nil {
 		plugin.Logger(ctx).Error("ListApiToken NewApiTokenPaginator", "error", err)
 		return nil, err
@@ -1382,7 +1486,17 @@ func ListApiToken(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	return nil, nil
 }
 
-var getApiTokenFilters = map[string]string{}
+var getApiTokenFilters = map[string]string{
+	"condition":   "Description.Condition",
+	"expires_on":  "Description.ExpiresOn",
+	"id":          "Description.ID",
+	"issued_on":   "Description.IssuedOn",
+	"modified_on": "Description.ModifiedOn",
+	"name":        "Description.Name",
+	"not_before":  "Description.NotBefore",
+	"policies":    "Description.Policies",
+	"status":      "Description.Status",
+}
 
 func GetApiToken(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("GetApiToken")
@@ -1399,7 +1513,7 @@ func GetApiToken(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 	if err != nil {
 		return nil, err
 	}
-	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	integrationID, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyIntegrationID)
 	if err != nil {
 		return nil, err
 	}
@@ -1413,7 +1527,7 @@ func GetApiToken(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 	}
 
 	limit := int64(1)
-	paginator, err := k.NewApiTokenPaginator(essdk.BuildFilter(ctx, d.QueryContext, getApiTokenFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), &limit)
+	paginator, err := k.NewApiTokenPaginator(essdk.BuildFilter(ctx, d.QueryContext, getApiTokenFilters, integrationID, encodedResourceCollectionFilters, clientType), &limit)
 	if err != nil {
 		return nil, err
 	}
@@ -1519,7 +1633,23 @@ func (p DNSRecordPaginator) NextPage(ctx context.Context) ([]DNSRecord, error) {
 	return values, nil
 }
 
-var listDNSRecordFilters = map[string]string{}
+var listDNSRecordFilters = map[string]string{
+	"content":     "Description.Content",
+	"created_on":  "Description.CreatedOn",
+	"data":        "Description.Data",
+	"id":          "Description.ID",
+	"locked":      "Description.Locked",
+	"meta":        "Description.Meta",
+	"modified_on": "Description.ModifiedOn",
+	"name":        "Description.Name",
+	"priority":    "Description.Priority",
+	"proxiable":   "Description.Proxiable",
+	"proxied":     "Description.Proxied",
+	"ttl":         "Description.TTL",
+	"type":        "Description.Type",
+	"zone_id":     "Description.ZoneID",
+	"zone_name":   "Description.ZoneName",
+}
 
 func ListDNSRecord(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("ListDNSRecord")
@@ -1539,9 +1669,9 @@ func ListDNSRecord(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 		plugin.Logger(ctx).Error("ListDNSRecord NewSelfClientCached", "error", err)
 		return nil, err
 	}
-	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	integrationID, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyIntegrationID)
 	if err != nil {
-		plugin.Logger(ctx).Error("ListDNSRecord GetConfigTableValueOrNil for OpenGovernanceConfigKeyAccountID", "error", err)
+		plugin.Logger(ctx).Error("ListDNSRecord GetConfigTableValueOrNil for OpenGovernanceConfigKeyIntegrationID", "error", err)
 		return nil, err
 	}
 	encodedResourceCollectionFilters, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyResourceCollectionFilters)
@@ -1555,7 +1685,7 @@ func ListDNSRecord(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 		return nil, err
 	}
 
-	paginator, err := k.NewDNSRecordPaginator(essdk.BuildFilter(ctx, d.QueryContext, listDNSRecordFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), d.QueryContext.Limit)
+	paginator, err := k.NewDNSRecordPaginator(essdk.BuildFilter(ctx, d.QueryContext, listDNSRecordFilters, integrationID, encodedResourceCollectionFilters, clientType), d.QueryContext.Limit)
 	if err != nil {
 		plugin.Logger(ctx).Error("ListDNSRecord NewDNSRecordPaginator", "error", err)
 		return nil, err
@@ -1581,7 +1711,23 @@ func ListDNSRecord(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 	return nil, nil
 }
 
-var getDNSRecordFilters = map[string]string{}
+var getDNSRecordFilters = map[string]string{
+	"content":     "Description.Content",
+	"created_on":  "Description.CreatedOn",
+	"data":        "Description.Data",
+	"id":          "Description.ID",
+	"locked":      "Description.Locked",
+	"meta":        "Description.Meta",
+	"modified_on": "Description.ModifiedOn",
+	"name":        "Description.Name",
+	"priority":    "Description.Priority",
+	"proxiable":   "Description.Proxiable",
+	"proxied":     "Description.Proxied",
+	"ttl":         "Description.TTL",
+	"type":        "Description.Type",
+	"zone_id":     "Description.ZoneID",
+	"zone_name":   "Description.ZoneName",
+}
 
 func GetDNSRecord(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("GetDNSRecord")
@@ -1598,7 +1744,7 @@ func GetDNSRecord(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	if err != nil {
 		return nil, err
 	}
-	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	integrationID, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyIntegrationID)
 	if err != nil {
 		return nil, err
 	}
@@ -1612,7 +1758,7 @@ func GetDNSRecord(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	}
 
 	limit := int64(1)
-	paginator, err := k.NewDNSRecordPaginator(essdk.BuildFilter(ctx, d.QueryContext, getDNSRecordFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), &limit)
+	paginator, err := k.NewDNSRecordPaginator(essdk.BuildFilter(ctx, d.QueryContext, getDNSRecordFilters, integrationID, encodedResourceCollectionFilters, clientType), &limit)
 	if err != nil {
 		return nil, err
 	}
@@ -1719,9 +1865,17 @@ func (p FireWallRulePaginator) NextPage(ctx context.Context) ([]FireWallRule, er
 }
 
 var listFireWallRuleFilters = map[string]string{
-	"id":      "ID",
-	"title":   "ID",
-	"zone_id": "ZoneID",
+	"action":      "Description.Action",
+	"created_on":  "Description.CreatedOn",
+	"description": "Description.Description",
+	"filter":      "Description.Filter",
+	"id":          "Description.ID",
+	"modified_on": "Description.ModifiedOn",
+	"paused":      "Description.Paused",
+	"priority":    "Description.Priority",
+	"products":    "Description.Products",
+	"title":       "Description.Title",
+	"zone_id":     "Description.ZoneID",
 }
 
 func ListFireWallRule(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
@@ -1742,9 +1896,9 @@ func ListFireWallRule(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 		plugin.Logger(ctx).Error("ListFireWallRule NewSelfClientCached", "error", err)
 		return nil, err
 	}
-	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	integrationID, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyIntegrationID)
 	if err != nil {
-		plugin.Logger(ctx).Error("ListFireWallRule GetConfigTableValueOrNil for OpenGovernanceConfigKeyAccountID", "error", err)
+		plugin.Logger(ctx).Error("ListFireWallRule GetConfigTableValueOrNil for OpenGovernanceConfigKeyIntegrationID", "error", err)
 		return nil, err
 	}
 	encodedResourceCollectionFilters, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyResourceCollectionFilters)
@@ -1758,7 +1912,7 @@ func ListFireWallRule(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 		return nil, err
 	}
 
-	paginator, err := k.NewFireWallRulePaginator(essdk.BuildFilter(ctx, d.QueryContext, listFireWallRuleFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), d.QueryContext.Limit)
+	paginator, err := k.NewFireWallRulePaginator(essdk.BuildFilter(ctx, d.QueryContext, listFireWallRuleFilters, integrationID, encodedResourceCollectionFilters, clientType), d.QueryContext.Limit)
 	if err != nil {
 		plugin.Logger(ctx).Error("ListFireWallRule NewFireWallRulePaginator", "error", err)
 		return nil, err
@@ -1785,9 +1939,17 @@ func ListFireWallRule(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 }
 
 var getFireWallRuleFilters = map[string]string{
-	"id":      "ID",
-	"title":   "ID",
-	"zone_id": "ZoneID",
+	"action":      "Description.Action",
+	"created_on":  "Description.CreatedOn",
+	"description": "Description.Description",
+	"filter":      "Description.Filter",
+	"id":          "Description.ID",
+	"modified_on": "Description.ModifiedOn",
+	"paused":      "Description.Paused",
+	"priority":    "Description.Priority",
+	"products":    "Description.Products",
+	"title":       "Description.Title",
+	"zone_id":     "Description.ZoneID",
 }
 
 func GetFireWallRule(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
@@ -1805,7 +1967,7 @@ func GetFireWallRule(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 	if err != nil {
 		return nil, err
 	}
-	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	integrationID, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyIntegrationID)
 	if err != nil {
 		return nil, err
 	}
@@ -1819,7 +1981,7 @@ func GetFireWallRule(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 	}
 
 	limit := int64(1)
-	paginator, err := k.NewFireWallRulePaginator(essdk.BuildFilter(ctx, d.QueryContext, getFireWallRuleFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), &limit)
+	paginator, err := k.NewFireWallRulePaginator(essdk.BuildFilter(ctx, d.QueryContext, getFireWallRuleFilters, integrationID, encodedResourceCollectionFilters, clientType), &limit)
 	if err != nil {
 		return nil, err
 	}
@@ -1926,8 +2088,24 @@ func (p LoadBalancerPaginator) NextPage(ctx context.Context) ([]LoadBalancer, er
 }
 
 var listLoadBalancerFilters = map[string]string{
-	"zone_id":   "ID",
-	"zone_name": "Name",
+	"created_on":                  "Description.CreatedOn",
+	"default_pools":               "Description.DefaultPools",
+	"description":                 "Description.Description",
+	"enabled":                     "Description.Enabled",
+	"fallback_pool":               "Description.FallbackPool",
+	"id":                          "Description.ID",
+	"modified_on":                 "Description.ModifiedOn",
+	"name":                        "Description.Name",
+	"pop_pools":                   "Description.PopPools",
+	"proxied":                     "Description.Proxied",
+	"region_pools":                "Description.RegionPools",
+	"session_affinity":            "Description.SessionAffinity",
+	"session_affinity_attributes": "Description.SessionAffinityAttributes",
+	"session_affinity_ttl":        "Description.SessionAffinityTTL",
+	"steering_policy":             "Description.SteeringPolicy",
+	"ttl":                         "Description.TTL",
+	"zone_id":                     "Description.ZoneID",
+	"zone_name":                   "Description.ZoneName",
 }
 
 func ListLoadBalancer(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
@@ -1948,9 +2126,9 @@ func ListLoadBalancer(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 		plugin.Logger(ctx).Error("ListLoadBalancer NewSelfClientCached", "error", err)
 		return nil, err
 	}
-	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	integrationID, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyIntegrationID)
 	if err != nil {
-		plugin.Logger(ctx).Error("ListLoadBalancer GetConfigTableValueOrNil for OpenGovernanceConfigKeyAccountID", "error", err)
+		plugin.Logger(ctx).Error("ListLoadBalancer GetConfigTableValueOrNil for OpenGovernanceConfigKeyIntegrationID", "error", err)
 		return nil, err
 	}
 	encodedResourceCollectionFilters, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyResourceCollectionFilters)
@@ -1964,7 +2142,7 @@ func ListLoadBalancer(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 		return nil, err
 	}
 
-	paginator, err := k.NewLoadBalancerPaginator(essdk.BuildFilter(ctx, d.QueryContext, listLoadBalancerFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), d.QueryContext.Limit)
+	paginator, err := k.NewLoadBalancerPaginator(essdk.BuildFilter(ctx, d.QueryContext, listLoadBalancerFilters, integrationID, encodedResourceCollectionFilters, clientType), d.QueryContext.Limit)
 	if err != nil {
 		plugin.Logger(ctx).Error("ListLoadBalancer NewLoadBalancerPaginator", "error", err)
 		return nil, err
@@ -1991,8 +2169,24 @@ func ListLoadBalancer(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 }
 
 var getLoadBalancerFilters = map[string]string{
-	"zone_id":   "ID",
-	"zone_name": "Name",
+	"created_on":                  "Description.CreatedOn",
+	"default_pools":               "Description.DefaultPools",
+	"description":                 "Description.Description",
+	"enabled":                     "Description.Enabled",
+	"fallback_pool":               "Description.FallbackPool",
+	"id":                          "Description.ID",
+	"modified_on":                 "Description.ModifiedOn",
+	"name":                        "Description.Name",
+	"pop_pools":                   "Description.PopPools",
+	"proxied":                     "Description.Proxied",
+	"region_pools":                "Description.RegionPools",
+	"session_affinity":            "Description.SessionAffinity",
+	"session_affinity_attributes": "Description.SessionAffinityAttributes",
+	"session_affinity_ttl":        "Description.SessionAffinityTTL",
+	"steering_policy":             "Description.SteeringPolicy",
+	"ttl":                         "Description.TTL",
+	"zone_id":                     "Description.ZoneID",
+	"zone_name":                   "Description.ZoneName",
 }
 
 func GetLoadBalancer(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
@@ -2010,7 +2204,7 @@ func GetLoadBalancer(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 	if err != nil {
 		return nil, err
 	}
-	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	integrationID, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyIntegrationID)
 	if err != nil {
 		return nil, err
 	}
@@ -2024,7 +2218,7 @@ func GetLoadBalancer(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 	}
 
 	limit := int64(1)
-	paginator, err := k.NewLoadBalancerPaginator(essdk.BuildFilter(ctx, d.QueryContext, getLoadBalancerFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), &limit)
+	paginator, err := k.NewLoadBalancerPaginator(essdk.BuildFilter(ctx, d.QueryContext, getLoadBalancerFilters, integrationID, encodedResourceCollectionFilters, clientType), &limit)
 	if err != nil {
 		return nil, err
 	}
@@ -2130,7 +2324,25 @@ func (p LoadBalancerMonitorPaginator) NextPage(ctx context.Context) ([]LoadBalan
 	return values, nil
 }
 
-var listLoadBalancerMonitorFilters = map[string]string{}
+var listLoadBalancerMonitorFilters = map[string]string{
+	"allow_insecure":   "Description.AllowInsecure",
+	"created_on":       "Description.CreatedOn",
+	"description":      "Description.Description",
+	"expected_body":    "Description.ExpectedBody",
+	"expected_codes":   "Description.ExpectedCodes",
+	"follow_redirects": "Description.FollowRedirects",
+	"header":           "Description.Header",
+	"id":               "Description.ID",
+	"interval":         "Description.Interval",
+	"method":           "Description.Method",
+	"modified_on":      "Description.ModifiedOn",
+	"path":             "Description.Path",
+	"port":             "Description.Port",
+	"probe_zone":       "Description.ProbeZone",
+	"retries":          "Description.Retries",
+	"timeout":          "Description.Timeout",
+	"type":             "Description.Type",
+}
 
 func ListLoadBalancerMonitor(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("ListLoadBalancerMonitor")
@@ -2150,9 +2362,9 @@ func ListLoadBalancerMonitor(ctx context.Context, d *plugin.QueryData, _ *plugin
 		plugin.Logger(ctx).Error("ListLoadBalancerMonitor NewSelfClientCached", "error", err)
 		return nil, err
 	}
-	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	integrationID, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyIntegrationID)
 	if err != nil {
-		plugin.Logger(ctx).Error("ListLoadBalancerMonitor GetConfigTableValueOrNil for OpenGovernanceConfigKeyAccountID", "error", err)
+		plugin.Logger(ctx).Error("ListLoadBalancerMonitor GetConfigTableValueOrNil for OpenGovernanceConfigKeyIntegrationID", "error", err)
 		return nil, err
 	}
 	encodedResourceCollectionFilters, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyResourceCollectionFilters)
@@ -2166,7 +2378,7 @@ func ListLoadBalancerMonitor(ctx context.Context, d *plugin.QueryData, _ *plugin
 		return nil, err
 	}
 
-	paginator, err := k.NewLoadBalancerMonitorPaginator(essdk.BuildFilter(ctx, d.QueryContext, listLoadBalancerMonitorFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), d.QueryContext.Limit)
+	paginator, err := k.NewLoadBalancerMonitorPaginator(essdk.BuildFilter(ctx, d.QueryContext, listLoadBalancerMonitorFilters, integrationID, encodedResourceCollectionFilters, clientType), d.QueryContext.Limit)
 	if err != nil {
 		plugin.Logger(ctx).Error("ListLoadBalancerMonitor NewLoadBalancerMonitorPaginator", "error", err)
 		return nil, err
@@ -2192,7 +2404,25 @@ func ListLoadBalancerMonitor(ctx context.Context, d *plugin.QueryData, _ *plugin
 	return nil, nil
 }
 
-var getLoadBalancerMonitorFilters = map[string]string{}
+var getLoadBalancerMonitorFilters = map[string]string{
+	"allow_insecure":   "Description.AllowInsecure",
+	"created_on":       "Description.CreatedOn",
+	"description":      "Description.Description",
+	"expected_body":    "Description.ExpectedBody",
+	"expected_codes":   "Description.ExpectedCodes",
+	"follow_redirects": "Description.FollowRedirects",
+	"header":           "Description.Header",
+	"id":               "Description.ID",
+	"interval":         "Description.Interval",
+	"method":           "Description.Method",
+	"modified_on":      "Description.ModifiedOn",
+	"path":             "Description.Path",
+	"port":             "Description.Port",
+	"probe_zone":       "Description.ProbeZone",
+	"retries":          "Description.Retries",
+	"timeout":          "Description.Timeout",
+	"type":             "Description.Type",
+}
 
 func GetLoadBalancerMonitor(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("GetLoadBalancerMonitor")
@@ -2209,7 +2439,7 @@ func GetLoadBalancerMonitor(ctx context.Context, d *plugin.QueryData, _ *plugin.
 	if err != nil {
 		return nil, err
 	}
-	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	integrationID, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyIntegrationID)
 	if err != nil {
 		return nil, err
 	}
@@ -2223,7 +2453,7 @@ func GetLoadBalancerMonitor(ctx context.Context, d *plugin.QueryData, _ *plugin.
 	}
 
 	limit := int64(1)
-	paginator, err := k.NewLoadBalancerMonitorPaginator(essdk.BuildFilter(ctx, d.QueryContext, getLoadBalancerMonitorFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), &limit)
+	paginator, err := k.NewLoadBalancerMonitorPaginator(essdk.BuildFilter(ctx, d.QueryContext, getLoadBalancerMonitorFilters, integrationID, encodedResourceCollectionFilters, clientType), &limit)
 	if err != nil {
 		return nil, err
 	}
@@ -2329,7 +2559,22 @@ func (p LoadBalancerPoolPaginator) NextPage(ctx context.Context) ([]LoadBalancer
 	return values, nil
 }
 
-var listLoadBalancerPoolFilters = map[string]string{}
+var listLoadBalancerPoolFilters = map[string]string{
+	"check_regions":      "Description.CheckRegions",
+	"created_on":         "Description.CreatedOn",
+	"description":        "Description.Description",
+	"enabled":            "Description.Enabled",
+	"id":                 "Description.ID",
+	"latitude":           "Description.Latitude",
+	"load_shedding":      "Description.LoadShedding",
+	"longitude":          "Description.Longitude",
+	"minimum_origins":    "Description.MinimumOrigins",
+	"modified_on":        "Description.ModifiedOn",
+	"monitor":            "Description.Monitor",
+	"name":               "Description.Name",
+	"notification_email": "Description.NotificationEmail",
+	"origins":            "Description.Origins",
+}
 
 func ListLoadBalancerPool(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("ListLoadBalancerPool")
@@ -2349,9 +2594,9 @@ func ListLoadBalancerPool(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 		plugin.Logger(ctx).Error("ListLoadBalancerPool NewSelfClientCached", "error", err)
 		return nil, err
 	}
-	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	integrationID, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyIntegrationID)
 	if err != nil {
-		plugin.Logger(ctx).Error("ListLoadBalancerPool GetConfigTableValueOrNil for OpenGovernanceConfigKeyAccountID", "error", err)
+		plugin.Logger(ctx).Error("ListLoadBalancerPool GetConfigTableValueOrNil for OpenGovernanceConfigKeyIntegrationID", "error", err)
 		return nil, err
 	}
 	encodedResourceCollectionFilters, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyResourceCollectionFilters)
@@ -2365,7 +2610,7 @@ func ListLoadBalancerPool(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 		return nil, err
 	}
 
-	paginator, err := k.NewLoadBalancerPoolPaginator(essdk.BuildFilter(ctx, d.QueryContext, listLoadBalancerPoolFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), d.QueryContext.Limit)
+	paginator, err := k.NewLoadBalancerPoolPaginator(essdk.BuildFilter(ctx, d.QueryContext, listLoadBalancerPoolFilters, integrationID, encodedResourceCollectionFilters, clientType), d.QueryContext.Limit)
 	if err != nil {
 		plugin.Logger(ctx).Error("ListLoadBalancerPool NewLoadBalancerPoolPaginator", "error", err)
 		return nil, err
@@ -2391,7 +2636,22 @@ func ListLoadBalancerPool(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 	return nil, nil
 }
 
-var getLoadBalancerPoolFilters = map[string]string{}
+var getLoadBalancerPoolFilters = map[string]string{
+	"check_regions":      "Description.CheckRegions",
+	"created_on":         "Description.CreatedOn",
+	"description":        "Description.Description",
+	"enabled":            "Description.Enabled",
+	"id":                 "Description.ID",
+	"latitude":           "Description.Latitude",
+	"load_shedding":      "Description.LoadShedding",
+	"longitude":          "Description.Longitude",
+	"minimum_origins":    "Description.MinimumOrigins",
+	"modified_on":        "Description.ModifiedOn",
+	"monitor":            "Description.Monitor",
+	"name":               "Description.Name",
+	"notification_email": "Description.NotificationEmail",
+	"origins":            "Description.Origins",
+}
 
 func GetLoadBalancerPool(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("GetLoadBalancerPool")
@@ -2408,7 +2668,7 @@ func GetLoadBalancerPool(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 	if err != nil {
 		return nil, err
 	}
-	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	integrationID, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyIntegrationID)
 	if err != nil {
 		return nil, err
 	}
@@ -2422,7 +2682,7 @@ func GetLoadBalancerPool(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 	}
 
 	limit := int64(1)
-	paginator, err := k.NewLoadBalancerPoolPaginator(essdk.BuildFilter(ctx, d.QueryContext, getLoadBalancerPoolFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), &limit)
+	paginator, err := k.NewLoadBalancerPoolPaginator(essdk.BuildFilter(ctx, d.QueryContext, getLoadBalancerPoolFilters, integrationID, encodedResourceCollectionFilters, clientType), &limit)
 	if err != nil {
 		return nil, err
 	}
@@ -2529,9 +2789,15 @@ func (p PageRulePaginator) NextPage(ctx context.Context) ([]PageRule, error) {
 }
 
 var listPageRuleFilters = map[string]string{
-	"id":      "ID",
-	"title":   "ID",
-	"zone_id": "ZoneID",
+	"actions":     "Description.Actions",
+	"created_on":  "Description.CreatedOn",
+	"id":          "Description.ID",
+	"modified_on": "Description.ModifiedOn",
+	"priority":    "Description.Priority",
+	"status":      "Description.Status",
+	"targets":     "Description.Targets",
+	"title":       "Description.Title",
+	"zone_id":     "Description.ZoneID",
 }
 
 func ListPageRule(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
@@ -2552,9 +2818,9 @@ func ListPageRule(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 		plugin.Logger(ctx).Error("ListPageRule NewSelfClientCached", "error", err)
 		return nil, err
 	}
-	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	integrationID, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyIntegrationID)
 	if err != nil {
-		plugin.Logger(ctx).Error("ListPageRule GetConfigTableValueOrNil for OpenGovernanceConfigKeyAccountID", "error", err)
+		plugin.Logger(ctx).Error("ListPageRule GetConfigTableValueOrNil for OpenGovernanceConfigKeyIntegrationID", "error", err)
 		return nil, err
 	}
 	encodedResourceCollectionFilters, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyResourceCollectionFilters)
@@ -2568,7 +2834,7 @@ func ListPageRule(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 		return nil, err
 	}
 
-	paginator, err := k.NewPageRulePaginator(essdk.BuildFilter(ctx, d.QueryContext, listPageRuleFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), d.QueryContext.Limit)
+	paginator, err := k.NewPageRulePaginator(essdk.BuildFilter(ctx, d.QueryContext, listPageRuleFilters, integrationID, encodedResourceCollectionFilters, clientType), d.QueryContext.Limit)
 	if err != nil {
 		plugin.Logger(ctx).Error("ListPageRule NewPageRulePaginator", "error", err)
 		return nil, err
@@ -2595,9 +2861,15 @@ func ListPageRule(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 }
 
 var getPageRuleFilters = map[string]string{
-	"id":      "ID",
-	"title":   "ID",
-	"zone_id": "ZoneID",
+	"actions":     "Description.Actions",
+	"created_on":  "Description.CreatedOn",
+	"id":          "Description.ID",
+	"modified_on": "Description.ModifiedOn",
+	"priority":    "Description.Priority",
+	"status":      "Description.Status",
+	"targets":     "Description.Targets",
+	"title":       "Description.Title",
+	"zone_id":     "Description.ZoneID",
 }
 
 func GetPageRule(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
@@ -2615,7 +2887,7 @@ func GetPageRule(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 	if err != nil {
 		return nil, err
 	}
-	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	integrationID, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyIntegrationID)
 	if err != nil {
 		return nil, err
 	}
@@ -2629,7 +2901,7 @@ func GetPageRule(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 	}
 
 	limit := int64(1)
-	paginator, err := k.NewPageRulePaginator(essdk.BuildFilter(ctx, d.QueryContext, getPageRuleFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), &limit)
+	paginator, err := k.NewPageRulePaginator(essdk.BuildFilter(ctx, d.QueryContext, getPageRuleFilters, integrationID, encodedResourceCollectionFilters, clientType), &limit)
 	if err != nil {
 		return nil, err
 	}
@@ -2735,7 +3007,22 @@ func (p UserPaginator) NextPage(ctx context.Context) ([]User, error) {
 	return values, nil
 }
 
-var listUserFilters = map[string]string{}
+var listUserFilters = map[string]string{
+	"api_key":                           "Description.APIKey",
+	"betas":                             "Description.Betas",
+	"country":                           "Description.Country",
+	"created_on":                        "Description.CreatedOn",
+	"email":                             "Description.Email",
+	"first_name":                        "Description.FirstName",
+	"id":                                "Description.ID",
+	"last_name":                         "Description.LastName",
+	"modified_on":                       "Description.ModifiedOn",
+	"organizations":                     "Description.Organizations",
+	"telephone":                         "Description.Telephone",
+	"two_factor_authentication_enabled": "Description.TwoFactorAuthenticationEnabled",
+	"username":                          "Description.Username",
+	"zipcode":                           "Description.Zipcode",
+}
 
 func ListUser(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("ListUser")
@@ -2755,9 +3042,9 @@ func ListUser(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (
 		plugin.Logger(ctx).Error("ListUser NewSelfClientCached", "error", err)
 		return nil, err
 	}
-	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	integrationID, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyIntegrationID)
 	if err != nil {
-		plugin.Logger(ctx).Error("ListUser GetConfigTableValueOrNil for OpenGovernanceConfigKeyAccountID", "error", err)
+		plugin.Logger(ctx).Error("ListUser GetConfigTableValueOrNil for OpenGovernanceConfigKeyIntegrationID", "error", err)
 		return nil, err
 	}
 	encodedResourceCollectionFilters, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyResourceCollectionFilters)
@@ -2771,7 +3058,7 @@ func ListUser(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (
 		return nil, err
 	}
 
-	paginator, err := k.NewUserPaginator(essdk.BuildFilter(ctx, d.QueryContext, listUserFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), d.QueryContext.Limit)
+	paginator, err := k.NewUserPaginator(essdk.BuildFilter(ctx, d.QueryContext, listUserFilters, integrationID, encodedResourceCollectionFilters, clientType), d.QueryContext.Limit)
 	if err != nil {
 		plugin.Logger(ctx).Error("ListUser NewUserPaginator", "error", err)
 		return nil, err
@@ -2797,7 +3084,22 @@ func ListUser(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (
 	return nil, nil
 }
 
-var getUserFilters = map[string]string{}
+var getUserFilters = map[string]string{
+	"api_key":                           "Description.APIKey",
+	"betas":                             "Description.Betas",
+	"country":                           "Description.Country",
+	"created_on":                        "Description.CreatedOn",
+	"email":                             "Description.Email",
+	"first_name":                        "Description.FirstName",
+	"id":                                "Description.ID",
+	"last_name":                         "Description.LastName",
+	"modified_on":                       "Description.ModifiedOn",
+	"organizations":                     "Description.Organizations",
+	"telephone":                         "Description.Telephone",
+	"two_factor_authentication_enabled": "Description.TwoFactorAuthenticationEnabled",
+	"username":                          "Description.Username",
+	"zipcode":                           "Description.Zipcode",
+}
 
 func GetUser(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("GetUser")
@@ -2814,7 +3116,7 @@ func GetUser(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (i
 	if err != nil {
 		return nil, err
 	}
-	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	integrationID, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyIntegrationID)
 	if err != nil {
 		return nil, err
 	}
@@ -2828,7 +3130,7 @@ func GetUser(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (i
 	}
 
 	limit := int64(1)
-	paginator, err := k.NewUserPaginator(essdk.BuildFilter(ctx, d.QueryContext, getUserFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), &limit)
+	paginator, err := k.NewUserPaginator(essdk.BuildFilter(ctx, d.QueryContext, getUserFilters, integrationID, encodedResourceCollectionFilters, clientType), &limit)
 	if err != nil {
 		return nil, err
 	}
@@ -2935,14 +3237,19 @@ func (p UserAuditLogPaginator) NextPage(ctx context.Context) ([]UserAuditLog, er
 }
 
 var listUserAuditLogFilters = map[string]string{
-	"actor_email":    "Actor.Email",
-	"actor_id":       "Actor.ID",
-	"actor_ip":       "Actor.IP",
-	"actor_type":     "Actor.Type",
-	"id":             "ID",
-	"new_value_json": "NewValueJSON",
-	"old_value_json": "OldValueJSON",
-	"owner_id":       "Owner.ID",
+	"action":         "Description.Action",
+	"actor_email":    "Description.ActorEmail",
+	"actor_id":       "Description.ActorID",
+	"actor_ip":       "Description.ActorIP",
+	"actor_type":     "Description.ActorType",
+	"id":             "Description.ID",
+	"metadata":       "Description.Metadata",
+	"new_value":      "Description.NewValue",
+	"new_value_json": "Description.NewValueJSON",
+	"old_value":      "Description.OldValue",
+	"old_value_json": "Description.OldValueJSON",
+	"owner_id":       "Description.OwnerID",
+	"resource":       "Description.Resource",
 }
 
 func ListUserAuditLog(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
@@ -2963,9 +3270,9 @@ func ListUserAuditLog(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 		plugin.Logger(ctx).Error("ListUserAuditLog NewSelfClientCached", "error", err)
 		return nil, err
 	}
-	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	integrationID, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyIntegrationID)
 	if err != nil {
-		plugin.Logger(ctx).Error("ListUserAuditLog GetConfigTableValueOrNil for OpenGovernanceConfigKeyAccountID", "error", err)
+		plugin.Logger(ctx).Error("ListUserAuditLog GetConfigTableValueOrNil for OpenGovernanceConfigKeyIntegrationID", "error", err)
 		return nil, err
 	}
 	encodedResourceCollectionFilters, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyResourceCollectionFilters)
@@ -2979,7 +3286,7 @@ func ListUserAuditLog(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 		return nil, err
 	}
 
-	paginator, err := k.NewUserAuditLogPaginator(essdk.BuildFilter(ctx, d.QueryContext, listUserAuditLogFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), d.QueryContext.Limit)
+	paginator, err := k.NewUserAuditLogPaginator(essdk.BuildFilter(ctx, d.QueryContext, listUserAuditLogFilters, integrationID, encodedResourceCollectionFilters, clientType), d.QueryContext.Limit)
 	if err != nil {
 		plugin.Logger(ctx).Error("ListUserAuditLog NewUserAuditLogPaginator", "error", err)
 		return nil, err
@@ -3006,14 +3313,19 @@ func ListUserAuditLog(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 }
 
 var getUserAuditLogFilters = map[string]string{
-	"actor_email":    "Actor.Email",
-	"actor_id":       "Actor.ID",
-	"actor_ip":       "Actor.IP",
-	"actor_type":     "Actor.Type",
-	"id":             "ID",
-	"new_value_json": "NewValueJSON",
-	"old_value_json": "OldValueJSON",
-	"owner_id":       "Owner.ID",
+	"action":         "Description.Action",
+	"actor_email":    "Description.ActorEmail",
+	"actor_id":       "Description.ActorID",
+	"actor_ip":       "Description.ActorIP",
+	"actor_type":     "Description.ActorType",
+	"id":             "Description.ID",
+	"metadata":       "Description.Metadata",
+	"new_value":      "Description.NewValue",
+	"new_value_json": "Description.NewValueJSON",
+	"old_value":      "Description.OldValue",
+	"old_value_json": "Description.OldValueJSON",
+	"owner_id":       "Description.OwnerID",
+	"resource":       "Description.Resource",
 }
 
 func GetUserAuditLog(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
@@ -3031,7 +3343,7 @@ func GetUserAuditLog(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 	if err != nil {
 		return nil, err
 	}
-	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	integrationID, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyIntegrationID)
 	if err != nil {
 		return nil, err
 	}
@@ -3045,7 +3357,7 @@ func GetUserAuditLog(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 	}
 
 	limit := int64(1)
-	paginator, err := k.NewUserAuditLogPaginator(essdk.BuildFilter(ctx, d.QueryContext, getUserAuditLogFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), &limit)
+	paginator, err := k.NewUserAuditLogPaginator(essdk.BuildFilter(ctx, d.QueryContext, getUserAuditLogFilters, integrationID, encodedResourceCollectionFilters, clientType), &limit)
 	if err != nil {
 		return nil, err
 	}
@@ -3152,8 +3464,11 @@ func (p WorkerRoutePaginator) NextPage(ctx context.Context) ([]WorkerRoute, erro
 }
 
 var listWorkerRouteFilters = map[string]string{
-	"zone_id":   "ID",
-	"zone_name": "Name",
+	"id":        "Description.ID",
+	"pattern":   "Description.Pattern",
+	"script":    "Description.Script",
+	"zone_id":   "Description.ZoneID",
+	"zone_name": "Description.ZoneName",
 }
 
 func ListWorkerRoute(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
@@ -3174,9 +3489,9 @@ func ListWorkerRoute(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 		plugin.Logger(ctx).Error("ListWorkerRoute NewSelfClientCached", "error", err)
 		return nil, err
 	}
-	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	integrationID, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyIntegrationID)
 	if err != nil {
-		plugin.Logger(ctx).Error("ListWorkerRoute GetConfigTableValueOrNil for OpenGovernanceConfigKeyAccountID", "error", err)
+		plugin.Logger(ctx).Error("ListWorkerRoute GetConfigTableValueOrNil for OpenGovernanceConfigKeyIntegrationID", "error", err)
 		return nil, err
 	}
 	encodedResourceCollectionFilters, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyResourceCollectionFilters)
@@ -3190,7 +3505,7 @@ func ListWorkerRoute(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 		return nil, err
 	}
 
-	paginator, err := k.NewWorkerRoutePaginator(essdk.BuildFilter(ctx, d.QueryContext, listWorkerRouteFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), d.QueryContext.Limit)
+	paginator, err := k.NewWorkerRoutePaginator(essdk.BuildFilter(ctx, d.QueryContext, listWorkerRouteFilters, integrationID, encodedResourceCollectionFilters, clientType), d.QueryContext.Limit)
 	if err != nil {
 		plugin.Logger(ctx).Error("ListWorkerRoute NewWorkerRoutePaginator", "error", err)
 		return nil, err
@@ -3217,8 +3532,11 @@ func ListWorkerRoute(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 }
 
 var getWorkerRouteFilters = map[string]string{
-	"zone_id":   "ID",
-	"zone_name": "Name",
+	"id":        "Description.ID",
+	"pattern":   "Description.Pattern",
+	"script":    "Description.Script",
+	"zone_id":   "Description.ZoneID",
+	"zone_name": "Description.ZoneName",
 }
 
 func GetWorkerRoute(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
@@ -3236,7 +3554,7 @@ func GetWorkerRoute(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 	if err != nil {
 		return nil, err
 	}
-	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	integrationID, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyIntegrationID)
 	if err != nil {
 		return nil, err
 	}
@@ -3250,7 +3568,7 @@ func GetWorkerRoute(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 	}
 
 	limit := int64(1)
-	paginator, err := k.NewWorkerRoutePaginator(essdk.BuildFilter(ctx, d.QueryContext, getWorkerRouteFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), &limit)
+	paginator, err := k.NewWorkerRoutePaginator(essdk.BuildFilter(ctx, d.QueryContext, getWorkerRouteFilters, integrationID, encodedResourceCollectionFilters, clientType), &limit)
 	if err != nil {
 		return nil, err
 	}
@@ -3356,7 +3674,30 @@ func (p ZonePaginator) NextPage(ctx context.Context) ([]Zone, error) {
 	return values, nil
 }
 
-var listZoneFilters = map[string]string{}
+var listZoneFilters = map[string]string{
+	"betas":                 "Description.Betas",
+	"created_on":            "Description.CreatedOn",
+	"deactivation_reason":   "Description.DeactivationReason",
+	"development_mode":      "Description.DevelopmentMode",
+	"dnssec":                "Description.DNSSEC",
+	"host":                  "Description.Host",
+	"id":                    "Description.ID",
+	"meta":                  "Description.Meta",
+	"modified_on":           "Description.ModifiedOn",
+	"name":                  "Description.Name",
+	"name_servers":          "Description.NameServers",
+	"original_dnshost":      "Description.OriginalDNSHost",
+	"original_name_servers": "Description.OriginalNameServers",
+	"original_registrar":    "Description.OriginalRegistrar",
+	"owner":                 "Description.Owner",
+	"paused":                "Description.Paused",
+	"permissions":           "Description.Permissions",
+	"plan":                  "Description.Plan",
+	"plan_pending":          "Description.PlanPending",
+	"status":                "Description.Status",
+	"type":                  "Description.Type",
+	"vanity_name_servers":   "Description.VanityNameServers",
+}
 
 func ListZone(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("ListZone")
@@ -3376,9 +3717,9 @@ func ListZone(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (
 		plugin.Logger(ctx).Error("ListZone NewSelfClientCached", "error", err)
 		return nil, err
 	}
-	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	integrationID, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyIntegrationID)
 	if err != nil {
-		plugin.Logger(ctx).Error("ListZone GetConfigTableValueOrNil for OpenGovernanceConfigKeyAccountID", "error", err)
+		plugin.Logger(ctx).Error("ListZone GetConfigTableValueOrNil for OpenGovernanceConfigKeyIntegrationID", "error", err)
 		return nil, err
 	}
 	encodedResourceCollectionFilters, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyResourceCollectionFilters)
@@ -3392,7 +3733,7 @@ func ListZone(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (
 		return nil, err
 	}
 
-	paginator, err := k.NewZonePaginator(essdk.BuildFilter(ctx, d.QueryContext, listZoneFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), d.QueryContext.Limit)
+	paginator, err := k.NewZonePaginator(essdk.BuildFilter(ctx, d.QueryContext, listZoneFilters, integrationID, encodedResourceCollectionFilters, clientType), d.QueryContext.Limit)
 	if err != nil {
 		plugin.Logger(ctx).Error("ListZone NewZonePaginator", "error", err)
 		return nil, err
@@ -3418,7 +3759,30 @@ func ListZone(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (
 	return nil, nil
 }
 
-var getZoneFilters = map[string]string{}
+var getZoneFilters = map[string]string{
+	"betas":                 "Description.Betas",
+	"created_on":            "Description.CreatedOn",
+	"deactivation_reason":   "Description.DeactivationReason",
+	"development_mode":      "Description.DevelopmentMode",
+	"dnssec":                "Description.DNSSEC",
+	"host":                  "Description.Host",
+	"id":                    "Description.ID",
+	"meta":                  "Description.Meta",
+	"modified_on":           "Description.ModifiedOn",
+	"name":                  "Description.Name",
+	"name_servers":          "Description.NameServers",
+	"original_dnshost":      "Description.OriginalDNSHost",
+	"original_name_servers": "Description.OriginalNameServers",
+	"original_registrar":    "Description.OriginalRegistrar",
+	"owner":                 "Description.Owner",
+	"paused":                "Description.Paused",
+	"permissions":           "Description.Permissions",
+	"plan":                  "Description.Plan",
+	"plan_pending":          "Description.PlanPending",
+	"status":                "Description.Status",
+	"type":                  "Description.Type",
+	"vanity_name_servers":   "Description.VanityNameServers",
+}
 
 func GetZone(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("GetZone")
@@ -3435,7 +3799,7 @@ func GetZone(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (i
 	if err != nil {
 		return nil, err
 	}
-	accountId, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyAccountID)
+	integrationID, err := sc.GetConfigTableValueOrNil(ctx, steampipesdk.OpenGovernanceConfigKeyIntegrationID)
 	if err != nil {
 		return nil, err
 	}
@@ -3449,7 +3813,7 @@ func GetZone(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (i
 	}
 
 	limit := int64(1)
-	paginator, err := k.NewZonePaginator(essdk.BuildFilter(ctx, d.QueryContext, getZoneFilters, "cloudflare", accountId, encodedResourceCollectionFilters, clientType), &limit)
+	paginator, err := k.NewZonePaginator(essdk.BuildFilter(ctx, d.QueryContext, getZoneFilters, integrationID, encodedResourceCollectionFilters, clientType), &limit)
 	if err != nil {
 		return nil, err
 	}
