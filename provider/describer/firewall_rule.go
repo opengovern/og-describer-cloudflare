@@ -49,20 +49,18 @@ func GetFireWallRule(ctx context.Context, handler *CloudFlareAPIHandler, resourc
 	value := models.Resource{
 		ID:   firewallRule.ID,
 		Name: firewallRule.ID,
-		Description: JSONAllFieldsMarshaller{
-			Value: model.FireWallRuleDescription{
-				ID:          firewallRule.ID,
-				Paused:      firewallRule.Paused,
-				Description: firewallRule.Description,
-				Action:      firewallRule.Action,
-				Priority:    firewallRule.Priority,
-				Title:       firewallRule.ID,
-				Filter:      firewallRule.Filter,
-				Products:    firewallRule.Products,
-				CreatedOn:   firewallRule.CreatedOn,
-				ModifiedOn:  firewallRule.ModifiedOn,
-				ZoneID:      *zoneID,
-			},
+		Description: model.FireWallRuleDescription{
+			ID:          firewallRule.ID,
+			Paused:      firewallRule.Paused,
+			Description: firewallRule.Description,
+			Action:      firewallRule.Action,
+			Priority:    firewallRule.Priority,
+			Title:       firewallRule.ID,
+			Filter:      firewallRule.Filter,
+			Products:    firewallRule.Products,
+			CreatedOn:   firewallRule.CreatedOn,
+			ModifiedOn:  firewallRule.ModifiedOn,
+			ZoneID:      *zoneID,
 		},
 	}
 	return &value, nil
@@ -93,20 +91,18 @@ func processFirewallRules(ctx context.Context, handler *CloudFlareAPIHandler, zo
 			value := models.Resource{
 				ID:   firewallRule.ID,
 				Name: firewallRule.ID,
-				Description: JSONAllFieldsMarshaller{
-					Value: model.FireWallRuleDescription{
-						ID:          firewallRule.ID,
-						Paused:      firewallRule.Paused,
-						Description: firewallRule.Description,
-						Action:      firewallRule.Action,
-						Priority:    firewallRule.Priority,
-						Title:       firewallRule.ID,
-						Filter:      firewallRule.Filter,
-						Products:    firewallRule.Products,
-						CreatedOn:   firewallRule.CreatedOn,
-						ModifiedOn:  firewallRule.ModifiedOn,
-						ZoneID:      zone.ID,
-					},
+				Description: model.FireWallRuleDescription{
+					ID:          firewallRule.ID,
+					Paused:      firewallRule.Paused,
+					Description: firewallRule.Description,
+					Action:      firewallRule.Action,
+					Priority:    firewallRule.Priority,
+					Title:       firewallRule.ID,
+					Filter:      firewallRule.Filter,
+					Products:    firewallRule.Products,
+					CreatedOn:   firewallRule.CreatedOn,
+					ModifiedOn:  firewallRule.ModifiedOn,
+					ZoneID:      zone.ID,
 				},
 			}
 			cloudFlareChan <- value

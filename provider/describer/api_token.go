@@ -38,18 +38,16 @@ func GetAPIToken(ctx context.Context, handler *CloudFlareAPIHandler, resourceID 
 	value := models.Resource{
 		ID:   token.ID,
 		Name: token.Name,
-		Description: JSONAllFieldsMarshaller{
-			Value: model.ApiTokenDescription{
-				ID:         token.ID,
-				Name:       token.Name,
-				Status:     token.Status,
-				Condition:  token.Condition,
-				ExpiresOn:  token.ExpiresOn,
-				IssuedOn:   token.IssuedOn,
-				ModifiedOn: token.ModifiedOn,
-				NotBefore:  token.NotBefore,
-				Policies:   token.Policies,
-			},
+		Description: model.ApiTokenDescription{
+			ID:         token.ID,
+			Name:       token.Name,
+			Status:     token.Status,
+			Condition:  token.Condition,
+			ExpiresOn:  token.ExpiresOn,
+			IssuedOn:   token.IssuedOn,
+			ModifiedOn: token.ModifiedOn,
+			NotBefore:  token.NotBefore,
+			Policies:   token.Policies,
 		},
 	}
 	return &value, nil
@@ -80,18 +78,16 @@ func processAPITokens(ctx context.Context, handler *CloudFlareAPIHandler, cloudF
 			value := models.Resource{
 				ID:   token.ID,
 				Name: token.Name,
-				Description: JSONAllFieldsMarshaller{
-					Value: model.ApiTokenDescription{
-						ID:         token.ID,
-						Name:       token.Name,
-						Status:     token.Status,
-						Condition:  token.Condition,
-						ExpiresOn:  token.ExpiresOn,
-						IssuedOn:   token.IssuedOn,
-						ModifiedOn: token.ModifiedOn,
-						NotBefore:  token.NotBefore,
-						Policies:   token.Policies,
-					},
+				Description: model.ApiTokenDescription{
+					ID:         token.ID,
+					Name:       token.Name,
+					Status:     token.Status,
+					Condition:  token.Condition,
+					ExpiresOn:  token.ExpiresOn,
+					IssuedOn:   token.IssuedOn,
+					ModifiedOn: token.ModifiedOn,
+					NotBefore:  token.NotBefore,
+					Policies:   token.Policies,
 				},
 			}
 			cloudFlareChan <- value

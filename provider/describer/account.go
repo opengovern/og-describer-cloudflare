@@ -38,13 +38,11 @@ func GetAccount(ctx context.Context, handler *CloudFlareAPIHandler, resourceID s
 	value := models.Resource{
 		ID:   account.ID,
 		Name: account.Name,
-		Description: JSONAllFieldsMarshaller{
-			Value: model.AccountDescription{
-				ID:       account.ID,
-				Name:     account.Name,
-				Type:     account.Type,
-				Settings: account.Settings,
-			},
+		Description: model.AccountDescription{
+			ID:       account.ID,
+			Name:     account.Name,
+			Type:     account.Type,
+			Settings: account.Settings,
 		},
 	}
 	return &value, nil
@@ -79,13 +77,11 @@ func processAccounts(ctx context.Context, handler *CloudFlareAPIHandler, cloudFl
 			value := models.Resource{
 				ID:   account.ID,
 				Name: account.Name,
-				Description: JSONAllFieldsMarshaller{
-					Value: model.AccountDescription{
-						ID:       account.ID,
-						Name:     account.Name,
-						Type:     account.Type,
-						Settings: account.Settings,
-					},
+				Description: model.AccountDescription{
+					ID:       account.ID,
+					Name:     account.Name,
+					Type:     account.Type,
+					Settings: account.Settings,
 				},
 			}
 			cloudFlareChan <- value

@@ -46,18 +46,16 @@ func GetAccessGroup(ctx context.Context, handler *CloudFlareAPIHandler, resource
 	value := models.Resource{
 		ID:   group.ID,
 		Name: group.Name,
-		Description: JSONAllFieldsMarshaller{
-			Value: model.AccessGroupDescription{
-				ID:          group.ID,
-				Name:        group.Name,
-				AccountID:   account.ID,
-				AccountName: account.Name,
-				CreatedAt:   group.CreatedAt,
-				UpdatedAt:   group.UpdatedAt,
-				Exclude:     group.Exclude,
-				Include:     group.Include,
-				Require:     group.Require,
-			},
+		Description: model.AccessGroupDescription{
+			ID:          group.ID,
+			Name:        group.Name,
+			AccountID:   account.ID,
+			AccountName: account.Name,
+			CreatedAt:   group.CreatedAt,
+			UpdatedAt:   group.UpdatedAt,
+			Exclude:     group.Exclude,
+			Include:     group.Include,
+			Require:     group.Require,
 		},
 	}
 	return &value, nil
@@ -101,18 +99,16 @@ func processAccessGroups(ctx context.Context, handler *CloudFlareAPIHandler, acc
 			value := models.Resource{
 				ID:   group.ID,
 				Name: group.Name,
-				Description: JSONAllFieldsMarshaller{
-					Value: model.AccessGroupDescription{
-						ID:          group.ID,
-						Name:        group.Name,
-						AccountID:   account.ID,
-						AccountName: account.Name,
-						CreatedAt:   group.CreatedAt,
-						UpdatedAt:   group.UpdatedAt,
-						Exclude:     group.Exclude,
-						Include:     group.Include,
-						Require:     group.Require,
-					},
+				Description: model.AccessGroupDescription{
+					ID:          group.ID,
+					Name:        group.Name,
+					AccountID:   account.ID,
+					AccountName: account.Name,
+					CreatedAt:   group.CreatedAt,
+					UpdatedAt:   group.UpdatedAt,
+					Exclude:     group.Exclude,
+					Include:     group.Include,
+					Require:     group.Require,
 				},
 			}
 			cloudFlareChan <- value

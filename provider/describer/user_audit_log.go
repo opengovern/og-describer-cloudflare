@@ -69,23 +69,21 @@ func processUserAuditLogs(ctx context.Context, handler *CloudFlareAPIHandler, cl
 			value := models.Resource{
 				ID:   auditLog.ID,
 				Name: auditLog.ID,
-				Description: JSONAllFieldsMarshaller{
-					Value: model.UserAuditLogDescription{
-						ActorEmail:   auditLog.Actor.Email,
-						ActorID:      auditLog.Actor.ID,
-						ActorIP:      auditLog.Actor.IP,
-						ActorType:    auditLog.Actor.Type,
-						ID:           auditLog.ID,
-						NewValue:     auditLog.NewValue,
-						OldValue:     auditLog.OldValue,
-						OwnerID:      auditLog.Owner.ID,
-						When:         when,
-						Action:       auditLog.Action,
-						Metadata:     auditLog.Metadata,
-						NewValueJSON: auditLog.NewValueJSON,
-						OldValueJSON: auditLog.OldValueJSON,
-						Resource:     auditLog.Resource,
-					},
+				Description: model.UserAuditLogDescription{
+					ActorEmail:   auditLog.Actor.Email,
+					ActorID:      auditLog.Actor.ID,
+					ActorIP:      auditLog.Actor.IP,
+					ActorType:    auditLog.Actor.Type,
+					ID:           auditLog.ID,
+					NewValue:     auditLog.NewValue,
+					OldValue:     auditLog.OldValue,
+					OwnerID:      auditLog.Owner.ID,
+					When:         when,
+					Action:       auditLog.Action,
+					Metadata:     auditLog.Metadata,
+					NewValueJSON: auditLog.NewValueJSON,
+					OldValueJSON: auditLog.OldValueJSON,
+					Resource:     auditLog.Resource,
 				},
 			}
 			cloudFlareChan <- value

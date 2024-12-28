@@ -47,34 +47,32 @@ func GetZone(ctx context.Context, handler *CloudFlareAPIHandler, resourceID stri
 	value := models.Resource{
 		ID:   zone.ID,
 		Name: zone.Name,
-		Description: JSONAllFieldsMarshaller{
-			Value: model.ZoneDescription{
-				ID:              zone.ID,
-				Name:            zone.Name,
-				Betas:           zone.Betas,
-				CreatedOn:       zone.CreatedOn,
-				DevelopmentMode: zone.DevMode,
-				DNSSEC:          *zoneDNSSEC,
-				Host: struct {
-					Name    string
-					Website string
-				}{Name: zone.Host.Name, Website: zone.Host.Website},
-				Meta:                zone.Meta,
-				ModifiedOn:          zone.ModifiedOn,
-				NameServers:         zone.NameServers,
-				OriginalDNSHost:     zone.OriginalDNSHost,
-				OriginalNameServers: zone.OriginalNS,
-				OriginalRegistrar:   zone.OriginalRegistrar,
-				Owner:               zone.Owner,
-				Paused:              zone.Paused,
-				Permissions:         zone.Permissions,
-				Settings:            settings,
-				Plan:                zone.Plan,
-				PlanPending:         zone.PlanPending,
-				Status:              zone.Status,
-				Type:                zone.Type,
-				VanityNameServers:   zone.VanityNS,
-			},
+		Description: model.ZoneDescription{
+			ID:              zone.ID,
+			Name:            zone.Name,
+			Betas:           zone.Betas,
+			CreatedOn:       zone.CreatedOn,
+			DevelopmentMode: zone.DevMode,
+			DNSSEC:          *zoneDNSSEC,
+			Host: struct {
+				Name    string
+				Website string
+			}{Name: zone.Host.Name, Website: zone.Host.Website},
+			Meta:                zone.Meta,
+			ModifiedOn:          zone.ModifiedOn,
+			NameServers:         zone.NameServers,
+			OriginalDNSHost:     zone.OriginalDNSHost,
+			OriginalNameServers: zone.OriginalNS,
+			OriginalRegistrar:   zone.OriginalRegistrar,
+			Owner:               zone.Owner,
+			Paused:              zone.Paused,
+			Permissions:         zone.Permissions,
+			Settings:            settings,
+			Plan:                zone.Plan,
+			PlanPending:         zone.PlanPending,
+			Status:              zone.Status,
+			Type:                zone.Type,
+			VanityNameServers:   zone.VanityNS,
 		},
 	}
 	return &value, nil
@@ -110,34 +108,32 @@ func processZones(ctx context.Context, handler *CloudFlareAPIHandler, cloudFlare
 					value := models.Resource{
 						ID:   zone.ID,
 						Name: zone.Name,
-						Description: JSONAllFieldsMarshaller{
-							Value: model.ZoneDescription{
-								ID:              zone.ID,
-								Name:            zone.Name,
-								Betas:           zone.Betas,
-								CreatedOn:       zone.CreatedOn,
-								DevelopmentMode: zone.DevMode,
-								DNSSEC:          *zoneDNSSEC,
-								Host: struct {
-									Name    string
-									Website string
-								}{Name: zone.Host.Name, Website: zone.Host.Website},
-								Meta:                zone.Meta,
-								ModifiedOn:          zone.ModifiedOn,
-								NameServers:         zone.NameServers,
-								OriginalDNSHost:     zone.OriginalDNSHost,
-								OriginalNameServers: zone.OriginalNS,
-								OriginalRegistrar:   zone.OriginalRegistrar,
-								Owner:               zone.Owner,
-								Paused:              zone.Paused,
-								Permissions:         zone.Permissions,
-								Settings:            settings,
-								Plan:                zone.Plan,
-								PlanPending:         zone.PlanPending,
-								Status:              zone.Status,
-								Type:                zone.Type,
-								VanityNameServers:   zone.VanityNS,
-							},
+						Description: model.ZoneDescription{
+							ID:              zone.ID,
+							Name:            zone.Name,
+							Betas:           zone.Betas,
+							CreatedOn:       zone.CreatedOn,
+							DevelopmentMode: zone.DevMode,
+							DNSSEC:          *zoneDNSSEC,
+							Host: struct {
+								Name    string
+								Website string
+							}{Name: zone.Host.Name, Website: zone.Host.Website},
+							Meta:                zone.Meta,
+							ModifiedOn:          zone.ModifiedOn,
+							NameServers:         zone.NameServers,
+							OriginalDNSHost:     zone.OriginalDNSHost,
+							OriginalNameServers: zone.OriginalNS,
+							OriginalRegistrar:   zone.OriginalRegistrar,
+							Owner:               zone.Owner,
+							Paused:              zone.Paused,
+							Permissions:         zone.Permissions,
+							Settings:            settings,
+							Plan:                zone.Plan,
+							PlanPending:         zone.PlanPending,
+							Status:              zone.Status,
+							Type:                zone.Type,
+							VanityNameServers:   zone.VanityNS,
 						},
 					}
 					cloudFlareChan <- value

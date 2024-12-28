@@ -48,17 +48,15 @@ func GetAccountMember(ctx context.Context, handler *CloudFlareAPIHandler, resour
 	value := models.Resource{
 		ID:   accountMember.ID,
 		Name: title,
-		Description: JSONAllFieldsMarshaller{
-			Value: model.AccountMemberDescription{
-				UserEmail: accountMember.User.Email,
-				ID:        accountMember.ID,
-				Status:    accountMember.Status,
-				AccountID: account.ID,
-				Code:      accountMember.Code,
-				User:      accountMember.User,
-				Roles:     accountMember.Roles,
-				Title:     title,
-			},
+		Description: model.AccountMemberDescription{
+			UserEmail: accountMember.User.Email,
+			ID:        accountMember.ID,
+			Status:    accountMember.Status,
+			AccountID: account.ID,
+			Code:      accountMember.Code,
+			User:      accountMember.User,
+			Roles:     accountMember.Roles,
+			Title:     title,
 		},
 	}
 	return &value, nil
@@ -100,17 +98,15 @@ func processAccountMembers(ctx context.Context, handler *CloudFlareAPIHandler, a
 			value := models.Resource{
 				ID:   accountMember.ID,
 				Name: title,
-				Description: JSONAllFieldsMarshaller{
-					Value: model.AccountMemberDescription{
-						UserEmail: accountMember.User.Email,
-						ID:        accountMember.ID,
-						Status:    accountMember.Status,
-						AccountID: account.ID,
-						Code:      accountMember.Code,
-						User:      accountMember.User,
-						Roles:     accountMember.Roles,
-						Title:     title,
-					},
+				Description: model.AccountMemberDescription{
+					UserEmail: accountMember.User.Email,
+					ID:        accountMember.ID,
+					Status:    accountMember.Status,
+					AccountID: account.ID,
+					Code:      accountMember.Code,
+					User:      accountMember.User,
+					Roles:     accountMember.Roles,
+					Title:     title,
 				},
 			}
 			cloudFlareChan <- value

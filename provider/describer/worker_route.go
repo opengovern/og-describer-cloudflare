@@ -50,14 +50,12 @@ func GetWorkerRoute(ctx context.Context, handler *CloudFlareAPIHandler, resource
 	value := models.Resource{
 		ID:   route.ID,
 		Name: route.ID,
-		Description: JSONAllFieldsMarshaller{
-			Value: model.WorkerRouteDescription{
-				ID:       route.ID,
-				ZoneName: *zoneName,
-				Pattern:  route.Pattern,
-				Script:   route.Script,
-				ZoneID:   *zoneID,
-			},
+		Description: model.WorkerRouteDescription{
+			ID:       route.ID,
+			ZoneName: *zoneName,
+			Pattern:  route.Pattern,
+			Script:   route.Script,
+			ZoneID:   *zoneID,
 		},
 	}
 	return &value, nil
@@ -88,14 +86,12 @@ func processWorkerRoutes(ctx context.Context, handler *CloudFlareAPIHandler, zon
 			value := models.Resource{
 				ID:   route.ID,
 				Name: route.ID,
-				Description: JSONAllFieldsMarshaller{
-					Value: model.WorkerRouteDescription{
-						ID:       route.ID,
-						ZoneName: zone.Name,
-						Pattern:  route.Pattern,
-						Script:   route.Script,
-						ZoneID:   zone.ID,
-					},
+				Description: model.WorkerRouteDescription{
+					ID:       route.ID,
+					ZoneName: zone.Name,
+					Pattern:  route.Pattern,
+					Script:   route.Script,
+					ZoneID:   zone.ID,
 				},
 			}
 			cloudFlareChan <- value

@@ -46,15 +46,13 @@ func GetAccountRole(ctx context.Context, handler *CloudFlareAPIHandler, resource
 	value := models.Resource{
 		ID:   accountRole.ID,
 		Name: accountRole.Name,
-		Description: JSONAllFieldsMarshaller{
-			Value: model.AccountRoleDescription{
-				ID:          accountRole.ID,
-				Name:        accountRole.Name,
-				Description: accountRole.Description,
-				Permissions: accountRole.Permissions,
-				AccountID:   account.ID,
-				Title:       accountRole.Name,
-			},
+		Description: model.AccountRoleDescription{
+			ID:          accountRole.ID,
+			Name:        accountRole.Name,
+			Description: accountRole.Description,
+			Permissions: accountRole.Permissions,
+			AccountID:   account.ID,
+			Title:       accountRole.Name,
 		},
 	}
 	return &value, nil
@@ -85,15 +83,13 @@ func processAccountRoles(ctx context.Context, handler *CloudFlareAPIHandler, acc
 			value := models.Resource{
 				ID:   accountRole.ID,
 				Name: accountRole.Name,
-				Description: JSONAllFieldsMarshaller{
-					Value: model.AccountRoleDescription{
-						ID:          accountRole.ID,
-						Name:        accountRole.Name,
-						Description: accountRole.Description,
-						Permissions: accountRole.Permissions,
-						AccountID:   account.ID,
-						Title:       accountRole.Name,
-					},
+				Description: model.AccountRoleDescription{
+					ID:          accountRole.ID,
+					Name:        accountRole.Name,
+					Description: accountRole.Description,
+					Permissions: accountRole.Permissions,
+					AccountID:   account.ID,
+					Title:       accountRole.Name,
 				},
 			}
 			cloudFlareChan <- value

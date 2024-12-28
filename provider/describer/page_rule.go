@@ -49,18 +49,16 @@ func GetPageRule(ctx context.Context, handler *CloudFlareAPIHandler, resourceID 
 	value := models.Resource{
 		ID:   pageRule.ID,
 		Name: pageRule.ID,
-		Description: JSONAllFieldsMarshaller{
-			Value: model.PageRuleDescription{
-				ID:         pageRule.ID,
-				Status:     pageRule.Status,
-				ZoneID:     *zoneID,
-				CreatedOn:  pageRule.CreatedOn,
-				ModifiedOn: pageRule.ModifiedOn,
-				Priority:   pageRule.Priority,
-				Title:      pageRule.ID,
-				Actions:    pageRule.Actions,
-				Targets:    pageRule.Targets,
-			},
+		Description: model.PageRuleDescription{
+			ID:         pageRule.ID,
+			Status:     pageRule.Status,
+			ZoneID:     *zoneID,
+			CreatedOn:  pageRule.CreatedOn,
+			ModifiedOn: pageRule.ModifiedOn,
+			Priority:   pageRule.Priority,
+			Title:      pageRule.ID,
+			Actions:    pageRule.Actions,
+			Targets:    pageRule.Targets,
 		},
 	}
 	return &value, nil
@@ -91,18 +89,16 @@ func processPageRules(ctx context.Context, handler *CloudFlareAPIHandler, zone c
 			value := models.Resource{
 				ID:   pageRule.ID,
 				Name: pageRule.ID,
-				Description: JSONAllFieldsMarshaller{
-					Value: model.PageRuleDescription{
-						ID:         pageRule.ID,
-						Status:     pageRule.Status,
-						ZoneID:     zone.ID,
-						CreatedOn:  pageRule.CreatedOn,
-						ModifiedOn: pageRule.ModifiedOn,
-						Priority:   pageRule.Priority,
-						Title:      pageRule.ID,
-						Actions:    pageRule.Actions,
-						Targets:    pageRule.Targets,
-					},
+				Description: model.PageRuleDescription{
+					ID:         pageRule.ID,
+					Status:     pageRule.Status,
+					ZoneID:     zone.ID,
+					CreatedOn:  pageRule.CreatedOn,
+					ModifiedOn: pageRule.ModifiedOn,
+					Priority:   pageRule.Priority,
+					Title:      pageRule.ID,
+					Actions:    pageRule.Actions,
+					Targets:    pageRule.Targets,
 				},
 			}
 			cloudFlareChan <- value
