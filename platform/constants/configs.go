@@ -13,10 +13,10 @@ var Manifest []byte
 var SetupMd []byte
 
 const (
-	IntegrationName = integration.Type("github_account") // example: aws_cloud, azure_subscription
+	IntegrationName = integration.Type("cloudflare_account") // example: aws_cloud, azure_subscription
 )
 
 const (
-	DescriberDeploymentName = "og-describer-github"
-	DescriberRunCommand     = "/og-describer-github"
+	DescriberDeploymentName = "og-describer-cloudflare"
+	DescriberRunCommand     = "/og-describer-cloudflare"
 )

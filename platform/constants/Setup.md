@@ -1,68 +1,89 @@
-# Setup GitHub Integration
+# OpenComply Integration Setup with Cloudflare
 
-Integrating opencomply with your GitHub organization using a Classic Personal Access Token (PAT) is a straightforward process. Here's a step-by-step guide to help you through it:
+To set up the OpenComply integration (formerly OpenGovernance) with Cloudflare, you need your **Account ID** and an **Account Token**. OpenComply requires a separate token for each Cloudflare account. If you're an enterprise with multiple accounts, ensure you create a token for each one.
 
 ## Prerequisites
 
-1. **opencomply Should be Installed and Running**: Ensure you have opencomply set up and ready to integrate with external services.
-2. **GitHub Organization Admin Permissions**: Make sure you have administrative access to the GitHub organization you want to integrate with.
-3. **Read Access to All Organization Repositories**: Ensure you have the necessary permissions to access the data in your GitHub organization.
+- **Cloudflare Account** with necessary permissions.
+- Access to [Cloudflare Dashboard](https://dash.cloudflare.com/).
 
-<br>
+## Steps to Create an Account API Token
 
-## Create a Classic Personal Access Token (PAT)
+### 1. Login to Cloudflare
 
-1. **Access GitHub Settings**:
-    - In the upper-right corner of any GitHub page, click your profile photo.
-    - Select **Settings** from the dropdown menu.
+- Visit [https://dash.cloudflare.com/](https://dash.cloudflare.com/).
 
-2. **Go to Developer Settings**:
-    - In the left sidebar, navigate to **Developer settings**.
+### 2. Select Your Account
 
-3. **Generate a New Token**:
-    - Under **Personal access tokens**, select **Tokens (classic)**.
-    - Click **Generate new token**, and then **Generate new token (classic)** again.
+- If you have multiple accounts, click the **account selector** at the top of the dashboard.
+- Choose the **account** for which you want to create the API token.
 
-4. **Set Token Expiration**:
-    - Choose an expiration for the token by selecting **Expiration** and picking a default option or entering a custom date.
+### 3. Copy Your Account ID
 
-5. **Select Required Scopes**:
-    - Ensure you select the following scopes to grant opencomply the necessary access:
-        - `repo`
-        - `read:org`
-        - `read:packages`
-        - `read:project`
-        - `read:ssh_signing_key`
-        - `read:audit_log`
-        - `read:enterprise`
-        - `read:discussion`
-        - `read:user`
-        - `user:email`
-        - `notification`
-        - `read:repo_hook`
-        - `read:public_key`
+- On the **Account page**, locate your **Account ID**.
+- **Copy** the Account ID and store it securely in a file. See screenshot below
 
-6. **Generate the Token**:
-    - After selecting the scopes, generate the token and copy it for use in opencomply integration.
+![Copy Account ID](https://raw.githubusercontent.com/opengovern/hub/refs/heads/main/ui/src/pages/setup/setup-cloudflare.png)
 
-## Configure Integration in opencomply
+> **Note:** Ensure you keep your Account ID confidential and store it in a secure location.
 
-1. **Open opencomply Dashboard**:
-    - Navigate to the opencomply dashboard.
+### 4. Navigate to Manage Account
 
-2. **Go to Integrations**:
-    - Select **Integrations** and then choose **GitHub** from the options.
+- From the dashboard, click on **"Manage Account"** in the sidebar or dropdown menu.
 
-3. **Select Classic PAT Integration**:
-    - Opt for the **Classic PAT integration** method.
+### 5. Access Account API Tokens
 
-4. **Paste the PAT**:
-    - Paste the copied PAT into the appropriate field.
+- Within **Manage Account**, locate and click on **"Account API Tokens"**.
 
-5. **Select GitHub Organization**:
-    - In the dropdown menu, choose the GitHub organization you want to connect.
+### 6. Create a New API Token
 
-6. **Finalize Integration**:
-    - Click **Save** to confirm and enable the connection.
+- Click the **"Create Token"** button to start the token creation process.
 
-With these steps, opencomply will have read access to your GitHub repositories and related metadata, allowing it to provide governance and compliance oversight effectively.
+### 7. Provide Token Name
+
+- In the **Name** field, enter: `opencomply`.
+
+### 8. Select API Token Template
+
+- Choose **"API token templates"**.
+- Select **"Read all resources"** to grant necessary permissions.
+
+### 9. Configure Zone Resources
+
+- Under **Zone Resources**, select **"Include All zones from an account"**.
+
+### 10. Set Token TTL
+
+- Set the **TTL (Time to Live)** to **365 Days** to prevent integration issues.
+
+### 11. Create the Token
+
+- Click on **"Create Token"**.
+- **Copy the Token Value immediately** as it won’t be shown again.
+
+### 12. Securely Store the Token
+
+- Save the **Token Value** in a secure location, such as a password manager.
+- **Do not share** the token publicly to maintain account security.
+
+## Provide Account ID and Token to OpenComply
+
+Once you have both the **Account ID** and **Account Token**, follow these steps to integrate them with OpenComply:
+
+1. **Log in to OpenComply** using your credentials.
+2. Navigate to the **Integrations** section.
+3. Select **Cloudflare Integration**.
+4. **Enter** your **Account ID** and **Account Token** in the respective fields.
+5. Click **Save** or **Connect** to finalize the integration.
+
+## Summary
+
+By following these steps, you will successfully create an **Account API Token** named **opencomply** on Cloudflare and obtain the **Token Value** and **Account ID** necessary for integrating with OpenComply. Ensure you store the token securely and set the TTL to 365 Days to maintain seamless integration.
+
+---
+
+If you encounter any issues, refer to [Cloudflare’s official documentation](https://developers.cloudflare.com/api/tokens/create/) or contact their support for assistance.
+
+# OpenComply Support
+
+For further assistance with the integration, please contact [OpenComply Support](mailto:support@opencomply.com).

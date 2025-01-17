@@ -2,12 +2,10 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/opengovern/og-describer-github/platform/constants"
-	"strconv"
-
+	"github.com/opengovern/og-describer-cloudflare/platform/constants"
 	"github.com/jackc/pgtype"
-	"github.com/opengovern/og-describer-github/global"
-	"github.com/opengovern/og-describer-github/global/maps"
+	"github.com/opengovern/og-describer-cloudflare/global"
+	"github.com/opengovern/og-describer-cloudflare/global/maps"
 	"github.com/opengovern/og-util/pkg/integration"
 	"github.com/opengovern/og-util/pkg/integration/interfaces"
 )
@@ -40,13 +38,9 @@ func (i *Integration) HealthCheck(jsonData []byte, providerId string, labels map
 		return false, err
 	}
 
-	var name string
-	if v, ok := labels["OrganizationName"]; ok {
-		name = v
-	}
-	isHealthy, err := GithubIntegrationHealthcheck(Config{
-		Token:            credentials.PatToken,
-		OrganizationName: name,
+	isHealthy, err := CloudflareIntegrationHealthcheck(Config{
+		Token:     credentials.Token,
+		AccountID: credentials.AccountID,
 	})
 	return isHealthy, err
 }
@@ -58,31 +52,27 @@ func (i *Integration) DiscoverIntegrations(jsonData []byte) ([]integration.Integ
 		return nil, err
 	}
 	var integrations []integration.Integration
-	accounts, err := GithubIntegrationDiscovery(Config{
-		Token: credentials.PatToken,
+	account, err := CloudflareIntegrationDiscovery(Config{
+		Token:     credentials.Token,
+		AccountID: credentials.AccountID,
 	})
+	labels := map[string]string{
+		"Type": account.Type,
+	}
+	labelsJsonData, err := json.Marshal(labels)
 	if err != nil {
 		return nil, err
 	}
-	for _, a := range accounts {
-		labels := map[string]string{
-			"OrganizationName": a.Login,
-		}
-		labelsJsonData, err := json.Marshal(labels)
-		if err != nil {
-			return nil, err
-		}
-		integrationLabelsJsonb := pgtype.JSONB{}
-		err = integrationLabelsJsonb.Set(labelsJsonData)
-		if err != nil {
-			return nil, err
-		}
-		integrations = append(integrations, integration.Integration{
-			ProviderID: strconv.FormatInt(a.ID, 10),
-			Name:       a.Login,
-			Labels:     integrationLabelsJsonb,
-		})
+	integrationLabelsJsonb := pgtype.JSONB{}
+	err = integrationLabelsJsonb.Set(labelsJsonData)
+	if err != nil {
+		return nil, err
 	}
+	integrations = append(integrations, integration.Integration{
+		ProviderID: account.ID,
+		Name:       account.Name,
+		Labels:     integrationLabelsJsonb,
+	})
 	return integrations, nil
 }
 
