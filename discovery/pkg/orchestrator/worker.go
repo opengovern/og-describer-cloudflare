@@ -9,8 +9,8 @@ import (
 
 	"github.com/go-errors/errors"
 	model "github.com/opengovern/og-describer-cloudflare/discovery/pkg/models"
-	"github.com/opengovern/og-describer-cloudflarelare/discovery/provider"
-	"github.com/opengovern/og-describer-cloudflarelare/global"
+	"github.com/opengovern/og-describer-cloudflare/discovery/provider"
+	"github.com/opengovern/og-describer-cloudflare/global"
 	describe2 "github.com/opengovern/og-util/pkg/describe"
 	"github.com/opengovern/og-util/pkg/es"
 	"github.com/opengovern/og-util/pkg/vault"

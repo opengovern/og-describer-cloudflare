@@ -2,5 +2,6 @@ package models
 
 
 type IntegrationCredentials struct {
-	PatToken string `json:"pat_token"`
+	Token     string `json:"token"`
+	AccountID string `json:"account_id"`
 }

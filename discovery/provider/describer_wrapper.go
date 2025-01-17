@@ -1,57 +1,114 @@
 package provider
 
 import (
-	"fmt"
-
-	"github.com/google/go-github/v55/github"
-	model "github.com/opengovern/og-describer-github/discovery/pkg/models"
+	model "github.com/opengovern/og-describer-cloudflare/discovery/pkg/models"
 	"github.com/opengovern/og-util/pkg/describe/enums"
-	"github.com/shurcooL/githubv4"
 	"golang.org/x/net/context"
-	"golang.org/x/oauth2"
+	"github.com/cloudflare/cloudflare-go"
+	"golang.org/x/time/rate"
+	"net/http"
+	"time"
+	"errors"
+
 )
 
 
-type GitHubClient struct {
-	RestClient    *github.Client
-	GraphQLClient *githubv4.Client
-	Token         string
+type CloudFlareAPIHandler struct {
+	Conn         *cloudflare.API
+	AccountID    string
+	RateLimiter  *rate.Limiter
+	Semaphore    chan struct{}
+	MaxRetries   int
+	RetryBackoff time.Duration
 }
+
+func NewCloudFlareAPIHandler(client *cloudflare.API, accountID string, rateLimit rate.Limit, burst int, maxConcurrency int, maxRetries int, retryBackoff time.Duration) *CloudFlareAPIHandler {
+	return &CloudFlareAPIHandler{
+		Conn:         client,
+		AccountID:    accountID,
+		RateLimiter:  rate.NewLimiter(rateLimit, burst),
+		Semaphore:    make(chan struct{}, maxConcurrency),
+		MaxRetries:   maxRetries,
+		RetryBackoff: retryBackoff,
+	}
+}
+
+// DoRequest executes the Cloudflare API request with rate limiting, retries, and concurrency control.
+func (h *CloudFlareAPIHandler) DoRequest(ctx context.Context, requestFunc func() (*int, error)) error {
+	h.Semaphore <- struct{}{}
+	defer func() { <-h.Semaphore }()
+	var statusCode *int
+	var err error
+	for attempt := 0; attempt <= h.MaxRetries; attempt++ {
+		// Wait based on rate limiter
+		if err = h.RateLimiter.Wait(ctx); err != nil {
+			return err
+		}
+		// Execute the request function
+		statusCode, err = requestFunc()
+		if err == nil {
+			return nil
+		}
+		// Handle rate limit errors
+		if statusCode != nil && *statusCode == http.StatusTooManyRequests {
+			backoff := h.RetryBackoff * (1 << attempt)
+			time.Sleep(backoff)
+			continue
+		}
+		// Handle temporary network errors
+		if isTemporary(err) {
+			backoff := h.RetryBackoff * (1 << attempt)
+			time.Sleep(backoff)
+			continue
+		}
+		break
+	}
+	return err
+}
+
+// isTemporary checks if an error is temporary.
+func isTemporary(err error) bool {
+	if err == nil {
+		return false
+	}
+	var netErr interface{ Temporary() bool }
+	if errors.As(err, &netErr) {
+		return netErr.Temporary()
+	}
+	return false
+}
+
+
+
 var (
 	triggerTypeKey string = "trigger_type"
 )
 func WithTriggerType(ctx context.Context, tt enums.DescribeTriggerType) context.Context {
 	return context.WithValue(ctx, triggerTypeKey, tt)
 }
-func DescribeByGithub(describe func(context.Context, GitHubClient, string, *model.StreamSender) ([]model.Resource, error)) model.ResourceDescriber {
+
+
+// DescribeListByCloudFlare A wrapper to pass cloudflare authorization to describer functions
+func DescribeListByCloudFlare(describe func(context.Context, *CloudFlareAPIHandler, *model.StreamSender) ([]model.Resource, error)) model.ResourceDescriber {
 	return func(ctx context.Context, cfg model.IntegrationCredentials, triggerType enums.DescribeTriggerType, additionalParameters map[string]string, stream *model.StreamSender) ([]model.Resource, error) {
 		ctx = WithTriggerType(ctx, triggerType)
 
-		if cfg.PatToken == "" {
-			return nil, fmt.Errorf("'token' must be set in the connection configuration. Edit your connection configuration file and then restart Steampipe")
+		// Create cloudflare client using token or (email, api key)
+		var conn *cloudflare.API
+		var err error
+		// Check for the token
+		if cfg.Token != "" {
+			conn, err = cloudflare.NewWithAPIToken(cfg.Token)
+			if err != nil {
+				return nil, err
+			}
 		}
 
-		// Create an OAuth2 token source
-		ts := oauth2.StaticTokenSource(
-			&oauth2.Token{AccessToken: cfg.PatToken},
-		)
+		cloudflareAPIHandler := NewCloudFlareAPIHandler(conn, cfg.AccountID, rate.Every(time.Second/4), 1, 10, 5, 5*time.Minute)
 
-		// Create an OAuth2 client
-		tc := oauth2.NewClient(ctx, ts)
-
-		// Create a new GitHub client
-		restClient := github.NewClient(tc)
-		graphQLClient := githubv4.NewClient(tc)
-
-		client := GitHubClient{
-			RestClient:    restClient,
-			GraphQLClient: graphQLClient,
-			Token:         cfg.PatToken,
-		}
-
-		organizationName := additionalParameters["OrganizationName"]
+		// Get values from describer
 		var values []model.Resource
-		result, err := describe(ctx, client, organizationName, stream)
+		result, err := describe(ctx, cloudflareAPIHandler, stream)
 		if err != nil {
 			return nil, err
 		}
@@ -60,37 +117,29 @@ func DescribeByGithub(describe func(context.Context, GitHubClient, string, *mode
 	}
 }
 
-func DescribeSingleByRepo(describe func(context.Context, GitHubClient, string, string, string, *model.StreamSender) (*model.Resource, error)) model.SingleResourceDescriber {
-	return func(ctx context.Context, cfg model.IntegrationCredentials, triggerType enums.DescribeTriggerType, additionalParameters map[string]string, resourceID string, stream *model.StreamSender) (*model.Resource, error) {
+// DescribeSingleByCloudFlare A wrapper to pass cloudflare authorization to describer functions
+func DescribeSingleByCloudFlare(describe func(context.Context, *CloudFlareAPIHandler, string) (*model.Resource, error)) model.SingleResourceDescriber {
+	return func(ctx context.Context, cfg model.IntegrationCredentials, triggerType enums.DescribeTriggerType, additionalParameters map[string]string, resourceID string,stram *model.StreamSender) (*model.Resource, error) {
 		ctx = WithTriggerType(ctx, triggerType)
 
-		if cfg.PatToken == "" {
-			return nil, fmt.Errorf("'token' must be set in the connection configuration. Edit your connection configuration file and then restart Steampipe")
+		// Create cloudflare client using token or (email, api key)
+		var conn *cloudflare.API
+		var err error
+		// Check for the token
+		if cfg.Token != "" {
+			conn, err = cloudflare.NewWithAPIToken(cfg.Token)
+			if err != nil {
+				return nil, err
+			}
 		}
 
-		// Create an OAuth2 token source
-		ts := oauth2.StaticTokenSource(
-			&oauth2.Token{AccessToken: cfg.PatToken},
-		)
+		cloudflareAPIHandler := NewCloudFlareAPIHandler(conn, cfg.AccountID, rate.Every(time.Second/4), 1, 10, 5, 5*time.Minute)
 
-		// Create an OAuth2 client
-		tc := oauth2.NewClient(ctx, ts)
-
-		// Create a new GitHub client
-		restClient := github.NewClient(tc)
-		graphQLClient := githubv4.NewClient(tc)
-
-		client := GitHubClient{
-			RestClient:    restClient,
-			GraphQLClient: graphQLClient,
-		}
-
-		organizationName := additionalParameters["OrganizationName"]
-		repoName := additionalParameters["RepositoryName"]
-		result, err := describe(ctx, client, organizationName, repoName, resourceID, stream)
+		// Get value from describer
+		value, err := describe(ctx, cloudflareAPIHandler, resourceID)
 		if err != nil {
 			return nil, err
 		}
-		return result, nil
+		return value, nil
 	}
 }

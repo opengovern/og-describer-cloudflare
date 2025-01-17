@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/opengovern/og-describer-cloudflare/discovery/pkg/orchestrator"
-	"github.com/opengovern/og-describer-cloudflarelare/global"
+	"github.com/opengovern/og-describer-cloudflare/global"
 
 	"github.com/nats-io/nats.go/jetstream"
 

@@ -8,9 +8,9 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/opengovern/og-describer-cloudflare/discovery/describers"
 	model "github.com/opengovern/og-describer-cloudflare/discovery/pkg/models"
-	"github.com/opengovern/og-describer-cloudflarelare/discovery/describers"
-	"github.com/opengovern/og-describer-cloudflarelare/global/maps"
+	"github.com/opengovern/og-describer-cloudflare/global/maps"
 	"github.com/opengovern/og-util/pkg/describe/enums"
 	"go.uber.org/zap"
 )
