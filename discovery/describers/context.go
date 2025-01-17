@@ -1,7 +1,8 @@
-package describer
+package describers
 
 import (
 	"context"
+
 	"github.com/opengovern/og-util/pkg/describe/enums"
 	"go.uber.org/zap"
 )

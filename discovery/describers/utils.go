@@ -1,10 +1,11 @@
-package describer
+package describers
 
 import (
 	"context"
 	"errors"
 
 	"github.com/cloudflare/cloudflare-go"
+	model "github.com/opengovern/og-describer-cloudflare/discovery/provider"
 )
 
 const (

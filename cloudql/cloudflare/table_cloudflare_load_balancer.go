@@ -7,7 +7,7 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 
-	opengovernance "github.com/opengovern/og-describer-cloudflare/pkg/sdk/es"
+	opengovernance "github.com/opengovern/og-describer-cloudflare/discovery/pkg/es"
 )
 
 func tableCloudflareLoadBalancer(ctx context.Context) *plugin.Table {
