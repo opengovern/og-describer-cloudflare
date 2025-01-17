@@ -745,8 +745,6 @@ github.com/opencontainers/go-digest v1.0.0 h1:apOUWs51W5PlhuyGyz9FCeeBIOUDA/6nW8
 github.com/opencontainers/go-digest v1.0.0/go.mod h1:0JzlMkj0TRzQZfJkVvzbP0HBR3IKzErnv2BNG4W4MAM=
 github.com/opencontainers/image-spec v1.1.0 h1:8SG7/vwALn54lVB/0yZ/MMwhFrPYtpEHQb2IpWsCzug=
 github.com/opencontainers/image-spec v1.1.0/go.mod h1:W4s4sFTMaBeK1BQLXbG4AdM2szdn85PY75RI83NrTrM=
-github.com/opengovern/og-describer-github v0.49.0 h1:hQ/ESCSEiI2Nc8HdlSTxZYL23J2sLsU6zZN1J/uIFws=
-github.com/opengovern/og-describer-github v0.49.0/go.mod h1:le5AnQgfkZuNg/SFxJ+/rWSsvQR11PqP9iZgpzGN5b0=
 github.com/opengovern/og-util v1.11.0 h1:Amct1bHXDF5TBnymstPUEWpWaC+Lji5dnJ8Mr6fkbMA=
 github.com/opengovern/og-util v1.11.0/go.mod h1:9uNpGalixRoQkUzPPBdT+JG1epg8FTRx/qmkfTyUZHE=
 github.com/opengovern/resilient-bridge v0.0.0-20241223164127-85ad8f42a67d h1:OnoG1Za89armxN1ZlEbr/eKvAdbRN6UGKXCFxee58s0=

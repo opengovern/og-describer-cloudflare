@@ -3,20 +3,21 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"os"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/google/uuid"
-	"github.com/opengovern/og-describer-github/discovery/pkg/orchestrator"
-	model "github.com/opengovern/og-describer-github/discovery/pkg/models"
-	"github.com/opengovern/og-describer-github/discovery/provider"
-	"github.com/opengovern/og-describer-github/global"
+	model "github.com/opengovern/og-describer-cloudflare/discovery/pkg/models"
+	"github.com/opengovern/og-describer-cloudflare/discovery/pkg/orchestrator"
+	"github.com/opengovern/og-describer-cloudflare/discovery/provider"
+	"github.com/opengovern/og-describer-cloudflare/global"
 	"github.com/opengovern/og-util/pkg/describe"
 	"github.com/opengovern/og-util/pkg/es"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	"golang.org/x/net/context"
-	"os"
-	"strconv"
-	"strings"
-	"time"
 )
 
 var (
@@ -39,35 +40,28 @@ var getDescriberCmd = &cobra.Command{
 		defer file.Close() // Ensure the file is closed at the end
 
 		job := describe.DescribeJob{
-			JobID:           uint(uuid.New().ID()),
-			ResourceType:    resourceType,
-			IntegrationID:   "",
-			ProviderID:      "",
-			DescribedAt:     time.Now().UnixMilli(),
-			IntegrationType: global.IntegrationTypeLower,
-			CipherText:      "",
-			IntegrationLabels: map[string]string{
-				"OrganizationName": OrganizationName,
-			},
+			JobID:                  uint(uuid.New().ID()),
+			ResourceType:           resourceType,
+			IntegrationID:          "",
+			ProviderID:             "",
+			DescribedAt:            time.Now().UnixMilli(),
+			IntegrationType:        global.IntegrationTypeLower,
+			CipherText:             "",
+			IntegrationLabels:      nil,
 			IntegrationAnnotations: nil,
 		}
 
 		ctx := context.Background()
 		logger, _ := zap.NewProduction()
 
-		creds, err := provider.AccountCredentialsFromMap(map[string]any{
-			"pat_token": PatToken,
-		})
-		if err != nil {
-			return fmt.Errorf(" account credentials: %w", err)
-		}
+		// TODO: Set the credentials
+		creds := model.IntegrationCredentials{}
 
 		additionalParameters, err := provider.GetAdditionalParameters(job)
 		if err != nil {
 			return err
 		}
 		plg := global.Plugin()
-		additionalParameters["RepositoryName"] = RepositoryName
 
 		f := func(resource model.Resource) error {
 			if resource.Description == nil {

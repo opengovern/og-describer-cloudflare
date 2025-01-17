@@ -5,16 +5,17 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/opengovern/og-describer-github/global"
 	"os"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/opengovern/og-describer-cloudflare/global"
+
 	"github.com/google/uuid"
-	"github.com/opengovern/og-describer-github/discovery/pkg/orchestrator"
-	model "github.com/opengovern/og-describer-github/discovery/pkg/models"
-	"github.com/opengovern/og-describer-github/discovery/provider"
+	model "github.com/opengovern/og-describer-cloudflare/discovery/pkg/models"
+	"github.com/opengovern/og-describer-cloudflare/discovery/pkg/orchestrator"
+	"github.com/opengovern/og-describer-cloudflare/discovery/provider"
 	"github.com/opengovern/og-util/pkg/describe"
 	"github.com/opengovern/og-util/pkg/es"
 	"github.com/spf13/cobra"
@@ -31,18 +32,6 @@ var describerCmd = &cobra.Command{
 	Use:   "describer",
 	Short: "A brief description of your command",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		// Environment takes priority
-		orgEnv := os.Getenv("GITHUB_ORG")
-		patEnv := os.Getenv("GITHUB_PAT")
-
-		if orgEnv != "" {
-			OrganizationName = orgEnv
-		}
-
-		if patEnv != "" {
-			PatToken = patEnv
-		}
-
 		// Open the output file
 		file, err := os.Create(outputFile)
 		if err != nil {
@@ -51,27 +40,22 @@ var describerCmd = &cobra.Command{
 		defer file.Close() // Ensure the file is closed at the end
 
 		job := describe.DescribeJob{
-			JobID:           uint(uuid.New().ID()),
-			ResourceType:    resourceType,
-			IntegrationID:   "",
-			ProviderID:      "",
-			DescribedAt:     time.Now().UnixMilli(),
-			IntegrationType: global.IntegrationTypeLower,
-			CipherText:      "",
-			IntegrationLabels: map[string]string{
-				"OrganizationName": OrganizationName,
-			},
+			JobID:                  uint(uuid.New().ID()),
+			ResourceType:           resourceType,
+			IntegrationID:          "",
+			ProviderID:             "",
+			DescribedAt:            time.Now().UnixMilli(),
+			IntegrationType:        global.IntegrationTypeLower,
+			CipherText:             "",
+			IntegrationLabels:      nil,
 			IntegrationAnnotations: nil,
 		}
 
 		ctx := context.Background()
 		logger, _ := zap.NewProduction()
 
-		creds, err := provider.AccountCredentialsFromMap(map[string]any{
-			"pat_token": PatToken,
-		})
-		if err != nil {
-			return fmt.Errorf(" account credentials: %w", err)
+		creds := model.IntegrationCredentials{
+		
 		}
 
 		additionalParameters, err := provider.GetAdditionalParameters(job)
