@@ -68,7 +68,7 @@ jobs:
       - name: Upload Local Artifact
         uses: actions/upload-artifact@v4.6.0
         with:
-          name: local-og-describer-github
+          name: local-og-describer-cloudflare
           path: ./discovery/local.tar
           retention-days: 1
       - name: Build Integration Plugin
@@ -152,7 +152,7 @@ jobs:
       - name: Download Local Describer Artifact
         uses: actions/download-artifact@v4
         with:
-          name: local-og-describer-github
+          name: local-og-describer-cloudflare
           path: .
       - name: Unpack Local Describer Artifact
         run: |
@@ -168,8 +168,8 @@ jobs:
         with:
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/og-describer-github:local-latest
-            ghcr.io/${{ github.repository_owner }}/og-describer-github:local-${{ needs.build.outputs.latest_tag }}
+            ghcr.io/${{ github.repository_owner }}/og-describer-cloudflare:local-latest
+            ghcr.io/${{ github.repository_owner }}/og-describer-cloudflare:local-${{ needs.build.outputs.latest_tag }}
           file: discovery/DockerFile
           context: .
   release-integration-plugin:

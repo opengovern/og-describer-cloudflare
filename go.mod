@@ -1,4 +1,4 @@
-module github.com/opengovern/og-describer-github
+module github.com/opengovern/og-describer-cloudflare
 
 go 1.23.3
 

@@ -2,8 +2,8 @@ package describer
 
 import (
 	"context"
-	"github.com/opengovern/og-describer-github/describer/pkg/models"
-	model "github.com/opengovern/og-describer-github/describer/provider"
+	"github.com/opengovern/og-describer-cloudflare/describer/pkg/models"
+	model "github.com/opengovern/og-describer-cloudflare/describer/provider"
 	"strings"
 )
 

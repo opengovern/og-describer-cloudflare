@@ -3,8 +3,8 @@ package describer
 import (
 	"fmt"
 	"github.com/google/go-github/v55/github"
-	"github.com/opengovern/og-describer-github/describer/pkg/models"
-	model "github.com/opengovern/og-describer-github/describer/provider"
+	"github.com/opengovern/og-describer-cloudflare/describer/pkg/models"
+	model "github.com/opengovern/og-describer-cloudflare/describer/provider"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"golang.org/x/net/context"
 	"strings"

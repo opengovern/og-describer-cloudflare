@@ -22,7 +22,7 @@ func (i *Integration) GetConfiguration() (interfaces.IntegrationConfiguration, e
 		NatsConsumerGroup:        global.ConsumerGroup,
 		NatsConsumerGroupManuals: global.ConsumerGroupManuals,
 
-		SteampipePluginName: "github",
+		SteampipePluginName: "cloudflare",
 
 		UISpec:   constants.UISpec,
 		Manifest: constants.Manifest,

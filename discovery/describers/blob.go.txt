@@ -4,8 +4,8 @@ import (
 	"context"
 	"strings"
 
-	"github.com/opengovern/og-describer-github/describer/pkg/models"
-	model "github.com/opengovern/og-describer-github/describer/provider"
+	"github.com/opengovern/og-describer-cloudflare/describer/pkg/models"
+	model "github.com/opengovern/og-describer-cloudflare/describer/provider"
 )
 
 func GetAllBlobs(ctx context.Context, githubClient model.GitHubClient, organizationName string, stream *models.StreamSender) ([]models.Resource, error) {

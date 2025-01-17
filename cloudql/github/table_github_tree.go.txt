@@ -1,7 +1,7 @@
 package github
 
 import (
-	opengovernance "github.com/opengovern/og-describer-github/describer/pkg/sdk/es"
+	opengovernance "github.com/opengovern/og-describer-cloudflare/describer/pkg/sdk/es"
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
