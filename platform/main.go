@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
-	"github.com/opengovern/og-describer-github/platform/constants"
+	"github.com/opengovern/og-describer-cloudflare/platform/constants"
 	"github.com/opengovern/og-util/pkg/integration/interfaces"
 	"os"
 )

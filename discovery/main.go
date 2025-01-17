@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/opengovern/og-describer-github/discovery/pkg"
+	"github.com/opengovern/og-describer-cloudflare/discovery/pkg"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	"os"
