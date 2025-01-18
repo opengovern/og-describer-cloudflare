@@ -1,0 +1,172 @@
+[
+  {
+    "ResourceName": "CloudFlare/Access/Application",
+    "Tags": {
+      "category": ["Access"]
+    },
+    "ListDescriber": "DescribeListByCloudFlare(describers.ListAccessApplications)",
+    "GetDescriber": "DescribeSingleByCloudFlare(describers.GetAccessApplication)",
+    "SteampipeTable": "cloudflare_access_application",
+    "Model": "AccessApplication"
+  },
+  {
+    "ResourceName": "CloudFlare/Access/Group",
+    "Tags": {
+      "category": ["Access"]
+    },
+    "ListDescriber": "DescribeListByCloudFlare(describers.ListAccessGroups)",
+    "GetDescriber": "DescribeSingleByCloudFlare(describers.GetAccessGroup)",
+    "SteampipeTable": "cloudflare_access_group",
+    "Model": "AccessGroup"
+  },
+  {
+    "ResourceName": "CloudFlare/Access/Policy",
+    "Tags": {
+      "category": ["Access"]
+    },
+    "ListDescriber": "DescribeListByCloudFlare(describers.ListAccessPolicies)",
+    "GetDescriber": "DescribeSingleByCloudFlare(describers.GetAccessPolicy)",
+    "SteampipeTable": "cloudflare_access_policy",
+    "Model": "AccessPolicy"
+  },
+  {
+    "ResourceName": "CloudFlare/Account",
+    "Tags": {
+      "category": ["Account"]
+    },
+    "ListDescriber": "DescribeListByCloudFlare(describers.ListAccounts)",
+    "GetDescriber": "DescribeSingleByCloudFlare(describers.GetAccount)",
+    "SteampipeTable": "cloudflare_account",
+    "Model": "Account"
+  },
+  {
+    "ResourceName": "CloudFlare/Account/Member",
+    "Tags": {
+      "category": ["Account"]
+    },
+    "ListDescriber": "DescribeListByCloudFlare(describers.ListAccountMembers)",
+    "GetDescriber": "DescribeSingleByCloudFlare(describers.GetAccountMember)",
+    "SteampipeTable": "cloudflare_account_member",
+    "Model": "AccountMember"
+  },
+  {
+    "ResourceName": "CloudFlare/Account/Role",
+    "Tags": {
+      "category": ["Account"]
+    },
+    "ListDescriber": "DescribeListByCloudFlare(describers.ListAccountRoles)",
+    "GetDescriber": "DescribeSingleByCloudFlare(describers.GetAccountRole)",
+    "SteampipeTable": "cloudflare_account_role",
+    "Model": "AccountRole"
+  },
+  {
+    "ResourceName": "CloudFlare/ApiToken",
+    "Tags": {
+      "category": ["ApiToken"]
+    },
+    "ListDescriber": "DescribeListByCloudFlare(describers.ListAPITokens)",
+    "GetDescriber": "DescribeSingleByCloudFlare(describers.GetAPIToken)",
+    "SteampipeTable": "cloudflare_api_token",
+    "Model": "ApiToken"
+  },
+  {
+    "ResourceName": "CloudFlare/DNSRecord",
+    "Tags": {
+      "category": ["DNSRecord"]
+    },
+    "ListDescriber": "DescribeListByCloudFlare(describers.ListDNSRecords)",
+    "GetDescriber": "DescribeSingleByCloudFlare(describers.GetDNSRecord)",
+    "SteampipeTable": "cloudflare_dns_record",
+    "Model": "DNSRecord"
+  },
+  {
+    "ResourceName": "CloudFlare/Firewall/Rule",
+    "Tags": {
+      "category": ["Firewall"]
+    },
+    "ListDescriber": "DescribeListByCloudFlare(describers.ListFireWallRules)",
+    "GetDescriber": "DescribeSingleByCloudFlare(describers.GetFireWallRule)",
+    "SteampipeTable": "cloudflare_firewall_rule",
+    "Model": "FireWallRule"
+  },
+  {
+    "ResourceName": "CloudFlare/LoadBalancer",
+    "Tags": {
+      "category": ["LoadBalancer"]
+    },
+    "ListDescriber": "DescribeListByCloudFlare(describers.ListLoadBalancers)",
+    "GetDescriber": "DescribeSingleByCloudFlare(describers.GetLoadBalancer)",
+    "SteampipeTable": "cloudflare_load_balancer",
+    "Model": "LoadBalancer"
+  },
+  {
+    "ResourceName": "CloudFlare/LoadBalancer/Monitor",
+    "Tags": {
+      "category": ["LoadBalancer"]
+    },
+    "ListDescriber": "DescribeListByCloudFlare(describers.ListLoadBalancerMonitors)",
+    "GetDescriber": "DescribeSingleByCloudFlare(describers.GetLoadBalancerMonitor)",
+    "SteampipeTable": "cloudflare_load_balancer_monitor",
+    "Model": "LoadBalancerMonitor"
+  },
+  {
+    "ResourceName": "CloudFlare/LoadBalancer/Pool",
+    "Tags": {
+      "category": ["LoadBalancer"]
+    },
+    "ListDescriber": "DescribeListByCloudFlare(describers.ListLoadBalancerPools)",
+    "GetDescriber": "DescribeSingleByCloudFlare(describers.GetLoadBalancerPool)",
+    "SteampipeTable": "cloudflare_load_balancer_pool",
+    "Model": "LoadBalancerPool"
+  },
+  {
+    "ResourceName": "CloudFlare/PageRule",
+    "Tags": {
+      "category": ["PageRule"]
+    },
+    "ListDescriber": "DescribeListByCloudFlare(describers.ListPageRules)",
+    "GetDescriber": "DescribeSingleByCloudFlare(describers.GetPageRule)",
+    "SteampipeTable": "cloudflare_page_rule",
+    "Model": "PageRule"
+  },
+  {
+    "ResourceName": "CloudFlare/User",
+    "Tags": {
+      "category": ["User"]
+    },
+    "ListDescriber": "DescribeListByCloudFlare(describers.ListUsers)",
+    "GetDescriber": "DescribeSingleByCloudFlare(describers.GetUser)",
+    "SteampipeTable": "cloudflare_user",
+    "Model": "User"
+  },
+  {
+    "ResourceName": "CloudFlare/User/AuditLog",
+    "Tags": {
+      "category": ["User"]
+    },
+    "ListDescriber": "DescribeListByCloudFlare(describers.ListUserAuditLogs)",
+    "GetDescriber": "",
+    "SteampipeTable": "cloudflare_user_audit_log",
+    "Model": "UserAuditLog"
+  },
+  {
+    "ResourceName": "CloudFlare/WorkerRoute",
+    "Tags": {
+      "category": ["WorkerRoute"]
+    },
+    "ListDescriber": "DescribeListByCloudFlare(describers.ListWorkerRoutes)",
+    "GetDescriber": "DescribeSingleByCloudFlare(describers.GetWorkerRoute)",
+    "SteampipeTable": "cloudflare_worker_route",
+    "Model": "WorkerRoute"
+  },
+  {
+    "ResourceName": "CloudFlare/Zone",
+    "Tags": {
+      "category": ["Zone"]
+    },
+    "ListDescriber": "DescribeListByCloudFlare(describers.ListZones)",
+    "GetDescriber": "DescribeSingleByCloudFlare(describers.GetZone)",
+    "SteampipeTable": "cloudflare_zone",
+    "Model": "Zone"
+  }
+]

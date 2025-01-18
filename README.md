@@ -35,7 +35,7 @@ Copy your  Steampipe plugin to root directory of the repository.
 ### 6. Complete authentication and describer files
 
 Complete the authentication functions for your provider in the [config.go](./provider/config.go).
-After that Please complete all neccessary functions which tagged with `TODO` in the [provider](./provider/) and [describer](./describer/) directories.
+After that Please complete all neccessary functions which tagged with `TODO` in the [provider](./provider/) and [describer](discovery/) directories.
 
 ### 7. Run the Template
 

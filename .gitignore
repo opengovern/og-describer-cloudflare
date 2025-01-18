@@ -1,7 +1,5 @@
 build/
-og-describer-template
+og-describer-*
 .idea
 .env
-go1.23.2.linux-amd64.tar.gz
-command/output.json
-output.json
+.vscode
