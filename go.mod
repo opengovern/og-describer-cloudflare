@@ -11,7 +11,7 @@ require (
 	github.com/hashicorp/go-plugin v1.6.0
 	github.com/jackc/pgtype v1.14.4
 	github.com/nats-io/nats.go v1.36.0
-	github.com/opengovern/og-util v1.11.0
+	github.com/opengovern/og-util v1.12.0
 	github.com/spf13/cobra v1.8.1
 	github.com/turbot/steampipe-plugin-sdk/v5 v5.10.4
 	go.uber.org/zap v1.27.0
